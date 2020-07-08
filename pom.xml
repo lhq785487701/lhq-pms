@@ -35,7 +35,7 @@
         <!--useragent版本 -->
         <useragent.version>1.20</useragent.version>
         <!-- mysql版本 -->
-        <mysql.version>5.1.41</mysql.version>
+        <mysql.version>8.0.16</mysql.version>
         <!-- quartz版本 -->
         <quartz.version>2.2.3</quartz.version>
         <!-- spring-security版本 -->
