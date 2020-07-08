@@ -37,7 +37,7 @@
         <!-- mysql版本 -->
         <mysql.version>5.1.41</mysql.version>
         <!-- quartz版本 -->
-        <quartz.version>2.2.3</quartz.version>
+        <quartz.version>2.3.2</quartz.version>
         <!-- spring-security版本 -->
         <spring-security.version>4.2.3.RELEASE</spring-security.version>
         <spring-session.version>1.3.0.RELEASE</spring-session.version>
