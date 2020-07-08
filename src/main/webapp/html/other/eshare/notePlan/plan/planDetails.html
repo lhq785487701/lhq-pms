@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<title>计划详情页面</title>
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet"
+    href="../../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../../css/sdp-admin.css" />
+<link rel="stylesheet" href="../../../css/sdp-skin.css" />
+<link rel="stylesheet"
+    href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+    href="../../../css/fonts/awesome/font-awesome.min.css" />
+<link rel="stylesheet" href="../../../css/planDetails.css" />    
+    
+</head>
+
+<body>
+    <div id="mainContainer" v-cloak>
+        <div>
+        <card :bordered="false" v-for="item in datas" :key="item.plan_id">
+            <p slot="title">
+                <Icon type="social-vimeo-outline" size="20"></Icon>
+                <font size="4">计划详情</font>
+            </p>
+         <!--    <i-button slot="extra" type="dashed" icon="ios-compose-outline" @click="editPlanDetails" >编辑</i-button> -->
+            
+            <p slot="extra" v-if="item.plan_state != 'end'">
+                <i-button type="primary" icon="ios-compose-outline" @click="editPlanDetails">编辑</i-button>
+                <i-button type="primary" icon="ios-compose-outline" @click="endPlan">完成</i-button>
+            </p>
+            
+          <row>
+              <i-col span="3"><h3>计划名称:</h3></i-col>
+              <i-col span="21">{{item.plan_title}}</i-col>
+          </row>
+           <br/>
+           <row>
+               <i-col span="3"><h3>计划时间:</h3></i-col>
+               <i-col span="4">{{item.plan_start_time}}</i-col>
+               <i-col span="4" style="text-align: center"> —— </i-col>
+               <i-col span="6">{{item.plan_end_time}}</i-col>
+           </row>
+          <br/>
+          <row>
+              <i-col span="3"><h3>计划状态:</h3></i-col>
+              <i-col span="21">
+                <p v-if="item.plan_state == 'end'">
+                    已完成
+                </p>
+                <p v-else>
+                进行中
+                </p>
+              </i-col>
+          </row>
+          <br/>
+          <row>
+              <i-col span="3"><h3>计划描述:</h3></i-col>
+              <!-- <i-col span="21">{{item.plan_remark}}</i-col> -->
+              <i-col span="20">
+                <i-input v-model="item.plan_remark" type="textarea" :autosize="{minRows: 3,maxRows: 5}" :readonly="true"></i-input>
+              </i-col>
+          </row>
+        </card>
+        </div>
+        
+        <div>
+        <card :bordered="false">
+	        <p slot="title">
+	            <Icon type="ios-list-outline" size="20"></Icon>
+	            <font size="4">笔记列表</font>
+	        </p>
+	        <i-button slot="extra" type="dashed" icon="plus-round" @click="arrangePlanNotes">添加</i-button>
+	        
+                <card v-for="content in dataNotes" :key="content.note_id"> 
+                <p slot="title">
+                <a @click="toNoteDetails(content.note_id)">
+                    <span style=" font-size: 20px;font-weight: bold;color:black">
+	                {{ content.note_title }}
+	                </span>
+	                <span class="createDate">{{content.create_date }}</span>
+                </p>
+                <p class="content">{{ delHtmlTag(content.note_text) }}</p>
+                </a>
+                </card>
+        </card>
+        </div>
+        
+        
+        <!-- 修改学习计划 -->
+        <modal v-model="editDatas" title="学习计划" :mask-closable="false"  :closable="false">
+            <i-form ref="planForm" :model="curRow" :label-width="90" :rules="rulePlanForm">
+                <form-item label="计划名称" prop="plan_title">
+                    <i-input v-model="curRow.plan_title" :disabled="true"></i-input>
+                </form-item>
+                 <form-item label="开始时间" prop="plan_start_time" >
+                    <date-picker type="datetime" v-model="curRow.plan_start_time" :editable="false" :disabled="true"></date-picker>
+                </form-item>
+                <form-item label="结束时间" prop="plan_end_time" :required="true">
+                    <Date-Picker type="datetime"  v-model="curRow.plan_end_time" :editable="false" @on-change="editEndTimeFun"></Date-Picker>
+                </form-item>
+                <form-item label="计划详情" prop="plan_remark">
+                    <i-input type="textarea" v-model="curRow.plan_remark" :autosize="{minRows: 3,maxRows: 5}" placeholder="请输入计划详情" ></i-input>
+                </form-item>
+            </i-form>
+            <p slot="footer">
+                <i-button type="primary" @click="editDataCancel">取消</i-button>
+                <i-button type="primary" @click="editDataSave">确定</i-button>
+            </p>
+        </modal>
+        
+        <!-- 关联笔记 -->
+        <modal v-model="editNotes" title="关联笔记" :mask-closable="false" :closable="false">
+            <Transfer
+                :data="NoteLists.dataLists"
+                :target-keys="NoteLists.targetKeys"
+                :titles="['未关联笔记','相关笔记']"
+                :render-format="formatList"
+                @on-change="handleChange"
+                >
+            </Transfer>
+            <p slot="footer">
+                <i-button type="primary" @click="arrangeDataCancel">取消</i-button>
+                <i-button type="primary" @click="arrangeDataSave">确定</i-button>
+            </p>
+        </modal>
+    </div>
+</body>
+
+<!--[if lte IE 9]>
+    <script src="../../../js/jquery/respond.js"></script>
+    <script src="../../../js/jquery/html5shiv.js"></script>    
+<![endif]-->
+
+<script src="../../../js/md5.js"></script>
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.js"></script>
+<script src="../../../js/jquery/jquery-migrate.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.js"></script>
+
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+
+<script type="text/javascript" src="planDetails.js"></script>
+</html>

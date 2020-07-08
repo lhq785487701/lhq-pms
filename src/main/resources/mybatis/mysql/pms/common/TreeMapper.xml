@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.tree">
+
+	<!-- 返回结果对象定义 -->
+	<resultMap id="treeAllResultMap" type="map">
+		<id column="tree_id" property="tree_id" jdbcType="INTEGER" />
+		<result column="node_code" property="node_code" jdbcType="VARCHAR" />
+		<result column="node_pcode" property="node_pcode" jdbcType="VARCHAR" />
+		<result column="node_level" property="node_level" jdbcType="INTEGER" />
+		<result column="node_order" property="node_order" jdbcType="INTEGER" />
+		<result column="node_name" property="node_name" jdbcType="VARCHAR" />
+		<result column="node_icon" property="node_icon" jdbcType="VARCHAR" />
+		<result column="node_sts" property="node_sts" jdbcType="VARCHAR" />
+		<result column="node_text" property="node_text" jdbcType="VARCHAR" />
+		<result column="node_module" property="node_module" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<!-- 返回字段 -->
+	<sql id="tree_All_Column_List">
+		um.tree_id,um.node_code,um.node_pcode,um.node_level,um.node_order,um.node_name,
+		um.node_icon,um.node_sts,um.node_text,um.create_date,um.create_user,um.node_module,
+		um.update_date,um.update_user
+	</sql>
+
+	<!-- 树形生成 -->
+	<sql id="commonAllTree">
+		SELECT node_code,node_pcode,node_level,
+			@le :=IF (node_pcode IS NULL,0,
+				IF (LOCATE(CONCAT('|', node_pcode, ':'),@pathlevel) > 0,
+				SUBSTRING_INDEX(SUBSTRING_INDEX(@pathlevel
+					,CONCAT('|', node_pcode, ':'),- 1),'|',1) + 1,@le + 1)) levels,
+			@pathlevel := CONCAT(@pathlevel,'|',node_code,':',@le,'|') pathlevel,
+			@pathnodes :=IF (node_pcode IS NULL,',0',CONCAT_WS(',',
+				IF (LOCATE(CONCAT('|', node_pcode, ':'),@pathall) > 0,
+				SUBSTRING_INDEX(SUBSTRING_INDEX(@pathall,CONCAT('|', node_pcode, ':'),- 1),'|',1),
+			@pathnodes),node_pcode)) paths,
+	 		@pathall := CONCAT(@pathall,'|',node_code,':',@pathnodes,'|') pathall
+		FROM pms_common_tree,
+		(SELECT @le := 0,@pathlevel := '',@pathall := '',@pathnodes := '') vv
+	</sql>
+	
+	<!-- 获取所有节点 -->
+	<select id="queryCommonTree" resultMap="treeAllResultMap">
+		select
+		<include refid="tree_All_Column_List" />
+		FROM pms_common_tree
+		um inner join (
+		<include refid="commonAllTree" />
+		)
+		rm on um.node_code = rm.node_code
+		where um.node_module = #{node_module,jdbcType=CHAR}
+		order by
+		um.node_level,um.node_order
+	</select>
+	
+	<!-- 插入树节点 -->
+	<insert id = "insertCommonTreeNode" parameterType="map">
+		insert into 
+		pms_common_tree(node_name, node_code, node_pcode, node_level, 
+			node_order, node_icon, node_sts, node_module, create_date, create_user)
+		values(#{node_name,jdbcType=CHAR}, #{node_code,jdbcType=CHAR}, #{node_pcode,jdbcType=CHAR},
+			#{node_level,jdbcType=INTEGER}, #{node_order,jdbcType=INTEGER},
+			#{node_icon,jdbcType=CHAR}, #{node_sts,jdbcType=CHAR}, #{node_module,jdbcType=CHAR},
+			now(), #{$user_code,jdbcType=CHAR})	
+	</insert>
+	
+	<!-- 删除树节点 -->
+	<delete id="deleteCommonTreeNode" parameterType="map">
+		delete from pms_common_tree where node_code = #{node_code,jdbcType=CHAR}
+	</delete>
+	
+	<!-- 更新树节点 -->
+	<update id = "updateCommonTreeNode" parameterType="map">
+		update pms_common_tree 
+		<set>
+			<if test="node_name!=null">node_name=#{node_name,jdbcType=VARCHAR},</if>
+			<if test="node_icon!=null">node_icon=#{node_icon,jdbcType=VARCHAR},</if>
+			<if test="node_module!=null">node_module=#{node_module,jdbcType=VARCHAR},</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where node_code=#{node_code,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 判断是否重名 -->
+	<select id = "isExistTreeNodeCode" parameterType="map" resultType = "map">
+		select count(1) node_count from pms_common_tree where node_code=#{node_code,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 查询全部模块 -->
+	<select id = "queryAllModule" parameterType="map" resultType = "map">
+		select node_module from pms_common_tree group by node_module
+	</select> 
+	
+</mapper>

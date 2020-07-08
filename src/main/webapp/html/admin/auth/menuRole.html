@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="pms">
+<meta name="keywords" content="PMS">
+<title>用户角色管理页面</title>
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet"
+	href="../../../js/jquery/layer/theme/default/layer.css">
+<link rel="stylesheet" href="../../../js/jquery/ztree/style/zTreeStyle.css" />
+<link rel="stylesheet" href="../../../css/sdp-ui.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/awesome/font-awesome.min.css" />
+</head>
+<body>
+	<div class="sdp-main-container" id="mainContainer" v-cloak>
+		<row :gutter="15"> <i-col :span="10"> <row> <i-col
+			:span="14"> <i-input v-model="role_name"
+			placeholder="输入角色编码或名称"></i-input></i-col> <i-col :span="10"> <i-button
+			@click="searchDatas" icon="search"> 查询 </i-button> <i-button
+			@click="saveData" img="fa fa-save"> 授权 </i-button> </i-col></row> <i-table
+			:data='datas' :columns="columns" ref="dataRoleGrid" height="400"
+			@on-select-change="roleTableSelect" border> </i-table> <page
+			@on-page-size-change="handleSizeChange"
+			:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+			:current="page.getPageNumber()" show-total show-elevator show-sizer
+			:total="page.totalCount"></page></i-col> <i-col :span="10">
+		<ul id="menuTree" class="ztree" style="width: 100%; height: 100%;">
+		</ul>
+		</i-col> </row>
+	</div>
+</body>
+<script src="../../../js/jquery/IE.plugin.js"></script>
+<!--[if lte IE 9]>	
+	<script src="../../../js/ieBetter-min.js"></script>
+	<script src="../../../js/jquery/respond.js"></script>
+	<script src="../../../js/jquery/html5shiv.js"></script>	
+<![endif]-->
+
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.min.js"></script>
+<script src="../../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<script src="../../../js/jquery/ztree/jquery.ztree.all.min.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.min.js"></script>
+
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="menuRole.js"></script>
+</html>

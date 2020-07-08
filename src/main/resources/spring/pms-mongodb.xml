@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/cache 
+     http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<bean id="mongoDB" class="com.lhq.pms.plugin.mongodb.MongoManager">
+		<property name="hosts" value="${pms.mongodb.host}" />
+		<!-- 连接超时，推荐>3000毫秒 -->
+		<property name="connectTimeout" value="${pms.mongodb.connectTimeout}" />
+		<!-- 数据库连接之前的最长等待时间 -->
+		<property name="maxWaitTime" value="${pms.mongodb.maxWaitTime}" />
+		<!-- 连接池设置为300个连接,默认为100 -->
+		<property name="connectionsPerHost" value="${pms.mongodb.connectionsPerHost}" />
+		<!-- 线程队列数，如果连接线程排满了队列就会抛出“Out of semaphores to get db”错误 -->
+		<property name="blockSize" value="${pms.mongodb.blockSize}" />
+		<property name="defaultDB" value="${pms.mongodb.defaultDB}" />
+	</bean>
+
+	<bean id="mongoClient" factory-bean="mongoDB" factory-method="getMongoClient" />
+
+	<bean id="mongoDBSession" class="com.lhq.pms.plugin.mongodb.DefaultMongoDbSession" />
+
+<!-- 
+	<bean id="mongodbMapperListener"
+		class="com.lhq.pms.plugin.mongodb.redis.MapperDelegateListenerImpl" />
+
+	<bean id="mongodbMessageListener"
+		class="org.springframework.data.redis.listener.adapter.MessageListenerAdapter">
+		<property name="delegate" ref="mongodbMapperListener" />
+		<property name="serializer" ref="jdkSerializer" />
+	</bean>
+	 -->
+</beans>

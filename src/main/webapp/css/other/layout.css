@@ -1,0 +1,74 @@
+body{  
+	margin:0;  
+	position: relative;  
+}  
+img{  
+	position:absolute;  
+}  
+ul li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/*这里的margin-left尽量用绝对定位*/
+#bg {
+	margin-left : 320px; 
+	width: 402px;
+	height: 402px;
+	position: relative;
+	border: solid 1px #000;
+	float:left;
+}
+
+#thing {
+	margin-right : 25%; 
+	float:right;
+}
+
+#head1 {
+	font-size:20px;
+	margin-left:41%;
+	margin-top:0px;
+	height:30px;
+	float:left;
+}
+
+#head2 {
+	font-size:20px;
+	margin-right:20%;
+	margin-top:0px;
+	height:30px;
+	float:right;
+}
+
+#computer {
+	position:absolute; 
+}
+
+.white {
+	background: white;
+	width: 10px;
+	height: 10px;
+	position: absolute;
+	/* border-bottom:1px solid #000;
+	border-right:1px solid #000; */
+}
+ 	
+.black {
+	background: #000;
+	width: 10px;
+	height: 10px;
+	position: absolute;
+}
+
+#menu{
+    width: 100px;
+    height: 100px;
+    background-color: aquamarine;
+    text-align: center;
+    position: absolute;
+    left: 0;
+    top:0;
+    display: none;
+}

@@ -1,0 +1,54 @@
+<div id="index_nav">
+		<i-menu mode="horizontal"  id="nav" >
+			<div id="nav_img" >
+				<img src="../img/loginlogo.png" style="width:15%;height:80%;position: absolute;bottom:20%;left:10px;top:10%;" @click="ToIndex()"/>
+			</div>
+			<div id="nav_search">
+				<i-input style="width: 200px" size="large"></i-input>
+				<i-button type="ghost" shape="circle" icon="ios-search"></i-button>
+			</div>
+			<div id="nav_btn">
+				<Submenu name="1">
+					<template slot="title">
+					    <Icon type="flag"></Icon>个人发展
+					</template>
+					<menu-group title="学习笔记" name="11">
+					    <menu-item name="111">我的笔记</menu-item>
+					    <menu-item name="112">新建笔记</menu-item>
+					</menu-group>
+					<menu-group title="个人计划" name="12">
+					    <menu-item name="121">创建计划</menu-item>
+					    <menu-item name="122">查看计划</menu-item>
+					</menu-group>
+					<menu-group title="职业规划" name="13">
+					    <menu-item name="131">个人现状</menu-item>
+					    <menu-item name="132">能力评估</menu-item>
+					</menu-group>
+				</Submenu> 
+				<menu-item name="2">
+					<Icon type="ios-paper"></Icon>项目
+				</menu-item> 
+				<menu-item name="3">
+					<Icon type="ios-paper"></Icon>事业部
+				</menu-item> 
+				<menu-item name="4">
+					<Icon type="ios-paper"></Icon>知识库
+				</menu-item> 
+				<menu-item name="4">
+			            <Icon type="ios-paper"></Icon>
+			            	<span @click="ToIndex()"> 首页</span>
+			    </menu-item> 
+			</div>
+			<dropdown id="login_btn">
+				{{user.userName}}<Icon type="arrow-down-b"></Icon>
+				<dropdown-menu slot="list">
+					<dropdown-item>
+						<i-button type="text" @click="toMyCenter()">个人中心</i-button>
+					</dropdown-item>
+					<dropdown-item>
+						<i-button type="text" @click="loginout()">注销</i-button>
+					</dropdown-item>
+				</dropdown-menu>
+			</dropdown>
+		</i-menu>
+	</div>

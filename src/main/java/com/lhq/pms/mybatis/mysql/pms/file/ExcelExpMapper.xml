@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.excelexp">
+	<!-- 返回结果对象定义 -->
+	<resultMap id="ExpResultMap" type="com.lhq.pms.data.Row">
+		<id column="exp_code" property="exp_code" jdbcType="VARCHAR" />
+		<result column="exp_name" property="exp_name" jdbcType="VARCHAR" />
+		<result column="start_now" property="start_now" jdbcType="VARCHAR" />
+		<result column="exp_title" property="exp_title" jdbcType="VARCHAR" />
+		<result column="exp_remark" property="exp_remark" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+	<!-- 从表返回结果 -->
+	<resultMap id="exp01ResultMap" type="com.lhq.pms.data.Row">
+		<id column="exp_code" property="exp_code" jdbcType="VARCHAR" />
+		<result column="line_no" property="line_no" jdbcType="INTEGER" />
+		<result column="excel_col" property="excel_col" jdbcType="INTEGER" />
+		<result column="exp_col" property="exp_col" jdbcType="VARCHAR" />
+		<result column="col_width" property="col_width" jdbcType="INTEGER" />
+		<result column="col_name" property="col_name" jdbcType="VARCHAR" />
+		<result column="dic_code" property="dic_code" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 返回字段 -->
+	<sql id="exp_mcolumn_ist">
+		exp_code,exp_name,start_row,exp_title,exp_remark,create_date,create_user,update_date,update_user
+	</sql>
+
+	<!-- 查询头表数据 -->
+	<select id="queryExcelExp" resultMap="ExpResultMap"
+		parameterType="map">
+		select
+		<include refid="exp_mcolumn_ist" />
+		from sdp_excel_exp
+		<where>
+			<if test="exp_code != null">
+				exp_code like
+				CONCAT('%',#{exp_code,jdbcType=VARCHAR},'%')
+			</if>
+			<if test="exp_name != null">
+				and exp_name like
+				CONCAT('%',#{exp_name,jdbcType=VARCHAR},'%')
+			</if>
+			<if test="exp_title != null">
+				and exp_title like
+				CONCAT('%',#{exp_title,jdbcType=VARCHAR},'%')
+			</if>
+		</where>
+		order by create_date desc
+	</select>
+
+	<!-- 从表明细数据 -->
+	<select id="queryExcelExp01" resultType="com.lhq.pms.data.Row"
+		parameterType="string">
+		select exp_line_id,
+		exp_code,line_no,excel_col,exp_col,col_width,col_name,dic_code,create_date,create_user,update_date,update_user
+		from sdp_excel_exp_01 where exp_code=#{exp_code,jdbcType=VARCHAR}
+		order by
+		line_no
+	</select>
+
+	<!-- 主表数据插入 -->
+	<insert id="addExcelExp" parameterType="map">
+		insert into
+		sdp_excel_exp(exp_code,exp_name,start_row,exp_title,exp_remark,create_date,create_user)
+		VALUES(#{exp_code,jdbcType=VARCHAR},#{exp_name,jdbcType=VARCHAR},
+		#{start_row,jdbcType=CHAR},#{exp_title,jdbcType=VARCHAR},#{exp_remark,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 配置明细插入 -->
+	<insert id="addExcelExp01" parameterType="map">
+		insert into
+		sdp_excel_exp_01(exp_line_id,exp_code,line_no,excel_col,exp_col,col_width,col_name,dic_code,create_date,create_user)
+		VALUES(#{$uuid,jdbcType=VARCHAR},#{exp_code,jdbcType=VARCHAR},#{line_no,jdbcType=VARCHAR},#{excel_col,jdbcType=CHAR},
+		#{exp_col,jdbcType=VARCHAR},#{col_width,jdbcType=CHAR},#{col_name,jdbcType=VARCHAR},#{dic_code,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!--配置主表删除数据 -->
+	<delete id="deleteExcelExp" parameterType="map">
+		delete from
+		sdp_excel_exp
+		where exp_code=#{exp_code,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 删除部分明细 -->
+	<delete id="deleteExcelExp01s" parameterType="map">
+		delete from
+		sdp_excel_exp_01 where
+		exp_line_id=#{exp_line_id,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 删除头表时，删明细 -->
+	<delete id="deleteExcelExp01" parameterType="map">
+		delete from
+		sdp_excel_exp_01 where
+		exp_code=#{exp_code,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 配置修改 -->
+	<update id="updateExcelExp" parameterType="map">
+		update sdp_excel_exp
+		<set>
+			<if test="exp_name != null">
+				exp_name=#{exp_name,jdbcType=VARCHAR},
+			</if>
+			<if test="start_row != null">
+				start_row=#{start_row,jdbcType=CHAR},
+			</if>
+			<if test=" exp_title != null">
+				exp_title=#{exp_title,jdbcType=VARCHAR},
+			</if>
+			<if test="exp_remark != null">
+				exp_remark=#{exp_remark,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where exp_code=#{exp_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 配置明细修改 -->
+	<update id="updateExcelExp01" parameterType="map">
+		update sdp_excel_exp_01
+		<set>
+			<if test="line_no">
+				line_no=#{line_no,jdbcType=VARCHAR},
+			</if>
+			<if test="excel_col != null">
+				excel_col=#{excel_col,jdbcType=CHAR},
+			</if>
+			<if test="exp_col != null">
+				exp_col=#{exp_col,jdbcType=VARCHAR},
+			</if>
+			<if test="col_width != null">
+				col_width=#{col_width,jdbcType=CHAR},
+			</if>
+			<if test="col_name != null">
+				col_name=#{col_name,jdbcType=VARCHAR},
+			</if>
+			<if test="dic_code != null">
+				dic_code=#{dic_code,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where
+		exp_line_id=#{exp_line_id,jdbcType=VARCHAR}
+	</update>
+
+
+	<!-- 查询头表单项数据 -->
+	<select id="selectExcelExp" resultMap="ExpResultMap"
+		parameterType="map">
+		select
+		<include refid="exp_mcolumn_ist" />
+		from sdp_excel_exp
+		where exp_code=#{exp_code,jdbcType=VARCHAR}
+	</select>
+
+</mapper>

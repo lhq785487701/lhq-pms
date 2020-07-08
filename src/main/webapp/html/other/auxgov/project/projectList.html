@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="sdp">
+<meta name="keywords" content="SDP">
+<title>项目清单</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet" href="../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet" href="../../css/fonts/awesome/font-awesome.min.css" />
+</head>
+<body>
+<div  class="sdp-main-container" id="mainContainer" v-cloak>
+  <Layout>
+        <Header style="height:48px;text-align: center;line-height:48px;font-size:20px" ><strong>项目清单</strong></Header>
+        <br>
+    	 <Content>
+    <i-form inline :model="params" :label-width="80"> <form-item
+			label="项目类别:">
+			 <i-select
+			v-model="params.prj_class" style="width:180px;" 
+			placeholder="请选择" clearable> <i-option
+			v-for="item in dicDatas['gpm_prj_class']" :label="item.dic_label"
+			:value="item.dic_value" :key="item.dic_value">
+			</i-option>
+			</i-select>
+		</form-item>   
+	<form-item label="项目名称:">
+		<i-input v-model="params.prj_name" style="width:150px;"></i-input>
+		<i-button @click="searchDatas" type="primary" icon="search" style="margin-left:28px;">查询</i-button>
+	</form-item> 
+  <form-item >	
+		
+		<i-button type="primary"   icon="android-add"	style="margin-left:8px;"@click="selectProjectType">立项申请</i-button>
+	    <i-button type="primary"   icon="edit"	style="margin-left:8px;" @click="projectChange">修改</i-button>
+	    <i-button  type="primary"  icon="clock" style="margin-left:8px;" @click="projectChangePostpone">延期</i-button>
+	    <i-button  type="primary"  icon="close" style="margin-left:8px;" >废弃</i-button>
+	    <i-button  type="primary"  icon="checkmark" style="margin-left:8px;" >结项</i-button>
+	  </form-item> 
+	<i-table :data='datas' :columns="columns" ref="dataGrid" @on-selection-change="selectTableRow"  border></i-table>
+	<page @on-page-size-change="handleSizeChange"
+			:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+			:current="page.getPageNumber()" show-total show-elevator show-sizer
+			:total="page.totalCount"> </page>
+	</Content>
+	 </Layout>
+	 
+	  <Modal v-model="projectType" title="选择项目类型" :mask-closable="false" :styles="{top: '10px'}" :closable="false"> 
+
+				<Radio-group  v-model="prj_type" style="margin-left:100px;" type="button" size="large">
+			        <Radio label="项目类项目立项" style="font-weight:bold;"></Radio>
+			        <Radio label="荣誉类项目立项" style="font-weight:bold;"></Radio>
+			    </Radio-group>
+		
+			 	<div slot="footer">
+            	<i-button size="large"  @click="searchUserCancel">取消</i-button>
+            	<i-button type="primary" size="large"  @click="searchUserSave">选择</i-button>
+        	</div>
+		</Modal>
+</div>
+</body>
+<!--[if lte IE 9]>
+	<script src="../../js/jquery/respond.js"></script>
+	<script src="../../js/jquery/html5shiv.js"></script>	
+<![endif]-->
+
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.min.js"></script>
+<script src="../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<script src="../../js/jquery/IE.plugin.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.min.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script src="projectList.js"></script>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="sdp">
+<meta name="keywords" content="SDP">
+<title>项目类延期申请</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet" href="../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet" href="../../css/fonts/awesome/font-awesome.min.css" />
+<style scoped>
+    .top{
+        padding: 10px;
+        background: rgba(0, 153, 229, .7);
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+    }
+</style>
+</head>
+<body>
+
+<div class="sdp-main-container" id="mainContainer" v-cloak>
+   <div class="layout">
+	  <Layout>
+	  <div>
+	       	<i-button type="primary"  @click="cancle" style="width:80px;float:right;margin-right:10px;">取消延期</i-button>
+			<i-button type="primary"  @click="submit" style="width:80px;float:right;margin-right:3px;">提交</i-button>
+		</div>
+       <!--  <Header style="height:48px;text-align: center;line-height:48px;font-size:20px" >项目类项目延期申请</Header> -->
+    	 <Content style="margin-left:50px;">
+			<i-form inline :model="datas" :label-width="130" style="margin-top:20px"> 
+				<form-item label="项目名称:" :required="true" prop="prj_name">
+					<i-input v-model="datas.prj_name"  :disabled="true"  style="width:200px" ></i-input>
+				</form-item> 
+				<form-item label="项目编号:"> 
+					<i-input v-model="datas.prj_code" :disabled="true" style="width:200px"></i-input>
+				</form-item> 
+				<form-item label="版本号:">
+					<i-input v-model="datas.prj_version" style="width:200px" :disabled="true"></i-input>
+				</form-item> 
+				<form-item label="年份:">
+					<date-Picker @on-change="datas.prj_year=$event"  :disabled="true" v-model="datas.prj_year" type="year" style="width: 200px" ></date-Picker>
+				</form-item>
+				<form-item label="月份:"> 
+					<i-select v-model="datas.prj_month" style="width:200px;"  :disabled="true" >
+						<i-option v-for="item in dicDatas['gpm_prj_month']" :value="item.dic_value" :key="item.dic_value">{{ item.dic_label }}</i-option>
+					</i-select>
+				</form-item>
+				<form-item label="项目总目标:" > 
+					<i-input v-model="datas.prj_goal"  :disabled="true"  @on-change='changeStimulate'  style="width:200px" ></i-input>
+				</form-item>
+				<form-item label="项目分类:" :required="true"> 
+					<i-select v-model="datas.prj_type"  :disabled="true" @on-change='changeRatio' style="width:200px">
+				        <i-option v-for="item in dicDatas['gpm_prj_type']" :value="item.dic_value" :key="item.dic_value">{{ item.dic_label }}</i-option>
+				    </i-select>
+				</form-item>
+				<form-item label="激励比例:" :required="true">
+			        <i-input v-model="datas.ratio"  :disabled="true"  @on-change='changeStimulate'  style="width:200px"></i-input>
+				</form-item> 
+				<form-item label="激励总金额:"  :required="true"> 
+					<i-input v-model="datas.stimulate_sum"  :disabled="true"  style="width:200px" ></i-input>
+				</form-item>
+				<form-item label="项目级别:" :required="true"> 
+					<i-select v-model="datas.prj_level"  :disabled="true" style="width:200px">
+				        <i-option v-for="item in dicDatas['gpm_prj_level']" :value="item.dic_value" :key="item.dic_value">{{ item.dic_label }}</i-option>
+				    </i-select>
+				</form-item> 
+				<form-item label="政策文号:"> 
+					<i-input v-model="datas.policy_no"  :disabled="true"  style="width:200px" ></i-input>
+				</form-item> 
+				<form-item label="信息采集时间:"> 
+					<Date-Picker  :disabled="true"  @on-change="datas.info_acq_time=$event" v-model="datas.info_acq_time" type="date" style="width: 200px"></Date-Picker>
+				</form-item> 
+	 			<form-item label="采集取证:" style="height:32px"> 
+	            	<i-button  :disabled="true" style="width:200px" type="primary" icon="search" >采集取证</i-button>
+				</form-item>
+				<form-item label="项目开始时间:" :required="true"> 
+					<date-picker  :disabled="true"  @on-change="datas.prj_start_time=$event" v-model="datas.prj_start_time" type="date" style="width: 200px"></date-picker>
+				</form-item> 
+				<form-item label="项目结束时间:"> 
+					<date-picker @on-change="datas.prj_end_time=$event" v-model="datas.prj_end_time" type="date" style="width: 200px"></date-picker>
+				</form-item> 
+				<form-item label="主导单位:" :required="true"> 
+					<!-- <i-input v-model="datas.dominant_unit" style="width:200px" ></i-input> -->
+					<i-select v-model="datas.dominant_unit"  :disabled="true" style="width:200px;" >
+						<i-option v-for="item in dicDatas['gpm_prj_units']" :value="item.dic_value" :key="item.dic_value">{{ item.dic_label }}</i-option>
+					</i-select> 
+				</form-item>
+				<form-item label="申报公司:" :required="true"> 
+					<i-input v-model="datas.declaration_company"  :disabled="true" style="width:200px" ></i-input>
+				</form-item> 
+				<form-item label="对应部门:" > 
+					<!-- <i-input v-model="datas.prj_org" style="width:200px" ></i-input> -->
+					<i-select v-model="datas.prj_org"  :disabled="true" style="width:200px;" >
+						<i-option v-for="item in dicDatas['gpm_department']"	:value="item.dic_value" :key="item.dic_value">{{ item.dic_label }}</i-option>
+					</i-select> 
+				</form-item> 
+				<form-item label="状态:">
+					<i-select v-model="datas.status" style="width:200px" :disabled="true">
+				        <i-option v-for="item in dicDatas['gpm_status']" :value="item.dic_value" :key="item.dic_value">{{ item.dic_label }}</i-option>
+				    </i-select>
+				</form-item> 
+				<form-item label="项目负责人:" :required="true"> 
+					<i-input v-model="datas.prj_leader"  :disabled="true" style="width:200px" @on-focus="selectUserLeader" ></i-input>
+				</form-item> 
+				<form-item label="结项确认人:"> 
+					<i-input v-model="datas.acknowledgement"  :disabled="true" style="width:200px" @on-focus="selectUserConfirm" ></i-input>
+				</form-item> 
+				<form-item label="材料计划提交时间:"><!-- datas.material_plan_date=$event -->
+					<Date-Picker  :disabled="true"  @on-change="datas.material_plan_date=$event" v-model="datas.material_plan_date"  style="width: 200px"></Date-Picker>
+				</form-item> 
+				<form-item label="材料确认状态:">
+					<i-select v-model="datas.material_comfirm_state"  :disabled="true" style="width:200px">
+				        <i-option v-for="item in dicDatas['gpm_material_comfirm_state']" :value="item.dic_value" :key="item.dic_value">{{ item.dic_label }}</i-option>
+				    </i-select>
+				</form-item> 
+				<form-item label="最新版本标记:"> 
+					<i-select v-model="datas.newest_flag"  :disabled="true" style="width:200px">
+				        <i-option v-for="item in dicDatas['gpm_newest_flag']" :value="item.dic_value" :key="item.dic_value">{{ item.dic_label }}</i-option>
+				    </i-select>
+				</form-item> 
+				<form-item label="项目说明:" prop="prj_desc" > 
+					<i-input v-model="datas.prj_desc"  :disabled="true" type="textarea" :autosize="{minRows: 4,maxRows: 4}" style="width:535px" ></i-input>
+	            	<i-button  :disabled="true" type="primary" icon="search">材料上传</i-button>
+				</form-item><br><br>
+			    <div style="width:940px;margin-left:50px;">
+			   		<Header style="margin-left:50px;line-height:48px;float:left;font-size:18px" >延期原因:</Header>
+				    <i-button type="primary" @click="projectDelay" icon="search" style="float:right;margin:10px 5px 15px;">材料上传</i-button>
+					<i-input v-model="datas.delay_reson"  type="textarea" :autosize="{minRows: 10,maxRows: 12}" style="width:940px;margin-left:50px;" ></i-input>
+			    </div>
+			</i-form>
+   		<Content><br><br>
+     </Layout>
+   </div>
+</div>
+	
+</body>
+<script src="../../js/jquery/jquery.min.js"></script>
+<script src="../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<script src="../../js/jquery/IE.plugin.js"></script>
+<script src="../../js/vue/vue.min.js"></script>
+<script src="../../js/vue/ui/iview.min.js"></script>
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script src="../../js/sdp/SDPLayer.js"></script>
+<script type="text/javascript" src="XMproject_delay.js"></script>
+</html>

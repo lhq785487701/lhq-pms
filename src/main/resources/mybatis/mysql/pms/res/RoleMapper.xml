@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.role">
+	<!-- 返回结果对象定义 -->
+	<resultMap id="roleResultMap" type="com.lhq.pms.data.Row">
+		<id column="role_code" property="role_code" jdbcType="VARCHAR" />
+		<result column="role_name" property="role_name" jdbcType="VARCHAR" />
+		<result column="role_sts" property="role_sts" jdbcType="VARCHAR" />
+		<result column="role_type" property="role_type" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+		<result column="isdel" property="isdel" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 返回结果对象定义 -->
+	<resultMap id="roleUserResultMap" type="com.lhq.pms.data.Row">
+		<result column="role_code" property="role_code" jdbcType="VARCHAR" />
+		<result column="role_name" property="role_name" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 返回字段 -->
+	<sql id="role_column_list">
+		r.role_code,r.role_name,r.role_type,
+		r.role_sts,r.create_date,r.create_user,r.update_date,r.update_user
+	</sql>
+
+	<!-- 查询角色列表 -->
+	<select id="queryRoles" parameterType="map" resultMap="roleResultMap">
+		select
+		<include refid="role_column_list" />
+		,
+		(case when ((select count(0) from sdp_user_role ur where
+		ur.role_code=r.role_code)+(select count(0) from sdp_menu_role mr where
+		mr.role_code=r.role_code)+(select count(0) from sdp_res_role rr where
+		rr.role_code=r.role_code) ) then 'N' else 'Y' end) isdel
+		from sdp_role
+		r
+		<where>
+			<if test="role_code!=null">
+				r.role_code like
+				CONCAT('%',#{role_code,jdbcType=CHAR},'%')
+			</if>
+			<if test="role_name!=null">
+				and r.role_name like
+				CONCAT('%',#{role_name,jdbcType=CHAR},'%')
+			</if>
+			<if test="role_type!=null">
+				and r.role_type =#{role_name,jdbcType=CHAR}
+			</if>
+			<if test="role_sts!=null and role_sts.size()!=0">
+				AND r.role_sts in
+				<foreach collection="role_sts" item="sts" index="index"
+					open="(" close=")" separator=",">
+					#{sts}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<!-- 新增角色 -->
+	<insert id="addRole" parameterType="map">
+		insert into
+		sdp_role(role_code,role_name,role_sts,role_type,create_date,create_user)
+		VALUES(#{role_code,jdbcType=CHAR},#{role_name,jdbcType=CHAR},'Y',#{role_type,jdbcType=CHAR},now(),#{$user_code,jdbcType=CHAR})
+		<selectKey order="AFTER" resultType="long" keyProperty="role_id">
+			SELECT LAST_INSERT_ID() AS role_id
+		</selectKey>
+	</insert>
+
+	<!-- 更新角色信息 -->
+	<update id="updateRole" parameterType="map">
+		update sdp_role
+		<set>
+			<if test="role_name!=null">
+				role_name=#{role_name,jdbcType=CHAR},
+			</if>
+			<if test="role_type!=null">
+				role_type=#{role_type,jdbcType=CHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where role_code=#{role_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 禁用角色 -->
+	<update id="disableRole" parameterType="map">
+		update sdp_role set
+		role_sts='D',update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where role_code=#{role_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 角色解禁 -->
+	<update id="enableRole" parameterType="map">
+		update sdp_role set
+		role_sts='Y',update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where role_code=#{role_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 删除角色 -->
+	<delete id="deleteRole">
+		delete from sdp_role where
+		role_code=#{role_code,jdbcType=CHAR}
+	</delete>
+
+	<!-- 查询用户无配置角色列表 -->
+	<select id="queryUserNotExistRoles" parameterType="map"
+		resultMap="roleUserResultMap">
+		select
+		role_code,role_name from sdp_role r
+		where not
+		exists(select 1 from
+		sdp_user_role ur where
+		ur.role_code=r.role_code
+		and
+		ur.user_code=#{user_code,jdbcType=CHAR})
+		<if test="role_name!=null">
+			and (r.role_name like
+			CONCAT('%',#{role_name,jdbcType=CHAR},'%')
+			or r.role_code like
+			CONCAT('%',#{role_name,jdbcType=CHAR},'%'))
+		</if>
+	</select>
+
+	<!-- 查询用户无配置角色列表 -->
+	<select id="queryAuthRoles" parameterType="map" resultMap="roleUserResultMap">
+		select
+		role_code,role_name from sdp_role r
+		where r.role_sts='Y'
+		<if test="role_name!=null">
+			and (r.role_name like
+			CONCAT('%',#{role_name,jdbcType=CHAR},'%')
+			or r.role_code like
+			CONCAT('%',#{role_name,jdbcType=CHAR},'%'))
+		</if>
+	</select>
+	<!-- 查询角色包含菜单 -->
+	<select id="queryRoleMenus" parameterType="map" resultType="com.lhq.pms.data.Row">
+		select role_code, menu_code from sdp_menu_role where
+		role_code=#{role_code,jdbcType=CHAR}
+	</select>
+
+	<!-- 新增角色菜单 -->
+	<insert id="addMenuRole" parameterType="map">
+		insert into
+		sdp_menu_role(role_code,menu_code,create_date,create_user)
+		values(#{role_code,jdbcType=CHAR},#{menu_code,jdbcType=CHAR},now(),#{$user_code,jdbcType=CHAR})
+	</insert>
+	<!-- 删除角色菜单 -->
+	<delete id="delMenuRole" parameterType="map">
+		delete from sdp_menu_role
+		where role_code=#{role_code,jdbcType=CHAR} and
+		menu_code=#{menu_code,jdbcType=CHAR}
+	</delete>
+
+</mapper>

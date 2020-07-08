@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="pms">
+<meta name="keywords" content="PMS">
+<title>日志分析页面</title>
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet"
+	href="../../../js/jquery/layer/theme/default/layer.css">
+<link rel="stylesheet" href="../../../css/sdp-ui.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/awesome/font-awesome.min.css" />
+</head>
+<body>
+	<div class="sdp-main-container" id="mainContainer" v-cloak>
+		<row> 
+			<i-col :span="9"> 
+				<upload ref="fileUpload" type="drag" :action="impUrl" :data="impData" 
+					:format="uploadFormat" :accept="acceptFormat" :on-success="uploadSuccess"
+					:on-error="uploadError" :before-upload="beforeUpload">
+					<div style="padding: 20px 0">
+						<icon type="ios-cloud-upload" size="52" style="color: #3399ff"></icon>
+						<p>点击或者拖拽上传文件</p>
+					</div>
+				</upload>
+				<br>
+				<i-button @click="commonUpload" icon="search">公共上传</i-button> 
+				<i-button @click="openNewTab('test001')" icon="share">新增tab1</i-button> 
+				<i-button @click="openNewTab('test002')" icon="share">新增tab2</i-button> 
+				<i-button @click="closeNewTab('test001')" icon="share">关闭tab1</i-button> <br>
+				<i-button @click="openOnlyTab('html/admin/module/testChart.html', '报表')" icon="share">统一打开一个tab</i-button>
+				<i-button @click="openOnlyTab('html/admin/module/testFile.html', '文件')" icon="share">统一打开一个tab</i-button>
+			</i-col> 
+			<i-col :span="15"> 
+				<i-table :data="datas" :columns="columns" height="180" border></i-table> 
+			</i-col>
+		</row>
+	</div>
+</body>
+<script src="../../../js/jquery/IE.plugin.js"></script>
+<!--[if lte IE 9]>	
+	<script src="../../../js/ieBetter-min.js"></script>
+	<script src="../../../js/jquery/respond.js"></script>
+	<script src="../../../js/jquery/html5shiv.js"></script>	
+<![endif]-->
+
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.min.js"></script>
+<script src="../../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.min.js"></script>
+
+<script src="../../../js/sdp/fileDown.js"></script>
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/SDPLayer.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="testFile.js"></script>
+</html>

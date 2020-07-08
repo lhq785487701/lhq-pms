@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.res">
+	<!-- 返回结果对象定义 -->
+	<resultMap id="resRoleResultMap" type="com.lhq.pms.data.Row">
+		<id column="res_code" property="res_code" jdbcType="VARCHAR" />
+		<result column="res_url" property="res_url" jdbcType="VARCHAR" />
+		<collection property="roles" javaType="ArrayList" ofType="string">
+			<result column="role_code" property="role_code" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+
+	<!-- 返回字段 -->
+	<sql id="res_column_list">
+		r.res_code,r.res_order,r.res_name,r.res_url,r.system_code,
+		r.res_sts,r.res_remark,r.create_user,r.create_date,r.update_user,r.update_date
+	</sql>
+
+	<select id="queryAuthResRole" resultMap="resRoleResultMap">
+		select
+		sr.res_code,sr.res_url,srr.role_code from sdp_res sr right join
+		sdp_res_role srr on sr.res_code=srr.res_code where sr.res_code is not
+		null
+		<if test="system_code!=null">
+			and sr.system_code=#{system_code,jdbcType=VARCHAR}
+		</if>
+		union all
+		select m.menu_code,m.menu_url,mr.role_code from
+		sdp_menu_role
+		mr left join sdp_menu m
+		on mr.menu_code=m.menu_code where
+		m.menu_url is
+		not null
+		<if test="system_code!=null">
+			and m.menu_system=#{system_code,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<!--资源查询 -->
+	<select id="queryRes" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select
+		<include refid="res_column_list" />
+		from sdp_res r
+		<where>
+			<if test="res_code != null">
+				and (r.res_code like
+				CONCAT('%',#{res_code,jdbcType=VARCHAR}, '%') or r.res_name like
+				CONCAT('%',#{res_code,jdbcType=VARCHAR},'%'))
+			</if>
+			<if test="system_code!=null">
+				and r.system_code=#{system_code,jdbcType=VARCHAR}
+			</if>
+			<if test="res_sts != null">
+				and r.res_sts = #{res_sts, jdbcType=VARCHAR}
+				<!-- <foreach collection="res_sts" item="sts" index="index" open="("
+					close=")" separator=",">
+					#{sts}
+				</foreach> -->
+			</if>
+		</where>
+		order by r.create_date desc
+	</select>
+
+	<!-- 获取资源地址 -->
+	<select id="queryResUrl" resultType="com.lhq.pms.data.Row" parameterType="string">
+		select res_url,system_code from sdp_res where res_code=#{res_code,jdbcType=CHAR}
+	</select>
+
+	<!-- 添加资源 -->
+	<insert id="addRes" parameterType="map">
+		insert into
+		sdp_res(res_code,res_name,res_sts,res_url,res_order,res_remark,system_code,create_date,create_user)
+		VALUES(#{res_code,jdbcType=VARCHAR},#{res_name,jdbcType=VARCHAR},#{res_sts,jdbcType=VARCHAR},#{res_url,jdbcType=VARCHAR},
+		#{res_order,jdbcType=VARCHAR},#{res_remark,jdbcType=VARCHAR},#{system_code,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 修改资源 -->
+	<update id="updateRes" parameterType="map">
+		update sdp_res
+		<set>
+			<if test="res_name != null">
+				res_name=#{res_name,jdbcType=VARCHAR},
+			</if>
+			<if test="res_sts != null">
+				res_sts=#{res_sts,jdbcType=VARCHAR},
+			</if>
+			<if test="res_url != null">
+				res_url=#{res_url,jdbcType=VARCHAR},
+			</if>
+			<if test="res_order != null">
+				res_order=#{res_order,jdbcType=VARCHAR},
+			</if>
+			<if test="res_remark != null">
+				res_remark=#{res_remark,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where res_code=#{res_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 禁用资源 -->
+	<update id="disabledRes" parameterType="map">
+		update sdp_res
+		<set>
+			res_sts='D',
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where res_sts='Y' and res_code=#{res_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 启用资源 -->
+	<update id="enableRes" parameterType="map">
+		update sdp_res
+		<set>
+			res_sts='Y',
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where res_sts='D' and res_code=#{res_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 删除资源 -->
+	<delete id="delRes" parameterType="map">
+		delete from sdp_res
+		where
+		res_code=#{res_code,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 可获取资源 -->
+	<select id="queryRoleRes" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select
+		r.res_code,r.res_name,r.res_url from sdp_res r
+		left join
+		sdp_res_role sr on r.res_code=sr.res_code
+		where
+		sr.role_code=#{role_code,jdbcType=VARCHAR}
+		<if test="system_code!=null">
+			and r.system_code=#{system_code,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<!-- 删除角色资源 -->
+	<delete id="delResRole" parameterType="map">
+		delete from sdp_res_role where role_code=#{role_code,jdbcType=CHAR}
+		and
+		res_code in
+		<foreach collection="res_code" item="res" index="index" open="("
+			close=")" separator=",">
+			#{res}
+		</foreach>
+	</delete>
+
+	<!-- 查询当前用户未授权的角色 -->
+	<select id="queryRoleNotExistRes" parameterType="map"
+		resultType="com.lhq.pms.data.Row">
+		select
+		res_code,res_name,res_url,res_remark from sdp_res r
+		where not
+		exists(select 1 from
+		sdp_res_role sr where
+		sr.res_code=r.res_code
+		and
+		sr.role_code=#{role_code,jdbcType=CHAR})
+		<if test="system_code!=null">
+			and r.system_code=#{system_code,jdbcType=VARCHAR}
+		</if>
+		<if test="role_name!=null">
+			and (r.res_code like
+			CONCAT('%',#{res_name,jdbcType=CHAR},'%')
+			or r.res_name like
+			CONCAT('%',#{res_name,jdbcType=CHAR},'%'))
+		</if>
+	</select>
+
+	<!-- 新增角色资源 -->
+	<insert id="addRoleRes" parameterType="map">
+		insert into
+		sdp_res_role(res_code,role_code,create_date,create_user)
+		VALUES
+		<foreach collection="res_code" item="code" index="index"
+			separator=",">
+			(#{code,jdbcType=VARCHAR},#{role_code,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=CHAR})
+		</foreach>
+	</insert>
+
+
+</mapper>

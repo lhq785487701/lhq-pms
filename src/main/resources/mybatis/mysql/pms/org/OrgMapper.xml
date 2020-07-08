@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.org">
+	<resultMap id="resultORGMap" type="com.lhq.pms.data.Row">
+		<result column="org_code" property="org_code" jdbcType="VARCHAR" />
+		<result column="org_name" property="org_name" jdbcType="VARCHAR" />
+		<result column="org_order" property="org_order" jdbcType="INTEGER" />
+		<result column="org_pcode" property="org_pcode" jdbcType="VARCHAR" />
+		<result column="org_path" property="org_path" jdbcType="VARCHAR" />
+		<result column="org_name_path" property="org_name_path"
+			jdbcType="VARCHAR" />
+		<result column="mdm_code" property="mdm_code" jdbcType="VARCHAR" />
+		<result column="org_level" property="org_level" jdbcType="INTEGER" />
+	</resultMap>
+
+	<sql id="org_column_list">
+		org.org_code , org.org_name , org.org_order , org.org_pcode
+		,
+		org.org_path , org.org_name_path , org.mdm_code , org.org_level,
+		org.create_date ,
+		org.create_user , org.update_date , org.update_user
+	</sql>
+
+	<!-- 获取组织信息，根据组织编码 -->
+	<select id="selectORGByOrgCode" resultType="com.lhq.pms.data.Row"
+		parameterType="java.lang.String">
+		select
+		<include refid="org_column_list" />
+		from sdp_org org where org.org_code
+		=#{org_code,jdbcType=VARCHAR}
+		order
+		by org.org_code
+	</select>
+
+	<!--组织信息查询 -->
+	<select id="queryORG" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select
+		<include refid="org_column_list" />
+		from sdp_org org
+		<where>
+			<if test="org_code != null">
+				(org.org_code like
+				CONCAT('%',#{org_code,jdbcType=VARCHAR},'%')
+				or org.org_name like
+				CONCAT('%',#{org_code,jdbcType=VARCHAR},'%'))
+			</if>
+			<if test="mdm_code != null">
+				and mdm_code=#{mdm_code,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by org.create_date
+	</select>
+
+	<!-- 插入组织 -->
+	<insert id="addORG" parameterType="map">
+		insert into
+		sdp_org
+		(org_id,org_code,org_name,org_order,org_pcode,org_path,org_name_path,mdm_code,org_level,create_date,create_user)
+		VALUES
+		(#{$uuid,jdbcType=VARCHAR},#{org_code,jdbcType=VARCHAR},#{org_name,jdbcType=VARCHAR},#{org_order,jdbcType=VARCHAR},#{org_pcode
+		,jdbcType=VARCHAR},
+		#{org_path,jdbcType=VARCHAR},#{org_name_path,jdbcType=VARCHAR},#{mdm_code,jdbcType=VARCHAR},#{org_level
+		,jdbcType=VARCHAR},
+		now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 更新组织信息 -->
+	<update id="updateORG" parameterType="map">
+		update sdp_org
+		<set>
+			<if test="org_name != null">
+				org_name=#{org_name,jdbcType=VARCHAR},
+			</if>
+			<if test="org_order != null">
+				org_order=#{org_order,jdbcType=VARCHAR},
+			</if>
+			<if test="org_pcode != null">
+				org_pcode=#{org_pcode,jdbcType=VARCHAR},
+			</if>
+			<if test="org_path != null">
+				org_path=#{org_path,jdbcType=VARCHAR},
+			</if>
+			<if test="org_name_path != null">
+				org_name_path=#{org_name_path,jdbcType=VARCHAR},
+			</if>
+			<if test="mdm_code != null">
+				mdm_code=#{mdm_code,jdbcType=VARCHAR},
+			</if>
+			<if test="org_level != null">
+				org_level=#{org_level,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where org_code=#{org_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 删除职务信息 -->
+	<delete id="deleteORG" parameterType="map">
+		delete from sdp_org
+		where
+		sdp_org=#{sdp_org,jdbcType=VARCHAR}
+	</delete>
+</mapper>

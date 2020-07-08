@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.thread">
+	<!-- 返回结果对象定义 -->
+	<resultMap id="threadResultMap" type="com.lhq.pms.data.Row">
+		<id column="thread_code" property="thread_code" jdbcType="VARCHAR" />
+		<result column="thread_title" property="thread_title" jdbcType="VARCHAR" />
+		<result column="thread_name" property="thread_name" jdbcType="VARCHAR" />
+		<result column="thread_sts" property="thread_sts" jdbcType="VARCHAR" />
+		<result column="group_name" property="group_name" jdbcType="VARCHAR" />
+		<result column="server_ip" property="server_ip" jdbcType="VARCHAR" />
+		<result column="start_date" property="start_date" jdbcType="DATE" />
+		<result column="end_date" property="end_date" jdbcType="DATE" />
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 返回字段 -->
+	<sql id="thread_column_list">
+		t.thread_code,t.thread_title,t.thread_name,t.thread_sts,
+		t.group_name,t.server_ip,t.start_date,t.end_date,t.system_code,
+		t.create_date,t.create_user
+	</sql>
+
+	<!-- 查询线程列表 -->
+	<select id="queryThreads" parameterType="map" resultMap="threadResultMap">
+		select
+		<include refid="thread_column_list" />
+		from sdp_thread
+		t
+		<where>
+			<if test="system_code!=null">
+				t.system_code =#{system_code,jdbcType=CHAR}
+			</if>
+			<if test="create_user!=null">
+				and t.create_user =#{create_user,jdbcType=CHAR}
+			</if>
+			<if test="create_date_begin!=null">
+				and t.create_date <![CDATA[>=]]>#{create_date_begin,jdbcType=CHAR}
+			</if>
+			<if test="create_date_end!=null">
+				and t.create_date_end <![CDATA[<=]]>#{create_date_end,jdbcType=CHAR}
+			</if>
+			<if test="thread_title!=null">
+				and (t.thread_title like
+				CONCAT('%',#{thread_title,jdbcType=VARCHAR}, '%') or t.thread_code
+				like CONCAT('%',#{thread_title,jdbcType=VARCHAR}, '%'))
+			</if>
+			<if test="thread_sts!=null and thread_sts.size()!=0">
+				and t.thread_sts in
+				<foreach collection="thread_sts" item="sts" index="index"
+					open="(" close=")" separator=",">
+					#{sts}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<!-- 新增线程 -->
+	<insert id="addThread" parameterType="map">
+		insert into
+		sdp_thread(thread_code,thread_title,thread_name,thread_sts,group_name,server_ip,start_date,end_date,system_code,create_date,create_user)
+		VALUES(
+		#{thread_code,jdbcType=CHAR},#{thread_title,jdbcType=CHAR},#{thread_name,jdbcType=CHAR},#{thread_sts,jdbcType=CHAR},#{group_name,jdbcType=CHAR},
+		#{server_ip,jdbcType=CHAR},#{start_date,jdbcType=DATE},#{end_date,jdbcType=DATE},#{system_code,jdbcType=CHAR},now(),#{$user_code,jdbcType=CHAR})
+	</insert>
+
+	<!-- 更改线程状态 -->
+	<update id="updateThreadSts" parameterType="map">
+		update
+		sdp_thread set
+		thread_sts=#{thread_sts,jdbcType=CHAR}
+		where
+		thread_code=#{thread_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 更改线程启动时间和状态 -->
+	<update id="updateThreadStartDate" parameterType="map">
+		update
+		sdp_thread set start_date=now(),thread_sts=#{thread_sts,jdbcType=CHAR}
+		where
+		thread_code=#{thread_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 更改线程完成时间和状态 -->
+	<update id="updateThreadEndDate" parameterType="map">
+		update
+		sdp_thread
+		set end_date=now(),thread_sts=#{thread_sts,jdbcType=CHAR}
+		where
+		thread_code=#{thread_code,jdbcType=CHAR}
+	</update>
+</mapper>

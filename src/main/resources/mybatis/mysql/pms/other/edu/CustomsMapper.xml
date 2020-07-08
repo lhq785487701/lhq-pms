@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.customs">
+	
+	
+	<select id="queryCustomsByParams" resultType="map" parameterType="map">
+		SELECT
+			cus.customs_name customs_name,
+			cus.group_type group_type,
+			orgs.org_names org_names,
+			cus.create_date create_date,
+			cus.create_user create_user
+		FROM
+			edu_customs cus
+		LEFT JOIN (
+			SELECT
+				GROUP_CONCAT(b.org_name) org_names,
+				a.customs_id
+			FROM
+				edu_org_customs a,
+				sdp_org b
+			WHERE
+				a.org_code = b.org_code
+			GROUP BY
+				a.customs_id
+		) orgs ON cus.customs_id = orgs.customs_id
+	</select>
+
+</mapper>

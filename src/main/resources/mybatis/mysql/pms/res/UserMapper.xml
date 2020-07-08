@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.user">
+	<resultMap id="userResultMap" type="com.lhq.pms.map.LowerHashMap">
+		<id column="user_code" property="user_code" jdbcType="VARCHAR" />
+		<result column="user_id" property="user_id" jdbcType="INTEGER" />
+		<result column="user_name" property="user_name" jdbcType="VARCHAR" /> 
+		<result column="user_pwd" property="user_pwd" jdbcType="VARCHAR" />
+		<result column="user_sts" property="user_sts" jdbcType="VARCHAR" />
+		<result column="user_email" property="user_email" jdbcType="VARCHAR" />
+		<result column="user_mobile" property="user_mobile" jdbcType="VARCHAR" />
+		<association property="org" column="user_code" javaType="map"
+			select="com.lhq.pms.org.mgr.queryUserMainOrg" />
+		<collection property="roles" javaType="ArrayList"
+			resultMap="roleResult" />
+	</resultMap>
+	<resultMap id="roleResult" type="com.lhq.pms.data.Row">
+		<id column="role_code" property="role_code" jdbcType="VARCHAR" />
+		<result column="role_type" property="role_type" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="userListResultMap" type="com.lhq.pms.data.Row">
+		<id column="user_code" property="user_code" jdbcType="VARCHAR" />
+		<result column="user_name" property="user_name" jdbcType="VARCHAR" />
+		<result column="user_pwd" property="user_pwd" jdbcType="VARCHAR" />
+		<result column="user_sts" property="user_sts" jdbcType="VARCHAR" />
+		<result column="user_email" property="user_email" jdbcType="VARCHAR" />
+		<result column="user_mobile" property="user_mobile" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+		<result column="login_date" property="login_date" jdbcType="DATE" />
+	</resultMap>
+	<resultMap id="userListMap" type="com.lhq.pms.data.Row">
+		<id column="user_code" property="user_code" jdbcType="VARCHAR" />
+		<result column="user_name" property="user_name" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="userRoleListMap" type="com.lhq.pms.data.Row">
+		<result column="user_code" property="user_code" jdbcType="VARCHAR" />
+		<result column="role_code" property="role_code" jdbcType="VARCHAR" />
+		<result column="role_name" property="role_name" jdbcType="VARCHAR" />
+		<result column="role_sts" property="role_sts" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="user_column_list">
+		u.user_code,u.user_name,u.user_pwd,u.user_sts,u.user_id,
+		u.user_email,u.user_mobile,u.create_date,u.login_date,ur.role_code,ur.user_code,r.role_type
+	</sql>
+	<sql id="user_list_column_list">
+		u.user_code,u.user_name,u.user_pwd,u.user_sts,
+		u.user_email,u.user_mobile,u.create_date,u.login_date,u.create_user,u.update_date,u.update_user
+	</sql>
+
+	<!-- 根据帐号获取用户信息和角色信息 -->
+	<select id="selectUserByCode" resultMap="userResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="user_column_list" />
+		from sdp_user u left join sdp_user_role ur on u.user_code=ur.user_code
+		left join sdp_role r on r.role_code=ur.role_code
+		where u.user_code = #{userCode,jdbcType=CHAR}
+	</select>
+
+	<!-- 根据帐号获取用户信息和角色信息 -->
+	<select id="countUserByCode" resultType="java.lang.Integer"
+		parameterType="java.lang.String">
+		select count(*) 
+		from sdp_user u
+		where u.user_code = #{user_code,jdbcType=CHAR}
+	</select>
+	
+
+	<!-- 根据帐号获取用户名称 -->
+	<select id="selectUserNameByCode" resultType="string"
+		parameterType="java.lang.String">
+		select user_name from sdp_user u where
+		u.user_code=#{userCode,jdbcType=CHAR}
+	</select>
+
+	<!--用户信息查询 -->
+	<select id="queryUsers" resultMap="userListResultMap"
+		parameterType="map">
+		select
+		<include refid="user_list_column_list" />
+		from sdp_user u
+		<where>
+			<if test="user_name!=null">
+				(u.user_code like
+				CONCAT('%',#{user_name,jdbcType=CHAR},'%') or u.user_name like
+				CONCAT('%',#{user_name,jdbcType=CHAR},'%'))
+			</if>
+			<if test="user_sts!=null and user_sts.size()!=0">
+				AND u.user_sts in
+				<foreach collection="user_sts" item="sts" index="index"
+					open="(" close=")" separator=",">
+					#{sts}
+				</foreach>
+			</if>
+		</where>
+	</select>
+
+	<!-- 新增用户 -->
+	<insert id="addUser" parameterType="map">
+		insert into
+		sdp_user(user_code,user_name,user_pwd,user_sts,user_email,user_mobile,create_date,create_user)
+		VALUES(#{user_code,jdbcType=CHAR},#{user_name,jdbcType=CHAR},#{user_pwd,jdbcType=CHAR},'Y',
+		#{user_email,jdbcType=CHAR},#{user_mobile,jdbcType=CHAR},now(),#{$user_code,jdbcType=CHAR})
+		<selectKey order="AFTER" resultType="long" keyProperty="user_id">
+			SELECT LAST_INSERT_ID() AS user_id
+		</selectKey>
+	</insert>
+
+	<!-- 更新用户信息 -->
+	<update id="updateUser" parameterType="map">
+		update sdp_user
+		<set>
+			<if test="user_name!=null">
+				user_name=#{user_name,jdbcType=CHAR},
+			</if>
+			<if test="user_email!=null">
+				user_email=#{user_email,jdbcType=CHAR},
+			</if>
+			<if test="user_mobile!=null">
+				user_mobile=#{user_mobile,jdbcType=CHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where user_code=#{user_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 禁用用户 -->
+	<update id="disableUser" parameterType="map">
+		update sdp_user set
+		user_sts='D',update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where user_code=#{user_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 用户解禁 -->
+	<update id="enableUser" parameterType="map">
+		update sdp_user set
+		user_sts='Y',update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where user_code=#{user_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 用户锁定 -->
+	<update id="lockUser" parameterType="map">
+		update sdp_user set
+		user_sts='L',update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where user_code=#{user_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 用户解锁 -->
+	<update id="unlockUser" parameterType="map">
+		update sdp_user set
+		user_sts='Y',update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where user_code=#{user_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 修改密码 -->
+	<update id="updateUserPwd" parameterType="map">
+		update sdp_user set
+		user_pwd=#{user_pwd,jdbcType=VARCHAR}
+		,update_date=sysdate,update_user=#{$user_code,jdbcType=CHAR}
+		where
+		user_code=#{$user_code,jdbcType=CHAR}
+	</update>
+
+	<!--用户查询 -->
+	<select id="queryUserList" resultMap="userListMap"
+		parameterType="map">
+		select user_code,user_name
+		from sdp_user u
+		where u.user_sts='Y'
+		<if test="user_name!=null">
+			and (u.user_name like
+			CONCAT('%',#{user_name,jdbcType=CHAR},'%')
+			or u.user_code like
+			CONCAT('%',#{user_name,jdbcType=CHAR},'%'))
+		</if>
+	</select>
+
+	<!--用户角色查询 -->
+	<select id="queryUserRoleList" resultMap="userRoleListMap"
+		parameterType="map">
+		select ur.user_code,ur.role_code,r.role_name,r.role_sts
+		from
+		sdp_user_role ur left join sdp_role r on ur.role_code=r.role_code
+		where ur.user_code=#{user_code,jdbcType=CHAR}
+	</select>
+
+	<!-- 删除用户角色 -->
+	<delete id="delUserRole" parameterType="map">
+		delete from sdp_user_role where user_code=#{user_code,jdbcType=CHAR}
+		and
+		role_code in
+		<foreach collection="role_code" item="code" index="index"
+			open="(" close=")" separator=",">
+			#{code}
+		</foreach>
+	</delete>
+
+	<!-- 新增用户角色 -->
+	<insert id="addUserRole" parameterType="map">
+		insert into
+		sdp_user_role(user_code,role_code,create_date,create_user)
+		VALUES
+		<foreach collection="role_code" item="code" index="index"
+			separator=",">
+			(#{user_code,jdbcType=CHAR},#{code,jdbcType=CHAR},now(),#{$user_code,jdbcType=CHAR})
+		</foreach>
+	</insert>
+	
+	<!-- 默认新增用户角色ROLE_USER -->
+	<insert id="addDefUserRole" parameterType="map">
+		insert into
+		sdp_user_role(user_code,role_code,create_date,create_user)
+		VALUES
+		<foreach collection="role_code" item="code" index="index"
+			separator=",">
+			(#{user_code,jdbcType=CHAR},'ROLE_USER',now(),#{$user_code,jdbcType=CHAR})
+		</foreach>
+	</insert>
+
+	<!--查询角色下的用户 -->
+	<select id="queryRoleUsers" resultType="string" parameterType="string">
+		select ur.user_code
+		from sdp_user_role ur inner join sdp_role r on
+		ur.role_code=r.role_code
+		where r.role_sts='Y' and
+		ur.role_code=#{role_code,jdbcType=VARCHAR}
+	</select>
+	
+	<!--查询角色下所有的用户 -->
+	<select id="queryAllRoleUsers" resultType="map" parameterType="string">
+		select u.user_code, u.user_name, u.user_sts, u.user_mobile
+		from sdp_user_role ur 
+			inner join sdp_role r on ur.role_code=r.role_code
+			inner join sdp_user u on ur.user_code=u.user_code
+		where ur.role_code=#{role_code,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 删除角色下的用户 -->
+	<delete id="delRoleUser" parameterType="map">
+		delete from sdp_user_role where role_code=#{role_code,jdbcType=CHAR}
+		and
+		user_code in
+		<foreach collection="user_code" item="user" index="index"
+			open="(" close=")" separator=",">
+			#{user}
+		</foreach>
+	</delete>
+	
+	
+	<select id="queryNonRoleUser" parameterType="map" resultType="map">
+		select u.user_code, u.user_name, u.user_mobile, u.user_sts,r.role_codes
+		from sdp_user u 
+			LEFT JOIN (select role.user_code,GROUP_CONCAT(role.role_code) role_codes
+						from sdp_user_role role 
+						GROUP BY role.user_code) r on r.user_code = u.user_code
+		where (r.role_codes not like CONCAT('%',#{role_code,jdbcType=CHAR},'%')
+			  or r.role_codes is null)
+		<if test="user_name!=null">
+			and (u.user_code like
+			CONCAT('%',#{user_name,jdbcType=CHAR},'%') or u.user_name like
+			CONCAT('%',#{user_name,jdbcType=CHAR},'%'))
+		</if>
+	</select>
+	
+	<!-- 新增角色下用户 -->
+	<insert id="addRoleUser" parameterType="map">
+		insert into
+		sdp_user_role(user_code,role_code,create_date,create_user)
+		VALUES
+		<foreach collection="user_codes" item="code" index="index"
+			separator=",">
+			(#{code,jdbcType=CHAR},#{role_code,jdbcType=CHAR},now(),#{$user_code,jdbcType=CHAR})
+		</foreach>
+	</insert>
+</mapper>

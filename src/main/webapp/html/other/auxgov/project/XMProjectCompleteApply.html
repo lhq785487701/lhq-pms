@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="sdp">
+<meta name="keywords" content="SDP">
+<title>项目类结项申请</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet" href="../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet" href="../../css/fonts/awesome/font-awesome.min.css" />
+<style scoped>
+    .top{
+        padding: 10px;
+        background: rgba(0, 153, 229, .7);
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+    }
+</style>
+</head>
+<body>
+	<div class="sdp-main-container" id="mainContainer" v-cloak>
+	<div class="layout">
+	<Layout>
+        <Header style="height:48px;text-align: center;line-height:48px;font-size:20px" >项目类结项申请</Header>
+    	<Content>
+		<i-form inline :model="proCloseItem" :label-width="120"> 
+			<form-item :label-width="800">
+					<i-button type="primary" size="large">保存</i-button>
+	            	<i-button type="primary" size="large" @click="doSubmitClose">提交</i-button>
+	            	<i-button type="primary" size="large">废弃</i-button>
+	    	</form-item><br>
+			<form-item label="项目名称:" :required="true"> 
+				<i-input v-model="proCloseItem.prj_name" style="width:200px" :disabled="true"></i-input>
+			</form-item> 
+			<form-item label="项目编号:" > 
+				<i-input v-model="proCloseItem.prj_code"  style="width:200px" :disabled="true"></i-input>
+			</form-item> 
+			<!-- <form-item label="版本号:"> 
+				<i-input v-model="proCloseItem.prj_version" style="width:200px" :disabled="true"></i-input>
+			</form-item> --> 
+			<form-item label="结项年度:" :required="true"> 
+				<Date-Picker type="year" v-model="proCloseItem.close_year" style="width: 200px"></Date-Picker>
+			</form-item> 
+			<form-item label="项目负责人:" > 
+				<i-input v-model="proCloseItem.prj_leader" style="width:200px" :disabled="true"></i-input>
+			</form-item> 
+			<form-item label="项目开始时间:" > 
+				<Date-Picker type="date" v-model="proCloseItem.prj_start_time" style="width:200px" :disabled="true"></Date-Picker>
+			</form-item> 
+			<form-item label="计划结项时间:" :required="true"> 
+				<Date-Picker type="date" v-model="proCloseItem.plan_close_time"  style="width:200px"></Date-Picker>
+			</form-item> 
+			<form-item label="实际结项时间:" :required="true"> 
+				<Date-Picker type="date" v-model="proCloseItem.fact_close_time"  style="width:200px"></Date-Picker>
+			</form-item> 
+			<form-item label="结项确认人:"> 
+				<i-input v-model="proCloseItem.acknowledgement" style="width: 200px" :disabled="true"></i-input>
+			</form-item> 
+			<form-item label="结账入账公司:"> 
+				<i-input v-model="proCloseItem.close_account_company" style="width:200px"></i-input>
+			</form-item> 
+			<form-item label="项目目前阶段:" > 
+				<i-select v-model="proCloseItem.prj_parsh_now" style="width:200px;"placeholder="请选择" clearable> 
+					<i-option v-for="item in dicDatas['gpm_phase']" :label="item.dic_label" 
+					:value="item.dic_value" :key="item.dic_value">
+					</i-option>
+				</i-select>
+			</form-item> 
+			<form-item label="状态:"> 
+				<i-input  v-model="stsFormat('gpm_status',proCloseItem,'status')" style="width: 200px" :disabled="true"></i-input >
+			</form-item> 
+			<form-item label="激励总额:" > 
+				<i-input v-model="proCloseItem.incentive_amount" style="width:200px"></i-input>
+			</form-item> 
+			<form-item label="成功/失败" > 
+				<i-select v-model="proCloseItem.prj_close_status" style="width:200px;"placeholder="请选择" clearable> 
+					<i-option v-for="item in dicDatas['gpm_close_status']" :label="item.dic_label" 
+					:value="item.dic_value" :key="item.dic_value">
+					</i-option>
+				</i-select>
+			</form-item> 
+			<form-item label="复盘及原因:"> 
+				<i-input v-model="proCloseItem.multiray_reason"  type="textarea" :autosize="{minRows: 3,maxRows: 5}" style="width:535px" clearable></i-input>
+			</form-item>  
+			<form-item :label-width="23">
+	            	<i-button type="primary" size="large">附件</i-button>
+		    </form-item>
+		</i-form><br>
+    	
+    	<Tabs value="params1">
+	        <Tab-Pane label="成员及贡献" name="params1">
+		       	<i-button type="primary" @click="addRow('member')" icon="android-add" style="margin-left:8px">新增一行</i-button>
+				<i-button type="primary" style="margin-left:8px"><i class="fa fa-upload" aria-hidden="true" style="margin-right:4px"></i>成员贡献EXCEL导入</i-button>
+				<i-button type="primary" style="margin-left:8px">上传模板</i-button>
+				<i-button type="primary" style="margin-left:8px">下载模板</i-button>
+				<i-table :data='memberDatas' :columns="memberCols" ref="dataGrid" width="892" border highlight-row stripe></i-table>
+			</Tab-Pane>
+	        <Tab-Pane label="激励分摊明细" name="params2">
+	        	<i-button type="primary" @click="addRow('rewardDetail')" icon="android-add" style="margin-left:8px">新增一行</i-button>
+				<i-button type="primary" style="margin-left:8px"><i class="fa fa-upload" aria-hidden="true" style="margin-right:4px"></i>激励分摊EXCEL导入</i-button> 
+				<i-button type="primary" style="margin-left:8px">上传模板</i-button>
+				<i-button type="primary" style="margin-left:8px">下载模板</i-button>  
+				<i-table :data='rewardDetailDatas' :columns="rewardDetailCols" ref="dataGrid" width="712" border highlight-row stripe></i-table>
+	        </Tab-Pane>
+        	<Tab-Pane label="项目进展说明" name="params3">
+        		<!-- <i-button @click="addRow('projProgDesc')" icon="android-add" style="margin-left:8px">新增一行</i-button> -->
+				<i-button type="primary" style="margin-left:8px"><i class="fa fa-upload" aria-hidden="true" style="margin-right:4px"></i>说明文件导入</i-button>    
+				<i-table :data='projProgDescDatas' :columns="projProgDescCols" ref="dataGrid" width="762" border highlight-row stripe></i-table>
+	        </Tab-Pane>
+	    </Tabs>
+    	</Content><br>
+    	<Footer>&nbsp;</Footer>
+     </Layout>
+     </div>
+	</div>
+</body>
+<script src="../../js/jquery/jquery.min.js"></script>
+<script src="../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<script src="../../js/jquery/IE.plugin.js"></script>
+<script src="../../js/vue/vue.min.js"></script>
+<script src="../../js/vue/ui/iview.min.js"></script>
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script src="../../js/moment.js"></script>
+<script type="text/javascript" src="XMProjectCompleteApply.js"></script>
+</html>

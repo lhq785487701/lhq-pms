@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/security
+	http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<!-- 国际化消息 -->
+	<bean id="sdpSecBundleMessageBean" class="com.lhq.pms.plugin.bundle.PMSBundleMessageBean">
+		<property name="basenames">
+			<list>
+				<value>classpath:org/springframework/security/messages</value>
+			</list>
+		</property>
+	</bean>
+
+	<security:http pattern="/css/**" security="none">
+	</security:http>
+
+	<security:http pattern="/js/**" security="none">
+	</security:http>
+
+	<security:http pattern="/pub-api/**" security="none">
+	</security:http>
+
+	<security:http pattern="/404.html*" security="none">
+	</security:http>
+	
+	<security:http pattern="/index.html*" security="none">
+	</security:http>
+
+	<security:http pattern="/index.js*" security="none">
+	</security:http>
+	
+	<security:http pattern="/backIndex.js*" security="none">
+	</security:http>
+	
+	<security:http pattern="/backIndex.html*" security="none">
+	</security:http>
+	
+
+	<!-- entry-point-ref入口 -->
+	<security:http use-expressions="true" auto-config="false"
+		name="securityHttp" entry-point-ref="authenticationProcessingFilterEntryPoint">
+		<security:intercept-url pattern="/api/**"
+			access="hasAnyRole('ROLE_USER','ROLE_ADMIN')" />
+		<security:intercept-url pattern="/user/login"
+			access="true" />
+		<security:intercept-url pattern="/**"
+			access="IS_AUTHENTICATED_FULLY" />
+
+		<!-- DENY：浏览器拒绝当前页面加载任何Frame页面 SAMEORIGIN：frame页面的地址只能为同源域名下的页面 ALLOW-FROM：origin为允许frame加载的页面地址 -->
+		<security:headers>
+			<security:frame-options policy="SAMEORIGIN" />
+		</security:headers>
+
+		<!-- 同一时间内允许同一账号保持4个在线,error-if-maximum-exceeded="true"表示第第四个以后的登不进去 invalid-session-url="/index.html?timeout=1"-->
+		<security:session-management
+			session-fixation-protection="newSession" invalid-session-url="/index.html?timeout=1">
+			<security:concurrency-control
+				max-sessions="4" error-if-maximum-exceeded="true"
+				expired-url="/index.html?error=expired" />
+		</security:session-management>
+		<security:csrf disabled="true" />
+
+		<!-- 退出filter -->
+		<security:custom-filter position="LOGOUT_FILTER"
+			ref="pmsLogoutFilter" />
+		<!-- ajax登录过滤器 -->
+		<security:custom-filter position="FORM_LOGIN_FILTER"
+			ref="ajaxLoginFilter" />
+		<!-- 权限资源加载role -->
+		<security:custom-filter before="FILTER_SECURITY_INTERCEPTOR"
+			ref="securityFilter" />
+
+		<!-- 只cache get,避免ajax post 被cache -->
+		<security:request-cache ref="httpSessionRequestCache" />
+
+		<security:access-denied-handler ref="accessDeniedHandler" />
+	</security:http>
+
+	<bean id="httpSessionRequestCache"
+		class="org.springframework.security.web.savedrequest.HttpSessionRequestCache">
+		<property name="createSessionAllowed" value="false" />
+	</bean>
+
+	<!-- 访问控制验证器Authority -->
+	<bean id="securityFilter"
+		class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="accessDecisionManager" ref="affirmativeBasedAccessDecisionManager" />
+		<property name="securityMetadataSource" ref="securityMetadataSource" />
+	</bean>
+
+	<bean id="securityMetadataSource"
+		class="com.lhq.pms.plugin.spring.security.PMSFilterInvocationSecurityMetadataSource">
+		<constructor-arg type="java.util.LinkedHashMap" ref="securityRequestMap" />
+	</bean>
+
+	<bean id="affirmativeBasedAccessDecisionManager"
+		class="org.springframework.security.access.vote.AffirmativeBased">
+		<constructor-arg>
+			<list>
+				<bean class="org.springframework.security.access.vote.RoleVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="securityRequestMap"
+		class="com.lhq.pms.plugin.spring.security.SecurityRequestMapFactoryBean"
+		lazy-init="true" init-method="loadSecurityInfos"></bean>
+
+	<!-- 认证成功后的处理类 -->
+	<bean id="authenticationSuccessHandlerImpl"
+		class="com.lhq.pms.plugin.spring.security.AuthenticationSuccessHandlerImpl" />
+	<!-- 认证失败后的处理类 -->
+	<bean id="authenticationFailureHandlerImpl"
+		class="com.lhq.pms.plugin.spring.security.AuthenticationFailureHandlerImpl" />
+
+	<bean id="accessDeniedHandler"
+		class="com.lhq.pms.plugin.spring.security.AccessDeniedHandlerImpl" />
+
+	<!-- 登录的时候先去验证 -->
+	<bean id="pmsUserService" class="com.lhq.pms.plugin.spring.security.UserServiceImpl"></bean>
+
+	<!-- 处理是转发或重定向到登录页面 -->
+	<bean id="authenticationProcessingFilterEntryPoint"
+		class="com.lhq.pms.plugin.spring.security.PMSAuthenticationEntryPoint">
+		<constructor-arg index="0" value="/user/login" />
+	</bean>
+
+	<bean id="passwordEncoder"
+		class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" />
+
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider
+			user-service-ref="pmsUserService">
+			<!--<security:password-encoder ref="passwordEncoder" /> -->
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+	<!-- 验证ajax请求 
+	org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+	com.lhq.pms.plugin.spring.security.PMSUsernamePasswordAuthenticationFilter
+	-->
+	<bean id="ajaxLoginFilter"
+		class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
+		<property name="usernameParameter" value="userCode" />
+		<property name="passwordParameter" value="userPwd" />
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="authenticationFailureHandler" ref="authenticationFailureHandlerImpl" />
+		<property name="authenticationSuccessHandler" ref="authenticationSuccessHandlerImpl" />
+		<property name="filterProcessesUrl" value="/user/login" />
+	</bean>
+
+	<!-- 退出过滤器 -->
+	<bean id="pmsLogoutFilter" class="com.lhq.pms.plugin.spring.security.PMSLogoutFilter">
+		<!-- 处理退出的虚拟url -->
+		<property name="filterProcessesUrl" value="/user/logout" />
+		<constructor-arg index="0">
+			<bean class="com.lhq.pms.plugin.spring.security.PMSLogoutSuccessHandler"></bean>
+		</constructor-arg>
+		<constructor-arg index="1">
+			<!-- 退出成功后的handler列表 -->
+			<array>
+				<!-- 清除session -->
+				<bean
+					class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler" />
+				<!-- cookie清除 -->
+				<bean
+					class="com.lhq.pms.plugin.spring.security.PMSCookieClearingLogoutHandler">
+					<property name="cookiesToClear">
+						<list>
+							<value>${pms.session.cookiename}</value>
+						</list>
+					</property>
+					<property name="cookiePath" value="${pms.session.cookiepath}" />
+				</bean>
+			</array>
+		</constructor-arg>
+	</bean>
+</beans>

@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="sdp">
+<meta name="keywords" content="SDP">
+<title>个人档案管理页面</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet"
+	href="../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../css/sdp-admin.css" />
+<link rel="stylesheet" href="../../css/sdp-skin.css" />
+<link rel="stylesheet"
+	href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../css/fonts/awesome/font-awesome.min.css" />
+<style type="text/css">
+.ivu-form-item {margin-bottom: 1px;}
+.ivu-modal-header {padding: 3px 16px;}
+.desc .ivu-input:hover{height:100px;} 
+.ivu-modal .ivu-select-dropdown {position:fixed!important;}
+.ivu-input{text-align:center}
+</style>
+</head>
+<body>
+	<div id = "wait"><img alt="等待图片" src="../../img/wait.jpg" style="position: absolute;top: 50%;left: 50%;display: block;min-width: 50%;min-height: 50%;transform:translate(-50%,-50%);"></div>
+	<div class="sdp-main-container" id="mainContainer" style="display : none">
+		<i-form inline :model="params" :label-width="70"><br>
+		    <i-button type="primary" shape="circle" @click="returnHome" icon="home" style="font-size: 28px;margin-left: 50px;"></i-button> 
+			<form-item label="姓名:"> <i-input style="width: 120px" v-model="params.name" id = "paramName"></i-input></form-item> 
+			<form-item label="学历:"> <i-input style="width: 120px" v-model="params.education"></i-input></form-item>
+			<form-item label="司龄:"> <i-input style="width: 120px" v-model="params.comDate"></i-input></form-item> 
+			<form-item label="主要技能:"> <i-input style="width: 120px" v-model="params.skill"></i-input></form-item>
+			<form-item label="岗位级别:"> <i-input style="width: 120px" v-model="params.postLevel"></i-input></form-item>
+			<form-item>
+				<i-button type="primary" shape="circle" @click="queryDatas" icon="search">查询</i-button> 
+				<i-button type="primary" shape="circle" @click="addData" icon="android-add">新增 </i-button> 
+			</form-item> 
+		</i-form><br>
+		<i-table :data='datas' :columns="columns" ref="dataGrid" height="520"
+			border highlight-row> </i-table>
+
+		<page @on-page-size-change="handleSizeChange"
+			:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+			:current="page.getPageNumber()" show-total show-elevator show-sizer
+			:total="page.totalCount"> </page>
+	
+		
+		
+		
+
+
+		<Modal v-model="dataDetail" title="档案明细" :mask-closable="false" :closable="false"
+			 @on-cancel="detailDataCancel" @on-ok="detailDataCancel" width= "100%" :styles="{top: '0px'}"> 
+			<i-form inline label-position="right" :label-width="0">
+             	<form-item style = "float:right" size="small"><i-button type="primary" @click="exportSelect">导出</i-button></form-item>
+				<!-- <form-item style = "float:right" size="small"><i-button type="primary">附件</i-button></form-item><br> -->
+			</i-form><br>
+			<div class = "dataDetailStyle">
+				<!-- 左边 -->
+				<div style="float:left; width:14%; height:100%; text-align:center" >
+					<i-menu ref = "iMenuDetail" :theme="dataDetailMenuMess" active-name="baseMessDetail" style="width:100%;height:100%" @on-select="dataDetailMenuSelect" ref = "active_name">
+						<div style= "width: 120px; height: 150px;text-align: center;border: 1px solid #ddd; display: inline-block;">
+							<img alt="简历图像" src="../../img/touxiang.png" class = "imgHeadDetail" style="width: 100%; height: 100%">
+						</div>
+			            <menu-item name="baseMessDetail" >
+			                <Icon type="android-person" ></Icon>基础信息
+			            </menu-item>
+			            <menu-item name="preMessDetail">
+			                <Icon type="android-chat"></Icon>入职前信息
+			            </menu-item>
+			            <menu-item name="projMessDetail">
+			                <Icon type="chatbubble-working"></Icon>项目信息
+			            </menu-item>
+			            <menu-item name="otherMessDetail">
+			                <Icon type="ios-chatbubble"></Icon>其他信息
+			            </menu-item>
+				    </i-menu>
+				</div>
+				<!-- 右边 -->
+				<div style="float:right;width:86%; height:100%; text-align:left;overflow:auto; font-size:16px" >
+					<!-- 基本信息 -->
+					<div class="baseMessDetail">
+						<Collapse v-model="collapseDetail1">
+							<Panel name = "1">基础信息
+								<div slot="content" id="main" style="width:100%;min-height:100px; line-height: 40px;font-size: 13px;" class = "mainBodyDetail">
+									<div id="right" style="float:left ;  width:100%; min-height:100%;">
+										<i-form inline :model="curRow" label-position="right" :label-width="0" ref="dataAddForm" style = "text-align:left"> 
+											<form-item><div style="min-width: 280px;font-size:16px;color:#2d8cf0;">{{curRow.name }}</div></form-item><br>
+											<form-item><div style="min-width: 280px">性别:{{stsFormatDetail(curRow.sex) }};</div></form-item>
+											<form-item><div style="min-width: 280px">国籍:{{curRow.nationality }};</div></form-item>
+											<form-item><div style="min-width: 280px">民族:{{curRow.nation }};</div></form-item><br>
+											<form-item><div style="min-width: 280px">出生日期:{{curRow.birth_date }};</div></form-item>
+											<form-item><div style="min-width: 280px">年纪：{{curRow.age }};</div></form-item>
+											<form-item><div style="min-width: 280px">婚否:{{stsFormatDetail(curRow.marry_state)}};</div></form-item><br>																
+											<form-item><div style="min-width: 280px">学历：{{stsFormatDetail(curRow.education) }};</div></form-item>
+											<form-item><div style="min-width: 280px">专业:{{curRow.major }};</div></form-item>
+											<form-item><div style="min-width: 280px">毕业院校:{{curRow.graduate_from }};</div></form-item><br>
+											<!-- <form-item> <Button type="info"class="btn"  style="background-color: white;width: 46px;height:25px;color: black;">更多</Button></form-item><br> -->
+											<div class="moreMessDetail" style="display:inline;">
+												<form-item><div style="min-width: 280px">手机号码:{{curRow.phone }};</div></form-item>
+												<form-item><div style="min-width: 280px">QQ:{{curRow.qq_number }};</div></form-item>
+												<form-item><div style="min-width: 280px">E-mail:{{curRow.mail }}</div></form-item><br>
+												<form-item><div style="min-width: 280px">入职时间:{{curRow.in_date }};</div></form-item>
+												<form-item><div style="min-width: 280px">入职级别:{{curRow.in_level }};</div></form-item>
+												<form-item><div style="min-width: 280px">工作经验（司领）:{{curRow.com_date }}年;</div></form-item><br>									
+												<form-item><div style="min-width: 280px">工龄:{{curRow.work_date }}年;</div></form-item>
+												<form-item><div style="min-width: 280px">擅长:{{curRow.good_skill }};</div></form-item>
+												<form-item><div style="min-width: 280px">外语水平:{{curRow.english_level }};</div></form-item><br>
+												<form-item><div style="min-width: 280px">政治面貌:{{curRow.politics }};</div></form-item>
+												<form-item><div style="min-width: 280px">身高:{{curRow.height }}CM;</div></form-item>
+												<form-item><div style="min-width: 280px">身份证号:{{curRow.id_card }};</div></form-item><br>
+												<form-item><div style="min-width: 280px">联系人:{{curRow.emergency }};</div></form-item>
+												<form-item><div style="min-width: 280px">联系电话:{{curRow.emergency_phone }};</div></form-item>
+											    <form-item><div style="min-width: 280px">居住地址:{{curRow.address }};</div></form-item>
+											</div><br>
+											<form-item><a href = "#"  onClick="getMoreMess('Detail')" style = "text-decoration: underline;">
+											<div class = "moreButDetail">收起</div></a></form-item>
+										</i-form>
+									</div>
+								</div>
+							</Panel>
+						</Collapse>
+						<i-form :model="curRow" label-position="right" :label-width="0" ref="dataAddForm" > 
+							<!-- <h2 style = "color: #ff6600;font-family:Arial;margin:10px;">个人简介</h2> -->
+							<Collapse v-model="collapseDetail2">
+								<Panel name = "1">个人简介
+									<form-item slot="content" ><div style="font-size: 13px;margin-left: 10px;">{{curRow.self_remark }}</div> </form-item><br>
+								</Panel>
+							</Collapse>
+							
+							<!-- <h2 style = "color: #ff6600;font-family:Arial;margin:10px;">教育经历</h2> -->
+							<Collapse v-model="collapseDetail3" >
+								<Panel name = "1" >教育经历
+									<div slot="content"><i-table :data='dataEdu' :columns="columnsEdu" ref="eduExperienceDate"  border highlight-row stripe > </i-table></div>
+								</Panel>
+							</Collapse>
+							
+							<!-- <h2 style = "color: #ff6600;font-family:Arial;margin:10px;">个人目标</h2> -->
+							<Collapse v-model="collapseDetail4">
+								<Panel name = "1">个人目标
+									<form-item slot="content"><div style="font-size: 13px;margin-left: 10px;">{{curRow.personal_goals }}</div> </form-item><br>
+								</Panel>
+							</Collapse>
+							
+							<!-- <h2 style = "color: #ff6600;font-family:Arial;margin:10px;">兴趣爱好</h2> -->
+							<Collapse v-model="collapseDetail5">
+								<Panel name = "1">兴趣爱好
+									<form-item slot="content"><div style="font-size: 13px;margin-left: 10px;">{{curRow.hobby }}</div> </form-item><br>
+								</Panel>
+							</Collapse>
+						</i-form>
+					</div>
+					<!-- 入职前信息 -->
+					<div class="preMessDetail" style="display:none">
+						<!-- <h2 style = "color: #ff6600;font-family:Arial;margin:10px;display : inline">工作经验</h2 -->
+						<Collapse v-model="collapseDetail6">
+							<Panel name = "1">工作经验
+								<div slot="content"><i-table  :data='dataWork' :columns="columnsWork" ref="dataGrid" 
+									border highlight-row stripe> </i-table><br></div>
+							</Panel>
+						</Collapse>
+						<!-- <h2 style = "color: #ff6600;font-family:Arial;margin:10px;display : inline">项目经验</h2> -->
+						<Collapse v-model="collapseDetail7">
+							<Panel name = "1">项目经验
+								<div slot="content"><i-table :data='dataProj' :columns="columnsProj" ref="dataGrid" 
+									border highlight-row stripe> </i-table><br></div>
+							</Panel>
+						</Collapse>
+					</div>
+					<!-- 项目信息 -->
+					<div class="projMessDetail" style="display:none">
+						<Collapse v-model="collapseDetail8">
+							<Panel name = "1">项目信息
+								<i-form slot="content" :model="curRowComProj" :label-width="20" ref="dataAddForm" >
+									<Form-item v-for="(item, index) in dataComProj" :key="item.id">
+								    	<Row>
+									    	<i-col span="24">
+									        	<h2 style = "color:  #2d8cf0;font-family:Arial;margin:10px;">项目 {{ index+1 }}</h2>
+									         </i-col>
+								            <i-col span="24">
+								            	<div style = "margin:10px;">项目编码:{{item.proj_code}}</div>
+								            </i-col>
+								            <i-col span="24">
+								            	<div style = "margin:10px;">项目描述(职责):{{item.projMajor}}</div>
+								            </i-col>
+								        </Row>
+								    </Form-item>
+								</i-form>
+							</Panel>
+						</Collapse>
+					</div>
+					<!-- 其他信息 -->
+					<div class = "otherMessDetail"  style="display:none;border-top:1px solid #ddd;">暂无</div>
+				</div>	
+			</div>
+		</Modal>
+	
+	
+		
+		
+		
+		
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		<Modal v-model="dataAdd" title="档案新增" :mask-closable="false" :closable="false"
+			@on-ok="addDataSave" @on-cancel="addDataCancel" width= "100%" :styles="{top: '0px'}"> 
+			<i-form inline :model="curRow" label-position="right" :label-width="0" ref="dataAddForm":rules="rulesAdd" >
+				<form-item style = "float:right" size="small"><i-button type="primary" @click = "resumeImport" shape="circle">导入</i-button></form-item>
+				<!-- <form-item style = "float:right" size="small"><i-button type="primary" shape="circle">附件</i-button></form-item> -->
+				<form-item style = "float:right" size="small"><i-button type="primary" @click = "reset('Add')" shape="circle">重置</i-button></form-item><br>	
+				<div class = "dataAddStyle">
+					<!-- 左边 -->
+					<div  style="float:left; width:14%; height:100%; text-align:center;margin-top:31px;">
+						<i-menu ref = "iMenuAdd" :theme="dataDetailMenuMess" active-name="baseMessAdd" style="width:100%;height:100%" @on-select="dataAddMenuSelect">
+							<div class="imgDiv" onmouseover="showClear();" onmouseout="hiddenClear();"
+								style="width: 120px; height: 150px; border: 1px solid #ddd; display: none; text-align: center;  background: #fff; position: relative; box-shadow: 0 1px 1px rgba(0, 0, 0, .2);">
+								<img style="width: 100%; height: 100%" alt="头像" class = "imgHeadAdd">
+								<div class="clearFileDiv" style=" display: none; text-align: center;position: absolute;top: 0;bottom: 0;left: 0;right: 0;">
+									<i-button
+										style="width:100%;height:100%;border:none;opacity: 0.7;background: #000"
+										@click="clearFile('.imgHeadAdd')"> <Icon type="trash-a" size="52"></Icon>
+									</i-button>
+								</div>
+							</div>
+							<div class="uploadDiv"
+								style="width: 120px; height: 150px; border: 1px solid #ddd; display: inline-block; text-align: center;">
+								<input type="file" onchange="preImg(this.id ,'.imgHeadAdd');"
+									id="basicInfoHeadAdd" name="basicInfoHeadAdd" style="display: none" />
+								<i-button
+									style="width:100%;height:100%;background:#fff;border:none;"
+									@click="clickFile('#basicInfoHeadAdd')"> <Icon type="camera" size="52"></Icon>
+								</i-button>
+							</div>
+				            <menu-item name="baseMessAdd">
+				                 <Icon type="android-person" ></Icon>基础信息
+				            </menu-item>
+				            <menu-item name="preMessAdd">
+				                 <Icon type="android-chat"></Icon>入职前信息
+				            </menu-item>
+				            <menu-item name="projMessAdd">
+				                <Icon type="chatbubble-working"></Icon>项目信息
+				            </menu-item>
+				            <menu-item name="otherMessAdd">
+				                <Icon type="ios-chatbubble"></Icon>其他信息
+				            </menu-item>
+					    </i-menu>
+					</div>
+					<!-- 右边 -->
+					<div style="float:right;width:86%; height:100%; text-align:center;overflow:auto;" class = "detailRight">
+						<!-- 基本信息 -->
+						<div class="baseMessAdd">
+						<div style="border:1px solid #ddd;border-left:none;border-right:none;margin-top:15px;padding-bottom:30px;padding-top:17px;">
+								<form>
+									<!-- 第一行 -->
+									<Row>
+       									<i-col span="8" style="margin:15px 0 0 0">
+       											<label for="label_curRow_name" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">姓名：</label> 
+					  						<form-item  :required="true" prop="name" >
+												<i-input id="label_curRow_name" v-model="curRow.name" style="width: 200px;" ></i-input>
+											</form-item>
+										</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+											<form-item prop="sex">
+												<label for="label_curRow_sex" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">性别：</label>
+												<i-select id="label_curRow_sex" v-model="curRow.sex"  style="width: 200px;">
+				                					<i-option value="m">男</i-option>
+				                					<i-option value="f">女</i-option>
+			            						</i-select>
+											</form-item>
+										</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+											<form-item  :required="true" prop="birth_date">
+												<label for="label_curRow_birth_date" style="font-size:16px;display:inline-block ;width:92px; text-align:right;">出生日期：</label>
+												<Date-picker id="label_curRow_birth_date" v-model="curRow.birth_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+											</form-item>
+        								</i-col>
+    								</Row>
+    								<!-- 第二行 -->
+    								<Row>
+        								<i-col span="8" style="margin:15px 0 0 0">
+        										<label for="label_curRow_age" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">年龄：</label>
+											<form-item  :required="true" prop="age" >
+												<i-input id="label_curRow_age" v-model="curRow.age" style="width: 200px;" number>
+											</form-item>
+        								</i-col>
+								 		<i-col span="8" style="margin:15px 0 0 0">
+								 				<label for="label_curRow_phone" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">手机号码：</label>
+											<form-item  :required="true" prop="phone">
+												<i-input id="label_curRow_phone" v-model="curRow.phone" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+												<label for="label_curRow_qq_number" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">QQ：</label>
+											<form-item  :required="true" prop="qq_number">
+												<i-input id="label_curRow_qq_number" v-model="curRow.qq_number" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+    								</Row>
+									<!-- 第三行 -->
+    								<Row>
+        								<i-col span="8" style="margin:15px 0 0 0">
+        										<label for="label_curRow_mail" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">E-Mail：</label>
+											<form-item  :required="true" prop="mail">
+												<i-input id="label_curRow_mail" v-model="curRow.mail" style="width: 200px;">
+											</form-item>
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+												<label for="label_curRow_graduate_from" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">毕业院校：</label>
+											<form-item  :required="true" prop="graduate_from">
+												<i-input id="label_curRow_graduate_from" v-model="curRow.graduate_from" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+												<label for="label_curRow_major" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">专业：</label>
+											<form-item  :required="true" prop="major">
+												<i-input id="label_curRow_major" v-model="curRow.major" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+    								</Row>
+						   			<!-- 第四行 -->
+    								<Row>
+        								<!-- <i-col span="8" style="margin:15px 0 0 0">
+											<form-item  :required="true" prop="education">
+												<label for="label_curRow_education" style="font-size:16px;display:inline-block ;width:92px; text-align:right;">学历：</label>
+												<i-input id="label_curRow_education" v-model="curRow.education" style="width: 200px;" >
+											</form-item>
+        								</i-col> -->
+        								<i-col span="8" style="margin:15px 0 0 0">
+        									<form-item prop="education">
+												<label for="label_curRow_education" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">学历：</label>
+												<i-select id="label_curRow_education" v-model="curRow.education"  style="width: 200px;">
+				                					<i-option value="u">本科</i-option>
+				                					<i-option value="c">大专</i-option>
+				                					<i-option value="p">研究生</i-option>
+				                					<i-option value="ma">硕士</i-option>
+				                					<i-option value="d">博士</i-option>
+				                					<i-option value="o">其它</i-option>
+			            						</i-select>
+											</form-item>
+        								</i-col>
+						    			<i-col span="8" style="margin:15px 0 0 0">
+						    					<label for="label_curRow_nationality" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">国籍：</label>
+											<form-item  :required="true" prop="nationality">
+												<i-input id="label_curRow_nationality" v-model="curRow.nationality" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+											<form-item  :required="true" prop="nation">
+												<label for="label_curRow_nation" style="font-size:16px;display:inline-block ;width:92px; text-align:right;">民族：</label>
+												<i-input id="label_curRow_nation" v-model="curRow.nation" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+    								</Row>
+									<!-- 第五行 -->
+    								<Row>
+        								<i-col span="8" style="margin:15px 0 0 0">
+												<label style="font-size:16px; display:inline-block;  width:92px;text-align:right; height:32px;line-height:32px">身高：</label>
+											<form-item :required="true" prop="height">
+												<i-input v-model="curRow.height"  style="width: 200px">
+												<span slot="append">CM</span></i-input>
+											</form-item>
+										</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+											<form-item prop="marry_state">
+												<label for="label_curRow_marry_state" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">婚姻状况：</label>
+												<i-select id="label_curRow_marry_state" v-model="curRow.marry_state"  style="width: 200px;">
+					                				<i-option value="y">已婚</i-option>
+					                				<i-option value="n">未婚</i-option>
+				            					</i-select>
+											</form-item>
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+												<label for="label_curRow_politics" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">政治面貌：</label>
+											<form-item  :required="true" prop="politics">
+												<i-input id="label_curRow_politics" v-model="curRow.politics" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+    								</Row>
+		            				<!-- 第六行 -->
+    								<Row>
+    								    
+        					 			<i-col span="8" style="margin:15px 0 0 0">
+        					 			    <form-item prop="post_name"  style="display:none"></form-item>
+											<form-item  :required="true" prop="post_code">
+												<label for="label_curRow_post_code" style="font-size:16px;display:inline-block ;width:92px; text-align:right;">岗位：</label>
+												<i-input id="label_curRow_post_code" @on-focus = "selectPost" v-model="curRow.post_name" style="width: 200px;" >
+											</form-item>
+											
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+											<form-item  prop="in_date">
+												<label for="label_curRow_in_date" style="font-size:16px;display:inline-block ;width:92px; text-align:right;">入职日期：</label>
+												<Date-picker id="label_curRow_in_date" v-model="curRow.in_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;">
+											</form-item>
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+												<label for="label_curRow_in_level" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">入职级别：</label>
+											<form-item  :required="true" prop="in_level">
+												<i-input id="label_curRow_in_level" v-model="curRow.in_level" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+    								</Row>
+					        		<!-- 第七行 -->
+    								<Row>
+        								<i-col span="8" style="margin:15px 0 0 0">
+        										<label for="label_curRow_com_date" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">司龄：</label>
+											<form-item  :required="true" prop="com_date">
+												<i-input id="label_curRow_com_date" v-model="curRow.com_date" style="width: 200px;" number>
+											</form-item>
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+												<label for="label_curRow_work_date" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">工龄：</label>
+											<form-item  :required="true" prop="work_date">
+												<i-input id="label_curRow_work_date" v-model="curRow.work_date" style="width: 200px;" number>
+											</form-item>
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+												<label for="label_curRow_good_skill" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">擅长领域：</label>
+											<form-item  :required="true" prop="good_skill">
+												<i-input id="label_curRow_good_skill" v-model="curRow.good_skill" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+    								</Row>
+									<!-- 第八行 -->
+    								<Row>
+        								<i-col span="8" style="margin:15px 0 0 0">
+        										<label for="label_curRow_english_level" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">外语水平：</label>
+											<form-item  :required="true" prop="english_level">
+												<i-input id="label_curRow_english_level" v-model="curRow.english_level" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+										<i-col span="8" style="margin:15px 0 0 0">
+												<label for="label_curRow_emergency" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">联系人：</label>
+											<form-item  :required="true" prop="emergency">
+												<i-input id="label_curRow_emergency" v-model="curRow.emergency" style="width: 200px;" >
+											</form-item>
+										</i-col>
+        								<i-col span="8" style="margin:15px 0 0 0">
+        										<label  for="label_curRow_emergency_phone" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">联系电话：</label>
+											<form-item  :required="true" prop="emergency_phone">
+												<i-input id="label_curRow_emergency_phone" v-model="curRow.emergency_phone" style="width: 200px;" >
+											</form-item>
+        								</i-col>
+    								</Row>
+									<!-- 第九行 -->
+    								<Row>
+        								<i-col span="8" style="margin:15px 0 0 0">
+        										<label  for="label_curRow_id_card"  style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">身份证号：</label >
+											<form-item  :required="true" prop="id_card">
+												<i-input  id="label_curRow_id_card" v-model="curRow.id_card" style="width: 200px;" >
+											</form-item>
+        								</i-col>	
+        								<i-col span="8" style="margin:15px 0 0 0px">
+        										<label for="label_curRow_address" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">居住地址：</label>
+											<form-item  :required="true" prop="address">
+												<div class="desc" style="display:inline-block"><i-input type="textarea" :rows="1" id="label_curRow_address" v-model="curRow.address" style="width: 200px;" ></div>
+											</form-item>
+        								</i-col>
+    								</Row>
+								</form>
+							</div>						
+						    <!-- 个人简介 -->
+							<div style="border-bottom:1px solid #ddd;padding-top:20px;">
+								<Form-item :required="true" prop="self_remark" style="width: 882px;">
+									<Row>
+										<i-col span="8" offset="8">
+											<h2 style = "color: #2d8cf0;font-family:Arial;margin:10px;">个人简介</h2>
+										</i-col>
+									</Row>
+								</Form-item>
+								<form-item style="margin-bottom:30px">
+									<i-input  type="textarea" :autosize="{minRows: 10,maxRows: 20}"  style="width: 882px"  v-model="curRow.self_remark" placeholder="个人简介" >
+								</form-item>
+							</div>
+							<!-- 教育经历 -->
+							<div style="border-bottom:1px solid #ddd;padding-top:20px;padding-bottom:15px">
+								<Form-item style="width: 950px;">
+									<Row>
+										<i-col span="8" offset="8">
+											<h2 style = "color:#2d8cf0;font-family:Arial;margin:10px;">教育经历</h2>
+										</i-col>
+										<!-- 	       新增                  -->
+						       			<i-col span="1" offset="7" style="margin-top:10px">
+						       			<form-item icon="plus-round">
+						       				<i-button type="primary" shape="circle" @click="handleAdd('edu')" icon="plus-round" ></i-button>
+						       			</form-item>
+						       			</i-col>
+									</Row>
+								</Form-item>
+								<i-form  :model="curRowEdu" :label-width="20" ref="dataAddForm" >
+									<Form-item style="width: 950px;" >
+										<Row>
+								       		<i-col span="6">学校</i-col>
+								       		<i-col span="4" >开始时间</i-col>
+									   		<i-col span="4" >结束时间</i-col>
+								       		<i-col span="8">描述(荣誉、担任职务)</i-col>
+								       		<i-col span="2"></i-col>
+								    	</Row>
+							   		</Form-item>
+							   		<Form-item v-for="(item, index) in dataEdu" :key="item.edu_code"  style="width: 950px;margin-bottom:15px;" >
+										<Row >
+											<i-col span="6">
+												<i-input type="text" v-model="item.school" placeholder="请输入..." style="width: 205px"></i-input>
+											</i-col>
+											<i-col span="4">
+												<Date-picker v-model="item.starttime"  type="date" format="yyyy-MM-dd" placeholder="开始时间" style="width: 110px"></Date-picker>
+											</i-col>
+											<i-col span="4">
+												<Date-picker v-model="item.endtime"  type="date" format="yyyy-MM-dd" placeholder="结束时间" style="width: 110px"></Date-picker>
+											</i-col>
+											<i-col span="8">
+												<div class="desc"><i-input v-model="item.description"  type="textarea" :rows="1" ></i-input></div>
+											</i-col>
+											<!-- 	       删除                  -->
+											<i-col span="1" offset="1">
+											<form-item icon="plus-round">
+												<i-button type="primary" shape="circle" @click="handleRemove(index, 'edu')" icon="minus-round"></i-button>
+											</form-item>
+											</i-col>
+										</Row>
+							    	</Form-item>
+								</i-form>
+							</div>
+							<!-- 个人目标 -->
+							<div style="border-bottom:1px solid #ddd;padding-top:20px;">
+								<Form-item style="width: 882px;">
+									<Row>
+										<i-col span="8" offset="8">
+											<h2 style = "color: #2d8cf0;font-family:Arial;margin:10px;">个人目标</h2>
+										</i-col>
+									</Row>
+								</Form-item>
+								<form-item :required="true" prop="personal_goals" style="margin-bottom:30px">
+									<i-input type="textarea" :autosize="{minRows: 5,maxRows: 10}"  style="width: 882px" v-model="curRow.personal_goals " placeholder="个人目标">
+								</form-item>
+							</div>
+							<!-- 兴趣爱好 -->
+							<div style="border-bottom:1px solid #ddd;border-bottom:none;padding-top:20px;">
+								<Form-item  style="width: 882px;">
+									<Row>
+										<i-col span="8" offset="8">
+											<h2 style = "color: #2d8cf0;font-family:Arial;margin:10px;">兴趣爱好</h2>
+										</i-col>
+									</Row>
+								</Form-item>
+								<form-item :required="true" prop="hobby" style="margin-bottom:30px">
+									<i-input type="textarea" :autosize="{minRows: 5,maxRows: 10}"  style="width: 882px" v-model="curRow.hobby " placeholder="兴趣爱好">
+								</form-item>
+							</div>
+						</div>
+						<!-- 入职前信息 -->
+						<div class="preMessAdd" style="display:none;border-top:1px solid #ddd;margin-top:15px;padding-bottom:30px;">
+							<!-- 工作经验 -->
+							<div style="border-bottom:1px solid #ddd;padding-top:20px;padding-bottom:15px">
+								<Form-item style="width: 950px;">
+									<Row>
+										<i-col span="8" offset="8">
+											<h2 style = "color: #2d8cf0;font-family:Arial;margin:10px;">工作经验</h2>
+										</i-col>
+										<!-- 	       新增                  -->
+						       			<i-col span="1" offset="7" style="margin-top:10px">
+						       				<form-item icon="plus-round">
+						       				<i-button type="primary" shape="circle" @click="handleAdd('work')" icon="plus-round" ></i-button>
+						       				</form-item>
+						       			</i-col>
+									</Row>
+									</Row>
+								</Form-item>
+							<i-form  :model="curRowWork" :label-width="20" ref="dataAddForm" >
+								<Form-item style="width: 882px;" >
+									<Row>
+							       		<i-col span="6">公司名称</i-col>
+							       		<i-col span="3" >开始时间</i-col>
+								   		<i-col span="3" >结束时间</i-col>
+							       		<i-col span="3">职位</i-col>
+							       		<i-col span="7">绩效描述</i-col>
+							       		<i-col span="2"></i-col>
+							    	</Row>
+						   		</Form-item>
+						   		<Form-item v-for="(item, index) in dataWork" :key="item.id"  style="width: 950px;margin-bottom:15px" >
+									<Row>
+										<i-col span="6">
+											<i-input type="text" v-model="item.comName" placeholder="请输入..." style="width: 205px"></i-input>
+										</i-col>
+										<i-col span="3">
+											<Date-picker v-model="item.starttime"  type="date" format="yyyy-MM-dd" placeholder="开始时间" style="width: 110px"></Date-picker>
+										</i-col>
+										<i-col span="3">
+											<Date-picker v-model="item.endtime"  type="date" format="yyyy-MM-dd" placeholder="结束时间" style="width: 110px"></Date-picker>
+										</i-col>
+										<i-col span="3">
+											<i-input type="text" v-model="item.post" placeholder="请输入..." style="width: 100px">
+										</i-col>
+										<i-col span="7">
+											<div class="desc"><i-input v-model="item.individual"  type="textarea" :rows="1" ></div>
+										</i-col>
+										<!-- 	       删除                  -->
+										<i-col span="1" offset="1">
+										<form-item icon="plus-round">
+						                	<i-button type="primary" shape="circle" @click="handleRemove(index,'work')" icon="minus-round"></i-button>
+						            	</form-item>
+						            	</i-col>
+							    	</Form-item>
+								</i-form>
+							</div>
+							<!-- 项目经验 -->
+							<div style="border-bottom:1px solid #ddd;padding-top:20px;padding-bottom:15px">
+								<Form-item style="width: 950px;">
+									<Row>
+										<i-col span="8" offset="8">
+											<h2 style = "color: #2d8cf0;font-family:Arial;margin:10px;">项目经验</h2>
+										</i-col>
+										<!-- 	       新增                  -->
+						       			<i-col span="1" offset="7" style="margin-top:10px">
+						       			<form-item icon="plus-round">
+						       				<i-button type="primary" shape="circle" @click="handleAdd('proj')" icon="plus-round"></i-button>
+						       			</form-item>
+						       			</i-col>
+									</Row>
+								</Form-item>
+					    		<i-form  :model="curRowProj" :label-width="20" ref="dataAddForm" >
+								<Form-item style="width: 950px;" >
+									<Row>
+							       		<i-col span="6">项目名称</i-col>
+							       		<i-col span="3" >项目周期</i-col>
+							       		<i-col span="3" >开始时间</i-col>
+								   		<i-col span="3" >结束时间</i-col>
+							       		<i-col span="3">项目规模</i-col>
+							       		<i-col span="4">主要职责</i-col>
+							       		<i-col span="2"></i-col>
+							    	</Row>
+						   		</Form-item>
+					           	<Form-item v-for="(item, index) in dataProj" :key="item.id"  style="width: 950px;margin-bottom:15px" >
+									<Row >
+										<i-col span="6">
+											<i-input type="text" v-model="item.projName" placeholder="请输入..." style="width: 205px"></i-input>
+										</i-col>
+										<i-col span="3">
+											<i-input type="text" v-model="item.projPeriod" placeholder="请输入..." style="width: 100px"></i-input>
+										</i-col>
+										<i-col span="3">
+											<Date-picker v-model="item.starttime"  type="date" format="yyyy-MM-dd" placeholder="开始时间" style="width: 110px"></Date-picker>
+										</i-col>
+										<i-col span="3">
+											<Date-picker v-model="item.endtime"  type="date" format="yyyy-MM-dd" placeholder="结束时间" style="width: 110px"></Date-picker>
+										</i-col>
+										<i-col span="3">
+											<i-input type="text" v-model="item.projScale" placeholder="请输入..." style="width: 100px">
+										</i-col>
+										<i-col span="4">
+											<div class="desc"><i-input v-model="item.projRemark"  type="textarea" :rows="1" ></div>
+										</i-col>
+										<!-- 	       删除                  -->
+										<i-col span="1" offset="1">
+										<form-item icon="plus-round">
+						                	<i-button type="primary" shape="circle" @click="handleRemove(index,'proj')" icon="minus-round"></i-button>
+						            	</form-item>
+						            	</i-col>
+									</Row>
+						    	</Form-item>
+								</i-form>
+							</div>
+							</div>
+							<!-- 项目信息 -->
+							<div class="projMessAdd" style="display:none;border-top:1px solid #ddd;margin-top:15px;padding-bottom:30px;">
+								<i-form  :model="curRowComProj" :label-width="20" ref="dataAddForm" >
+									<Form-item v-for="(item, index) in dataComProj" :key="item.id" style="width: 882px;margin-top:15px;margin-bottom:20px;" >
+								    	<Row>
+								    		<i-col span="8" offset="8">
+												<h2 style = "color: #2d8cf0;font-family:Arial;margin:10px;">项目 {{ index+1 }}</h2>
+											</i-col>
+											<!-- 	       删除                  -->
+							       			<i-col span="1" offset="4" style="line-height:52px">
+							       			<form-item icon="plus-round">
+							       				<i-button type="primary" shape="circle" @click="handleRemove(index,'comProj')" icon="minus-round"  style="margin:10px;"></i-button>
+							       			</form-item>
+							       			</i-col>
+								        </Row>
+								        <Row>
+								        	<i-col span="24">
+								        		项目编码 : <i-input type="text" v-model="item.proj_code"   @on-focus = "selectProject(index)" placeholder="请输入..." style="width: 400px">
+								        	</i-col>
+								        </Row>
+								        <br/>
+						       			<Row>
+								        	<i-col span="24">
+								        		项目描述(职责) : <i-input type="textarea" :autosize="{minRows: 10,maxRows: 30}" v-model="item.projMajor " placeholder="兴趣爱好">
+								        	</i-col>
+								        </Row>
+								    </Form-item><br>
+						    		<!-- 	       新增                  -->
+								    <form-item icon="plus-round" style="margin-top:10px">
+								        <Row>
+								       		<i-col span="8" offset="8" style="line-height: 65px;">
+							                	<i-button type="primary" shape="circle" @click="handleAdd('comProj')" icon="plus-round"  style="margin:10px;"></i-button>
+								    		</i-col>
+								    	</Row>
+								    </form-item>
+							</i-form>
+						</div>
+						<!-- 其他信息 -->
+						<div class = "otherMessAdd"  style="display:none;border-top:1px solid #ddd;margin-top:15px;padding-bottom:30px;">暂无</div>
+						</div>	
+						</div>
+							</i-form>
+						<div slot="footer">
+			            	<i-button type="primary" size="large"  @click="addDataCancel" shape="circle">取消</i-button>
+			            	<i-button type="primary" size="large"  @click="addDataSave" shape="circle">确定</i-button>
+			        	</div>
+						</Modal>
+						
+		                                   
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		<!----------------------------------------------- 档案修改 ---------------------------------------------->
+		<Modal v-model="dataEdit" title="档案修改" :mask-closable="false" :closable="false"
+			@on-ok="editDataSave" @on-cancel="editDataCancel" width= "100%" :styles="{top: '0px'}">
+			<i-form inline :model="curRow" label-position="right" :label-width="0" ref="dataEditForm" :rules="rulesEdit"> 
+				<form-item style = "float:right" size="small"><i-button type="primary" @click = "resumeImport" shape="circle">导入</i-button></form-item>
+				<!-- <form-item style = "float:right" size="small"><i-button type="primary" shape="circle">附件</i-button></form-item> -->
+				<form-item style = "float:right" size="small"><i-button type="primary" @click="reset('Edit')" shape="circle">重置</i-button></form-item><br>	
+				<div class = "dataEditStyle">
+					<!-- 左边 -->
+					<div  style="float:left; width:14%; height:100%; text-align:center;margin-top:31px;">
+						<i-menu ref = "iMenuEdit" :theme="dataDetailMenuMess" active-name="baseMessEdit" style="width:100%;height:100%" @on-select="dataEditMenuSelect">
+							<!-- <div style= "width: 120px; height: 150px;text-align: center;border: 1px solid #ddd; display: inline-block;">
+								<img alt="简历图像" src="../../img/touxiang.png" class = "imgHeadEdit" style="width: 100%; height: 100%">
+							</div> -->
+							<div class="imgDiv" onmouseover="showClear();" onmouseout="hiddenClear();"
+								style="width: 120px; height: 150px; border: 1px solid #ddd; display: none; text-align: center;  background: #fff; position: relative; box-shadow: 0 1px 1px rgba(0, 0, 0, .2);">
+								<img style="width: 100%; height: 100%" alt="头像" class = "imgHeadEdit" >
+								<div class="clearFileDiv" style=" display: none; text-align: center;position: absolute;top: 0;bottom: 0;left: 0;right: 0;">
+									<i-button
+										style="width:100%;height:100%;border:none;opacity: 0.7;background: #000"
+										@click="clearFile('.imgHeadEdit')"> <Icon type="trash-a" size="52"></Icon>
+									</i-button>
+								</div>
+							</div>
+							<div class="uploadDiv"
+								style="width: 120px; height: 150px; border: 1px solid #ddd; display: inline-block; text-align: center;">
+								<input type="file" onchange="preImg(this.id ,'.imgHeadEdit');"
+									id="basicInfoHeadEdit" name="basicInfoHeadEdit" style="display: none" />
+								<i-button
+									style="width:100%;height:100%;background:#fff;border:none;"
+									@click="clickFile('#basicInfoHeadEdit')"> <Icon type="camera" size="52"></Icon>
+								</i-button>
+							</div>	
+							<menu-item name="baseMessEdit">
+				                <Icon type="android-person"></Icon>基础信息
+				            </menu-item>
+				            <menu-item name="preMessEdit">
+				                <Icon type="android-chat"></Icon>入职前信息
+				            </menu-item>
+				            <menu-item name="projMessEdit">
+				                <Icon type="chatbubble-working"></Icon>项目信息
+				            </menu-item>
+				            <menu-item name="otherMessEdit">
+				                <Icon type="ios-chatbubble"></Icon>其他信息
+				            </menu-item>
+			    		</i-menu>
+					</div>
+					<!-- 右边 -->
+					<div style="float:right;width:86%; height:100%; text-align:center;overflow:auto;">
+						<!-- 基本信息 -->
+						<div class="baseMessEdit">
+							<div style="border:1px solid #ddd;border-left:none;border-right:none;margin-top:15px;padding-bottom:30px;padding-top:17px;">
+								<Form>
+		 		  	<!-- 第一行 -->
+					<Row>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_name" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">姓名：</label>
+							<form-item  :required="true" prop="name" >
+								<i-input id="label_curRow_name" v-model="curRow.name" style="width: 200px;" >
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+							<form-item prop="sex">
+								<label for="label_curRow_sex" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">性别：</label>
+								<i-select id="label_curRow_sex" v-model="curRow.sex"  style="width: 200px;">
+	                				<i-option value="m">男</i-option>
+	                				<i-option value="f">女</i-option>
+            					</i-select>
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+							<form-item  :required="true" prop="birth_date">
+								<label for="label_curRow_birth_date" style="font-size:16px;display:inline-block ;width:92px; text-align:right;">出生日期：</label>
+									<Date-picker id="label_curRow_birth_date" v-model="curRow.birth_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+							</form-item>
+						</i-col>
+					</Row>
+					<!-- 第二行 -->
+					<Row>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_age" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">年龄：</label>
+							<form-item  :required="true" prop="age" >
+									<i-input id="label_curRow_age" v-model="curRow.age" style="width: 200px;" number >
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_phone" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">手机号码：</label>
+							<form-item  :required="true" prop="phone">
+									<i-input id="label_curRow_phone" v-model="curRow.phone" style="width: 200px;" >
+							</form-item>
+						</i-col>
+		            	<i-col span="8" style="margin:10px 0 0 0">
+		            			<label for="label_curRow_qq_number" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">QQ：</label>
+							<form-item  :required="true" prop="qq_number">
+									<i-input id="label_curRow_qq_number" v-model="curRow.qq_number" style="width: 200px;" >
+							</form-item>
+						</i-col>
+					</Row>
+					<!-- 第三行 -->
+					<Row>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_mail" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">E-Mail：</label>
+							<form-item  :required="true" prop="mail">
+									<i-input id="label_curRow_mail" v-model="curRow.mail" style="width: 200px;" >
+							</form-item>
+						</i-col>	
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_graduate_from" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">毕业院校：</label>
+							<form-item  :required="true" prop="graduate_from">
+									<i-input id="label_curRow_graduate_from" v-model="curRow.graduate_from" style="width: 200px;" >
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_major" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">专业：</label>
+							<form-item  :required="true" prop="major">
+									<i-input id="label_curRow_major" v-model="curRow.major" style="width: 200px;" >
+							</form-item>
+						</i-col>
+					</Row>
+					<!-- 第四行 -->
+					<Row>
+						<i-col span="8" style="margin:10px 0 0 0">
+							<form-item prop="education">
+								<label for="label_curRow_education" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">学历：</label>
+								<i-select id="label_curRow_education" v-model="curRow.education"  style="width: 200px;">
+                					<i-option value="u">本科</i-option>
+                					<i-option value="c">大专</i-option>
+                					<i-option value="p">研究生</i-option>
+                					<i-option value="ma">硕士</i-option>
+                					<i-option value="d">博士</i-option>
+                					<i-option value="o">其它</i-option>
+           						</i-select>
+							</form-item>
+						</i-col>
+					    <i-col span="8" style="margin:10px 0 0 0">
+					    		<label for="label_curRow_nationality" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">国籍：</label>
+							<form-item  :required="true" prop="nationality">
+									<i-input id="label_curRow_nationality" v-model="curRow.nationality" style="width: 200px;" >
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_nation" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">民族：</label>
+							<form-item  :required="true" prop="nation">
+									<i-input id="label_curRow_nation" v-model="curRow.nation" style="width: 200px;" >
+							</form-item>
+						</i-col>
+					</Row>
+				   	<!-- 第五行 -->
+					<Row>
+					<i-col span="8" style="margin:10px 0 0 0">
+								<label style="font-size:16px; display:inline-block;  width:92px;text-align:right; height:32px;line-height:32px">身高：</label>
+							<form-item :required="true" prop="height">
+								<i-input v-model="curRow.height"  style="width: 200px">
+								<span slot="append">CM</span></i-input>
+							</form-item>
+							</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+							<form-item  :required="true" prop="marry_state">
+								<label for="label_curRow_marry_state" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">婚姻状况：</label>
+									<i-select id="label_curRow_marry_state" v-model="curRow.marry_state"  style="width: 200px;">
+                						<i-option value="y">已婚</i-option>
+	                					<i-option value="n">未婚</i-option>
+            						</i-select>
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_politics" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">政治面貌：</label>
+							<form-item  :required="true" prop="politics">
+									<i-input id="label_curRow_politics" v-model="curRow.politics" style="width: 200px;" >
+							</form-item>
+						</i-col>
+					</Row> 
+					<!-- <form-item><a href = "#"  onClick="getMoreMess('Edit')" style = "text-decoration: underline;font-size:16px; " ><div class = "moreButEdit"  >更多</div></a></form-item><br> -->
+					<!-- 第六行 -->
+					<Row>
+			 			<i-col span="8" style="margin:10px 0 0 0">
+			 			    <form-item prop="post_name"  style="display:none"></form-item>
+							<form-item  :required="true" prop="post_code">
+								<label for="label_curRow_post_code" style="font-size:16px;display:inline-block ;width:92px; text-align:right;">岗位：</label>
+									<i-input id="label_curRow_post_code" @on-focus = "selectPost" v-model="curRow.post_name" style="width: 200px;" >
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+							<form-item prop="in_date">
+								<label for="label_curRow_in_date" style="font-size:16px;display:inline-block ;width:92px; text-align:right;">入职日期：</label>
+									<Date-picker id="label_curRow_in_date" v-model="curRow.in_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;">
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_in_level" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">入职级别：</label>
+							<form-item  :required="true" prop="in_level">
+									<i-input id="label_curRow_in_level" v-model="curRow.in_level" style="width: 200px;" >
+							</form-item>
+						</i-col>
+					</Row>	
+					<!-- 第七行 -->
+					<Row>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_com_date" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">司龄：</label>
+							<form-item  :required="true" prop="com_date">
+									<i-input id="label_curRow_com_date" v-model="curRow.com_date" style="width: 200px;" number>
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_work_date" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">工龄：</label>
+							<form-item  :required="true" prop="work_date">
+									<i-input id="label_curRow_work_date" v-model="curRow.work_date" style="width: 200px;" number>
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_good_skill" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">擅长领域：</label>
+							<form-item  :required="true" prop="good_skill">
+									<i-input id="label_curRow_good_skill" v-model="curRow.good_skill" style="width: 200px;" >
+							</form-item>
+						</i-col>
+					</Row>	
+					<!-- 第八行 -->
+   					<Row>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_english_level" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">外语水平：</label>
+							<form-item  :required="true" prop="english_level">
+									<i-input id="label_curRow_english_level" v-model="curRow.english_level" style="width: 200px;" >
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label for="label_curRow_emergency" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">联系人：</label>
+							<form-item  :required="true" prop="emergency">
+									<i-input id="label_curRow_emergency" v-model="curRow.emergency" style="width: 200px;" >
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label  for="label_curRow_emergency_phone" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">联系电话：</label>
+							<form-item  :required="true" prop="emergency_phone">
+									<i-input id="label_curRow_emergency_phone" v-model="curRow.emergency_phone" style="width: 200px;" >
+							</form-item>
+						</i-col>
+					</Row>	
+					<!-- 第九行 -->
+					<Row>
+						<i-col span="8" style="margin:10px 0 0 0">
+								<label  for="label_curRow_id_card"  style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">身份证号：</label >
+							<form-item  :required="true" prop="id_card">
+									<i-input  id="label_curRow_id_card" v-model="curRow.id_card" style="width: 200px;" >
+							</form-item>
+						</i-col>
+						<i-col span="8" style="margin:10px 0 0 0px">
+								<label for="label_curRow_address" style="font-size:16px;display:inline-block ;width:92px; text-align:right;line-height:32px">居住地址：</label>
+							<form-item  :required="true" prop="address">
+					<div class="desc" style="display:inline-block"><i-input type="textarea" :rows="1" id="label_curRow_address" v-model="curRow.address" style="width: 200px;" ></div>
+							</form-item>
+						</i-col>
+				</Row>
+				</Form>
+					</div>
+					<!-- 个人简介 -->
+					<div style="border-bottom:1px solid #ddd;padding-top:20px;">
+							<Form-item style="width: 882px;">
+								<Row>
+									<i-col span="8" offset="8">
+										<h2 style = "color: #2d8cf0;font-family:Arial;margin:10px;">个人简介</h2>
+									</i-col>
+								</Row>
+							</Form-item>
+							<form-item :required="true" prop="self_remark" style="margin-bottom:30px">
+								<i-input  type="textarea" :autosize="{minRows: 2,maxRows: 10}"  style="width: 882px"  v-model="curRow.self_remark" placeholder="个人简介" >
+							</form-item>
+					</div>		
+					<!-- 教育经历 -->
+					<div style="border-bottom:1px solid #ddd;padding-top:20px;padding-bottom:15px">
+							<Form-item style="width: 950px;">
+								<Row>
+									<i-col span="8" offset="8">
+										<h2 style = "color: #2d8cf0;font-family:Arial;margin:10px;">教育经历</h2>
+									</i-col>
+					       			<i-col span="1" offset="7" style="margin-top:10px">
+					       			<form-item size = "small">
+					       			<!-- 	新增             -->
+					       				<i-button type="primary" shape="circle" @click="handleAdd('edu')" icon="plus-round" ></i-button>
+					       			</form-item>
+					       			</i-col>
+								</Row>
+							</Form-item>
+						<i-form  :model="curRowEdu" :label-width="20" ref="dataEditForm" >
+							<Form-item style="width: 950px;" >
+								<Row>
+						       		<i-col span="6">学校</i-col>
+						       		<i-col span="4" >开始时间</i-col>
+							   		<i-col span="4" >结束时间</i-col>
+						       		<i-col span="8">描述(荣誉、担任职务)</i-col>
+						       		<i-col span="2"></i-col>
+						    	</Row>
+					   		</Form-item>	
+						    <Form-item v-for="(item, index) in dataEdu" :key="item.edu_code"  style="width: 950px;margin-bottom:15px" >
+								<Row >
+									<i-col span="6">
+										<i-input type="text" v-model="item.school" placeholder="请输入..." style="width: 200px"></i-input>
+									</i-col>
+									<i-col span="4">
+										<Date-picker v-model="item.starttime"  type="date" format="yyyy-MM-dd" placeholder="开始时间" style="width: 110px"></Date-picker>
+									</i-col>
+									<i-col span="4">
+										<Date-picker v-model="item.endtime"  type="date" format="yyyy-MM-dd" placeholder="结束时间" style="width: 110px"></Date-picker>
+									</i-col>
+									<i-col span="8">
+										<div class="desc"><i-input v-model="item.description"  type="textarea" :rows="1" ></i-input></div>
+									</i-col>
+									<i-col span="1" offset="1">
+									<form-item size = "small">
+									<!-- 	删除            -->
+										<i-button type="primary" shape="circle" @click="handleRemove(index, 'edu')" icon="minus-round"></i-button>
+									</form-item>
+									</i-col>
+								</Row>
+					    	</Form-item>
+						</i-form>
+					</div>
+					<!-- 个人目标 -->
+					<div style="border-bottom:1px solid #ddd;padding-top:20px;padding-bottom:15px">
+							<Form-item style="width: 882px;">
+								<Row>
+									<i-col span="8" offset="8">
+										<h2 style = "color:#2d8cf0;font-family:Arial;margin:10px;">个人目标</h2>
+									</i-col>
+								</Row>
+							</Form-item>
+							<form-item :required="true" prop = "personal_goals" style="margin-bottom:30px">
+								<i-input type="textarea" :autosize="{minRows: 2,maxRows: 10}"  style="width: 882px" v-model="curRow.personal_goals " placeholder="个人目标">
+							</form-item>
+					</div>
+					<!--= 兴趣爱好 -->
+					<div style="border-bottom:1px solid #ddd;border-bottom:none;padding-top:20px;">
+							<Form-item style="width: 882px;">
+								<Row>
+									<i-col span="8" offset="8">
+										<h2 style = "color: #2d8cf0;font-family:Arial;margin:10px;">兴趣爱好</h2>
+									</i-col>
+								</Row>
+							</Form-item>
+							<form-item :required="true" prop = "hobby" style="margin-bottom:30px">
+								<i-input type="textarea" :autosize="{minRows: 2,maxRows: 10}"  style="width: 882px" v-model="curRow.hobby " placeholder="兴趣爱好">
+							</form-item>
+					</div>
+				</div>
+				<!-- 入职前信息 -->
+				<div class="preMessEdit" style="display:none;border-top:1px solid #ddd;margin-top:15px;padding-bottom:30px;">
+				<!-- 工作经验 -->
+				<div style="border-bottom:1px solid #ddd;padding-top:20px;padding-bottom:15px">
+					<Form-item style="width: 950px;">
+						<Row>
+							<i-col span="8" offset="8">
+								<h2 style = "color:#2d8cf0;font-family:Arial;margin:10px;">工作经验</h2>
+							</i-col>	   
+							<i-col span="1" offset="7" style="margin-top:10px">
+							<form-item size = "small">
+							<!-- 	新增             -->
+			       				<i-button type="primary" shape="circle" @click="handleAdd('work')" icon="plus-round" ></i-button>
+			       			</form-item>
+			       			</i-col>
+						</Row>
+					</Form-item>
+				<i-form  :model="curRowWork" :label-width="20" ref="dataEditForm" >
+					<Form-item style="width: 950px;" >
+						<Row>
+				       		<i-col span="6">公司名称</i-col>
+				       		<i-col span="3" >开始时间</i-col>
+					   		<i-col span="3" >结束时间</i-col>
+				       		<i-col span="3">职位</i-col>
+				       		<i-col span="7">绩效描述</i-col>
+				       		<i-col span="2"></i-col>
+				    	</Row>
+			   		</Form-item>
+					<Form-item v-for="(item, index) in dataWork" :key="item.id"  style="width: 950px;margin-bottom:15px" >
+						<Row >
+							<i-col span="6">
+								<i-input type="text" v-model="item.comName" placeholder="请输入..." style="width: 200px"></i-input>
+							</i-col>
+							<i-col span="3">
+								<Date-picker v-model="item.starttime"  type="date" format="yyyy-MM-dd" placeholder="开始时间" style="width: 110px"></Date-picker>
+							</i-col>
+							<i-col span="3">
+								<Date-picker v-model="item.endtime"  type="date" format="yyyy-MM-dd" placeholder="结束时间" style="width: 110px"></Date-picker>
+							</i-col>
+							<i-col span="3">
+								<i-input type="text" v-model="item.post" placeholder="请输入..." style="width: 100px">
+							</i-col>
+							<i-col span="7">
+								<div class="desc"><i-input v-model="item.individual"  type="textarea" :rows="1" ></div>
+							</i-col>
+							<i-col span="1" offset="1">
+							<form-item size = "small">
+							<!-- 	删除             -->
+			                	<i-button type="primary" shape="circle" @click="handleRemove(index,'work')" icon="minus-round"></i-button>
+			            	</form-item>
+			            	</i-col>
+						</Row>
+			    	</Form-item>
+				</i-form>
+			</div>
+			<!-- 项目经验 -->
+			<div style="border-bottom:1px solid #ddd;padding-top:20px;padding-bottom:15px">
+					<Form-item style="width: 950px;">
+						<Row>
+							<i-col span="8" offset="8">
+								<h2 style = "color:#2d8cf0;font-family:Arial;margin:10px;">项目经验</h2>
+							</i-col>
+			       			<i-col span="1" offset="7" style="margin-top:10px">
+			       			<form-item size = "small">
+			       			<!-- 	新增             -->
+			       				<i-button type="primary" shape="circle" @click="handleAdd('proj')" icon="plus-round"></i-button>
+			       			</form-item>
+			       			</i-col>
+						</Row>
+					</Form-item>
+					<i-form  :model="curRowProj" :label-width="20" ref="dataEditForm" >
+						<Form-item style="width: 950px;" >
+							<Row>
+					       		<i-col span="6">项目名称</i-col>
+					       		<i-col span="3" >项目周期</i-col>
+					       		<i-col span="3" >开始时间</i-col>
+						   		<i-col span="3" >结束时间</i-col>
+					       		<i-col span="3">项目规模</i-col>
+					       		<i-col span="4">主要职责</i-col>
+					       		<i-col span="2"></i-col>
+					    	</Row>
+				   		</Form-item>		
+						<Form-item v-for="(item, index) in dataProj" :key="item.id"  style="width: 950px;margin-bottom:15px" >
+							<Row >
+								<i-col span="6">
+									<i-input type="text" v-model="item.projName" placeholder="请输入..." style="width: 205px"></i-input>
+								</i-col>
+								<i-col span="3">
+									<i-input type="text" v-model="item.projPeriod" placeholder="请输入..." style="width: 100px"></i-input>
+								</i-col>
+								<i-col span="3">
+									<Date-picker v-model="item.starttime"  type="date" format="yyyy-MM-dd" placeholder="开始时间" style="width: 110px"></Date-picker>
+								</i-col>
+								<i-col span="3">
+									<Date-picker v-model="item.endtime"  type="date" format="yyyy-MM-dd" placeholder="结束时间" style="width: 110px"></Date-picker>
+								</i-col>
+								<i-col span="3">
+									<i-input type="text" v-model="item.projScale" placeholder="请输入..." style="width: 100px">
+								</i-col>
+								<i-col span="4">
+									<div class="desc"><i-input v-model="item.projRemark"  type="textarea" :rows="1" ></div>
+								</i-col>
+								<i-col span="1" offset="1"> 
+								<form-item size = "small">
+								<!-- 	删除             -->
+				                	<i-button type="primary" shape="circle" @click="handleRemove(index,'proj')" icon="minus-round"></i-button>
+				            	</form-item>
+				            	</i-col>
+							</Row>
+				    	</Form-item>
+					</i-form>
+				</div>	
+			</div>
+			<!-- 项目信息 -->
+			<div class="projMessEdit" style="display:none;border-top:1px solid #ddd;margin-top:15px;padding-bottom:30px;">
+					<i-form  :model="curRowComProj" :label-width="20" ref="ddataEditForm" >
+						<Form-item v-for="(item, index) in dataComProj" :key="item.id" style="width: 882px;margin-top:15px;margin-bottom:20px;" >
+					    	<Row>
+					    		<i-col span="8" offset="8">
+									<h2 style = "color:#2d8cf0;font-family:Arial;margin:10px;">项目 {{ index+1 }}</h2>
+								</i-col>
+								<i-col span="1" offset="6" >
+					       			<form-item icon="plus-round">
+					       			<!-- 	删除             -->
+					       				<i-button type="primary" shape="circle" @click="handleRemove(index,'comProj')" icon="minus-round" style="margin:10px;"></i-button>
+					       			</form-item>
+				       			</i-col>
+				        	</Row>			   
+							 <Row>
+					        	<i-col span="24">
+					        		项目编码 : <i-input type="text" v-model="item.proj_code"   @on-focus = "selectProject(index)" placeholder="请输入..." style="width: 400px">
+					        	</i-col>
+					        </Row>
+					        <br/>
+					        <Row>
+					        	<i-col span="24">
+					        		项目描述(职责) : <i-input type="textarea" :autosize="{minRows: 10,maxRows: 30}" v-model="item.projMajor " placeholder="兴趣爱好">
+					        	</i-col>
+					        </Row>       
+					    </Form-item><br>
+					    <form-item icon="plus-round" style="width: 882px;" > 
+					        <Row>
+					       		<i-col span="8" offset="8" style="margin-top:10px">
+					       	<!-- 	新增             -->
+				                	<i-button type="primary" shape="circle" @click="handleAdd('comProj')" icon="plus-round" style="margin:10px;"></i-button>
+					    		</i-col>
+					    	</Row>
+					    </form-item>
+					</i-form>
+				</div>  
+				<!-- 其他信息 -->
+				<div class = "otherMessEdit"  style="display:none;border-top:1px solid #ddd;margin-top:15px;padding-bottom:30px;">暂无</div>
+				</div>	
+			</div>
+					</i-form>
+			<div slot="footer">
+            	<i-button type="primary" size="large"  @click="editDataCancel" shape="circle">取消</i-button>
+            	<i-button type="primary" size="large"  @click="editDataSave" shape="circle">确定</i-button>
+        	</div>
+		</Modal>
+							           
+						
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+		
+		<Modal v-model="exportData" title="导出选择" :mask-closable="false"
+				@on-ok="exportDataOk" @on-cancel="exportDataCancel" width= "550" :styles="{top: '150px'}"> 
+			<i-form :model="exportOption" :label-width="120" ref="exportOption" >
+				<!-- 选择导出方式 -->
+				 <Form-item label = "选择导出方式:" style = "height : 50px">
+		            <Radio-group v-model="exportOption.style"  @on-change = "select">
+		                <Radio label="default">默认模板</Radio>
+		                <Radio label="defined">自定义模板</Radio>
+		            </Radio-group>
+		        </Form-item>
+		        <!-- 选择导出格式 -->
+				<div id = "defaultOption" style = "display : block;height : 50px" >
+					<Form-item label = "选择导出格式:" >
+						<i-select v-model="exportOption.format" placeholder="请选择" style="width:170px">
+			                <i-option value="htmlFormat">html</i-option>
+			                <i-option value="pdfFormat">pdf</i-option>
+			                <i-option value="wordFormat">word</i-option>
+		            	</i-select>
+		            	<a href="#" @click="preview" style = "padding-left: 8px;">预览</a>
+	            	</Form-item>
+				</div>
+				 <!-- 选择导出模板 -->
+				<div id = "definedOption" style = "display : none;height : 100px">
+					<Form-item label = "选择导出模板:" >
+						<Upload action="//localhost:8080/TestWeb"
+							:format = "['pdf', 'doc', 'docx', 'html']">
+					        <i-button type="ghost" icon="ios-cloud-upload-outline">上传文件</i-button>
+					    </Upload>
+				    </Form-item>
+				</div>
+			</i-form>
+		</Modal>
+		
+		
+		
+		<Modal v-model="postData" title="岗位选择" :mask-closable="false"
+				@on-ok="postDataOk" @on-cancel="postDataCancel" width= "650" :styles="{top: '50px'}"> 
+			<i-table :data='dataPost' :columns="columnPost" ref="selectPost" height="300"
+				border highlight-row @on-current-change="selectOnePost" @on-row-dblclick = "postDataOk"> </i-table>
+		</Modal>
+		
+		<Modal v-model="projectData" title="项目选择" :mask-closable="false"
+				@on-ok="projectDataOk" @on-cancel="projectDataCancel" width= "1000" :styles="{top: '50px'}"> 
+			<i-table :data='dataProject' :columns="columnProject" ref="selectProject" height="300"
+				border highlight-row @on-current-change="selectOneProject" @on-row-dblclick = "projectDataOk"> </i-table>
+		</Modal>
+		
+		
+		<Modal v-model="userAdd" title="用户新增" class-name="vertical-center-modal" 
+			:mask-closable="false"> 
+			<i-form :model="curRowUser" label-position="right" :label-width="80" ref="userAddForm" :rules="rulesUser"> 
+				<form-item>新增用户登录：默认密码为111111</form-item>
+				<form-item label="用户编码:" prop="user_code" :required="true"> 
+					<i-input v-model="curRowUser.user_code"></i-input>
+				</form-item><br>
+				<form-item label="用户密码:" prop="user_pwd" :required="true"> 
+					<i-input v-model="curRowUser.user_pwd" type="password" v-bind:auto-complete="'off'"></i-input> 
+				</form-item><br>
+				<form-item label="密码确认:" prop="user_pwd1" :required="true"> 
+					<i-input v-model="curRowUser.user_pwd1" type="password" auto-complete="off"></i-input>
+				</form-item><br>
+			</i-form> 
+			<div slot="footer">
+            	<i-button type="primary" size="large"  @click="addUserCancel" shape="circle">取消</i-button>
+            	<i-button type="primary" size="large"  @click="addUserSave" shape="circle">确定</i-button>
+        	</div>
+		</Modal>
+		
+	</div>
+</body>
+<script src="../../js/md5.js"></script>
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/jquery-migrate.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<script src="../../js/sdp/ajaxfileupload.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="resumeList.js"></script>
+</html>

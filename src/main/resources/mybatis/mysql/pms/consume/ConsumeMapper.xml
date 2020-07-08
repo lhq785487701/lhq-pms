@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.consume">
+	<!-- 消费菜单返回结果对象定义 -->
+	<resultMap id="consumeMenu" type="map">
+		<id column="consume_id" property="consume_id" jdbcType="VARCHAR" />
+		<result column="user_code" property="user_code" jdbcType="VARCHAR" />
+		<result column="consume_menu_name" property="consume_menu_name" jdbcType="VARCHAR" />
+		<result column="consume_menu_order" property="consume_menu_order" jdbcType="VARCHAR" />
+		<result column="consume_menu_pid" property="consume_menu_pid" jdbcType="VARCHAR" />
+		<result column="consume_menu_desc" property="consume_menu_desc" jdbcType="VARCHAR" />
+		<result column="consume_menu_level" property="consume_menu_level" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 消费明细返回结果对象定义 -->
+	<resultMap id="consumeDetail" type="map">
+		<id column="cons_detail_id" property="cons_detail_id" jdbcType="VARCHAR" />
+		<result column="consume_id" property="consume_menu" jdbcType="VARCHAR" />
+		<result column="consume_menu_name" property="consume_menu_name" jdbcType="VARCHAR" />
+		<result column="consume_money" property="consume_money" jdbcType="DECIMAL" />
+		<result column="consume_date" property="consume_date" jdbcType="DATE" />
+		<result column="consume_desc" property="consume_desc" jdbcType="VARCHAR" />
+		<result column="consume_type" property="consume_type" jdbcType="VARCHAR" />
+		<result column="consume_way" property="consume_way" jdbcType="VARCHAR" />
+		<result column="consume_time" property="consume_time" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<!-- 消费统计返回结果对象定义 -->
+    <resultMap id="consumeStatistics" type="map">
+        <result column="consume_type" property="consume_type" jdbcType="VARCHAR" />
+        <result column="consume_count" property="consume_count" jdbcType="INTEGER" />
+        <result column="consume_money" property="consume_money" jdbcType="DECIMAL" />
+    </resultMap>
+
+	<!-- 菜单返回字段 -->
+	<sql id="consume_menu_List">
+		consume_id,user_code,consume_menu_name,consume_menu_order,consume_menu_pid,consume_menu_desc,create_date,create_user
+	</sql>
+	
+	<!-- 明细返回字段 -->
+	<sql id="consume_detail_List">
+		a.cons_detail_id,b.consume_menu_name,b.consume_id,a.consume_money,a.consume_time,a.consume_date,a.consume_desc,a.consume_type,a.consume_way
+	</sql>
+
+	<!-- 查询个人消费的明细 -->
+	<select id="queryConsumeDetail" resultMap="consumeDetail"
+		parameterType="map">
+		SELECT
+			<include refid="consume_detail_List" />
+		FROM
+			pms_consume_detail a,
+			(SELECT consume_id,consume_menu_name
+				FROM pms_consume_menu
+				WHERE FIND_IN_SET(consume_id,getChildList (#{consume_id,jdbcType=CHAR}, #{$user_code,jdbcType=CHAR}))
+			) b
+		<where>
+			a.consume_id = b.consume_id
+			<if test="consume_desc!=null">
+				and a.consume_desc like
+				CONCAT('%',#{consume_desc,jdbcType=CHAR},'%')
+			</if>
+			<if test="consume_date_s !=null and consume_date_s != '' and
+					consume_date_e !=null and consume_date_e != ''">
+				and a.consume_date &gt;= #{consume_date_s,jdbcType=CHAR}
+				and a.consume_date &lt;= #{consume_date_e,jdbcType=CHAR}
+			</if>
+			<if test="consume_date_s !=null and consume_date_s != ''">
+				and a.consume_date &gt;= #{consume_date_s,jdbcType=CHAR}
+			</if>
+			<if test="consume_date_e !=null and consume_date_e != ''">
+				and a.consume_date &lt;= #{consume_date_e,jdbcType=CHAR}
+			</if>
+			<if test="consume_type !=null and consume_type != ''">
+				and a.consume_type = #{consume_type,jdbcType=CHAR}
+			</if>
+		</where>
+		ORDER BY a.consume_date desc
+	</select>
+	
+	
+	<!-- 统计收入和支出 -->
+	<select id="consumeStatistics" resultMap="consumeStatistics"
+        parameterType="map">
+        SELECT
+		    statis.consume_type consume_type,
+		    sum(statis.consume_money) consume_money,
+		    count(statis.consume_money) consume_count
+		FROM
+		    (
+		        SELECT
+		            a.cons_detail_id,
+		            b.consume_menu_name,
+		            b.consume_id,
+		            a.consume_money,
+		            a.consume_date,
+		            a.consume_desc,
+		            a.consume_type,
+		            a.consume_way
+		        FROM
+		            pms_consume_detail a,
+		            (
+		                SELECT
+		                    consume_id,
+		                    consume_menu_name
+		                FROM
+		                    pms_consume_menu
+		                WHERE
+		                    FIND_IN_SET(
+		                        consume_id,
+		                        getChildList (#{consume_id,jdbcType=CHAR}, #{$user_code,jdbcType=CHAR})
+		                    )
+		            ) b
+		        <where>
+		            a.consume_id = b.consume_id
+		            <if test="consume_desc!=null">
+		                and a.consume_desc like
+		                CONCAT('%',#{consume_desc,jdbcType=CHAR},'%')
+		            </if>
+		            <if test="consume_date_s !=null and consume_date_s != '' and
+		                    consume_date_e !=null and consume_date_e != ''">
+		                and a.consume_date &gt;= #{consume_date_s,jdbcType=CHAR}
+		                and a.consume_date &lt;= #{consume_date_e,jdbcType=CHAR}
+		            </if>
+		            <if test="consume_date_s !=null and consume_date_s != ''">
+		                and a.consume_date &gt;= #{consume_date_s,jdbcType=CHAR}
+		            </if>
+		            <if test="consume_date_e !=null and consume_date_e != ''">
+		                and a.consume_date &lt;= #{consume_date_e,jdbcType=CHAR}
+		            </if>
+		        </where>
+		        ORDER BY
+		            a.consume_date DESC
+		    ) statis
+		GROUP BY
+		    statis.consume_type    
+    </select>
+
+	<!-- 删除消费记录，调用存储过程 -->
+	<select id="deleteConsumeDetail" resultType="map" parameterType="map">
+		select deleteConsumeDetail(#{cons_detail_id,jdbcType=CHAR}, #{$user_code,jdbcType=CHAR}) returnCode from dual
+	</select>
+	
+	<!-- 插入消费记录 -->
+	<insert id="insertConsumeDetail" parameterType="map">
+		INSERT INTO pms_consume_detail (
+			consume_id,
+			consume_money,
+			consume_date,
+			consume_type,
+			consume_way,
+			consume_desc,
+			consume_time,
+			create_date,
+			create_user)
+		VALUES(#{consume_id,jdbcType=CHAR},
+				#{consume_money,jdbcType=CHAR},
+				#{consume_date,jdbcType=CHAR},
+				#{consume_type,jdbcType=CHAR},
+				#{consume_way,jdbcType=CHAR},
+				#{consume_desc,jdbcType=CHAR},
+				#{consume_time,jdbcType=CHAR},
+				now(),
+				#{$user_code,jdbcType=CHAR})
+	</insert>
+	
+	<!-- 修改消费明细 -->
+	<update id="updateConsumeDetail" parameterType="map">
+		update pms_consume_detail
+		<set>
+			<if test="consume_money!=null">
+				consume_money=#{consume_money,jdbcType=CHAR},
+			</if>
+			<if test="consume_type!=null">
+				consume_type=#{consume_type,jdbcType=CHAR},
+			</if>
+			<if test="consume_way!=null">
+				consume_way=#{consume_way,jdbcType=CHAR},
+			</if>
+			<if test="consume_desc!=null">
+				consume_desc=#{consume_desc,jdbcType=CHAR},
+			</if>
+			<if test="consume_id!=null">
+				consume_id=#{consume_id,jdbcType=CHAR},
+			</if>
+			<if test="consume_date!=null">
+				consume_date=#{consume_date,jdbcType=DATE},
+			</if>
+			<if test="consume_time!=null">
+				consume_time=#{consume_time,jdbcType=CHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where cons_detail_id=#{cons_detail_id,jdbcType=INTEGER}
+	</update>
+
+	<!-- 查询个人消费的菜单 -->
+	<select id="queryConsumeMenu" resultMap="consumeMenu"
+		parameterType="map">
+		SELECT
+			<include refid="consume_menu_List" />
+		FROM
+			pms_consume_menu
+		WHERE
+			user_code = #{$user_code,jdbcType=CHAR}
+		ORDER BY
+			consume_id 
+	</select>
+	
+	
+	<!-- 插入个人消费的菜单 -->
+	<insert id="insertConsumeMenu" parameterType="map">
+		INSERT INTO pms_consume_menu (
+			user_code,
+			consume_menu_name,
+			consume_menu_order,
+			consume_menu_pid,
+			consume_menu_desc,
+			create_date,
+			create_user)
+		VALUES(#{$user_code,jdbcType=CHAR},
+				#{consume_menu_name,jdbcType=CHAR},
+				#{consume_menu_order,jdbcType=CHAR},
+				#{consume_menu_pid,jdbcType=CHAR},
+				#{consume_menu_desc,jdbcType=CHAR},
+				now(),
+				#{$user_code,jdbcType=CHAR})
+	</insert>
+	
+	<!-- 修改菜单信息 -->
+	<update id="updateConsumeMenuName" parameterType="map">
+		update pms_consume_menu
+		<set>
+			<if test="consume_menu_name!=null">
+				consume_menu_name=#{consume_menu_name,jdbcType=CHAR},
+			</if>
+			<if test="consume_menu_order!=null">
+				consume_menu_order=#{consume_menu_order,jdbcType=INTEGER},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where consume_id=#{consume_id,jdbcType=INTEGER}
+	</update>
+	
+	<!-- 删除消费菜单 -->
+	<delete id="deleteConsumeMenu" parameterType="map">
+		DELETE
+		FROM
+			pms_consume_menu
+		WHERE
+			consume_id IN (
+				SELECT
+					a.consume_id
+				FROM
+					(
+						SELECT
+							b.consume_id
+						FROM
+							pms_consume_menu b
+						WHERE
+							FIND_IN_SET(
+								b.consume_id,
+								getChildList (#{consume_id,jdbcType=INTEGER}, #{$user_code,jdbcType=CHAR})
+							)
+						group by b.consume_id
+					) a
+			)
+		<!-- delete from pms_consume_menu where consume_id=#{consume_id,jdbcType=INTEGER} -->
+	</delete>
+	
+	<!-- 查询消费菜单下是否有数据 -->
+	<select id="queryConsumeDetailCount" resultType="map" parameterType="map">
+		SELECT
+			count(1) count_consume_detail
+		FROM
+			pms_consume_detail a,
+			(
+				SELECT
+					consume_id,
+					consume_menu_name
+				FROM
+					pms_consume_menu
+				WHERE
+					FIND_IN_SET(
+						consume_id,
+						getChildList (#{consume_id,jdbcType=CHAR}, #{$user_code,jdbcType=CHAR})
+					)
+			) b
+		WHERE
+			a.consume_id = b.consume_id
+	</select>
+	
+
+</mapper>

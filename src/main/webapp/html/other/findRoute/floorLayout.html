@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<title>寻找路线</title>
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet" href="../../../css/other/layout.css">
+<body>
+	<div id="mainContainer">
+		<div id="head1">平面图</div>
+		<div id="head2">物品</div>
+		<div id="bg" onmousemove="getCoordinates(event)" 
+		             onmouseout="clearCoordinates()"
+		             ondragover="allowDrop(event)"
+		             ondrop="drop(event)"
+		             onmousewheel="return changeImgSize(this)"></div>
+		
+		<div id = "thing">
+			<img id="computer" src="../../../css/things/computer.jpg" draggable="true" ondragstart="drag(event)"/>  
+		</div>
+		<div id="xycoordinates" style="margin-left:475px;clear:both;"></div>
+		<div id="layoutcoordinates" style="margin-left:475px"></div>
+		<!-- 右键菜单 -->
+		<div id="menu">
+    		<p id="pMenu">lalala</p>
+		</div>
+	</div>
+</body>
+
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.js"></script>
+<script src="../../../js/jquery/jquery-migrate.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.min2.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.min2.js"></script>
+
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="floorLayout.js"></script>
+</html>

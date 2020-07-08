@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<title>计划详情页面</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet"
+    href="../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../css/sdp-admin.css" />
+<link rel="stylesheet" href="../../css/sdp-skin.css" />
+<link rel="stylesheet"
+    href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+    href="../../css/fonts/awesome/font-awesome.min.css" />
+<link rel="stylesheet" href="../../css/planDetails.css" />    
+    
+</head>
+
+<body>
+    <div id="mainContainer" v-cloak>
+        <div>
+        <card :bordered="false" v-for="item in datas" :key="item.stu_plan_id">
+            <p slot="title">
+                <Icon type="social-vimeo-outline" size="20"></Icon>
+                <font size="4">计划详情</font>
+            </p>
+            
+          <row>
+              <i-col span="3"><h3>计划名称:</h3></i-col>
+              <i-col span="21">{{item.stu_name}}</i-col>
+          </row>
+           <br/>
+           <row>
+               <i-col span="3"><h3>计划时间:</h3></i-col>
+               <i-col span="3">{{item.stu_start_date}}</i-col>
+               <i-col span="2"> —— </i-col>
+               <i-col span="3">{{item.stu_end_date}}</i-col>
+           </row>
+          <br/>
+          <row>
+              <i-col span="3"><h3>学习成员:</h3></i-col>
+              <i-col span="20">{{item.users_name}}</i-col>
+          </row>
+          <br/>
+          <row>
+              <i-col span="3"><h3>计划描述:</h3></i-col>
+              <i-col span="20">
+                <i-input v-model="item.stu_details" type="textarea" :autosize="{minRows: 3,maxRows: 5}" :readonly="true"></i-input>
+              </i-col>
+          </row>
+        </card>
+        </div>
+        
+         <div>
+          
+        <card :bordered="false" >
+        <p slot="title">
+	      <Icon type="ios-list-outline" size="20"></Icon>
+	      <font size="4">成员学习情况</font>
+	     </p>
+	      <div v-for="item in planDetail">
+	      <row>
+              <i-col span="3"><h4>{{item.user_name}}</h4></i-col>
+              <i-col span="2" style="color:rgb(51,153,255)">{{item.detail_name}}</i-col>
+              <i-col span="16"><h5>感悟收获：</h5>{{item.stu_detail}}<h5></h5>
+              <span style="color:rgb(51,153,255);font-size:small;">开始时间：{{item.create_date}},学了{{item.stu_time}}h,完成度{{item.stu_progress}}%</span></i-col>
+          </row>
+          <br/>
+          </div>
+        </card>
+        </div> 
+        
+        
+        
+    </div>
+</body>
+
+<!--[if lte IE 9]>
+    <script src="../../js/jquery/respond.js"></script>
+    <script src="../../js/jquery/html5shiv.js"></script>    
+<![endif]-->
+
+<script src="../../js/md5.js"></script>
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/jquery-migrate.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+
+<script type="text/javascript" src="stuPlanDetails.js"></script>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>预览</title>
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/jquery-migrate.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<script src="../../js/jquery/jquery.media.js"></script>
+<script type="text/javascript">  
+    $(function() {  
+    	var url = url || window.location.href;
+    	var arr = url.split("?"); 
+    	if(arr.length == 1){  
+            alert('无预览文件');
+       	} 
+    	var js = window.location.pathname.split("/")[1];
+    	var localObj = window.location;
+        var contextPath = localObj.pathname.split("/")[1];
+		var basePath = localObj.protocol + "//" + localObj.host + "/"+ contextPath + '/html/resume/' + arr[1].split("=")[1];
+		//服务器上路径
+		console.log(basePath)
+		$('a.media').attr('href', arr[1].split("=")[1]);
+        $('a.media').media({width:1000, height:800});  
+    });  
+</script> 
+</head>
+<body>
+	<a class="media" href="#"></a>  
+</body>
+</html>

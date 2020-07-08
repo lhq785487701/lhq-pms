@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>项目列表页面</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet"
+	href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../css/fonts/awesome/font-awesome.min.css" />
+<link rel="stylesheet"  href="project.css" />
+<style type="text/css">
+	.desc .ivu-input:hover{
+		height:100px;
+		} 
+	
+	.desc .ivu-input{
+		max-width:200px;
+	}
+	
+	.ivu-tag{
+		height:30px;
+		width:80px;
+		line-height:30px
+	}
+	.ivu-form-item-content{
+		text-align:center
+	}
+	.cust{
+		display:inline-block;
+		height:30px;
+		width:200px;
+		font-size:15px;
+		color:#777777;
+		letter-spacing:2px;
+		border-bottom:1px solid #B9BCBF;
+	}
+	textarea.ivu-input{
+		max-width:1000px;
+	    width: 580px
+	}
+	
+	.ivu-card-head{
+		padding: 5px 16px;
+	}	
+	
+	#state-tip .ivu-form-item-error-tip{
+		margin-top:40px;
+	}
+		
+</style>
+</head>
+<body>
+	<div class="mainContainer" id="mainContainer">
+		<i-form inline :model="params" :label-width="70">
+		<br>
+		<i-button type="primary" shape="circle" icon="home"
+			style="font-size: 28px;margin-left: 50px;"></i-button> <form-item
+			label="项目编号:" style="margin-left:180px"> <i-input style="width: 120px"
+			v-model="params.proj_code" id="paramName"></i-input></form-item> <form-item
+			label="项目名称:"> <i-input style="width: 120px"
+			v-model="params.proj_name"></i-input></form-item> <form-item label="项目经理:">
+		<i-input style="width: 120px" v-model="params.proj_mgr"></i-input></form-item> <form-item>
+		<i-button type="primary" shape="circle" @click="queryDatas"
+			icon="search">查询</i-button> <i-button type="primary" shape="circle"
+			@click="addData" icon="android-add">新增 </i-button> </form-item> </i-form>
+		<br>
+		<i-table :data='datas' :columns="columns" ref="dataGrid" height="520"
+			border highlight-row> </i-table>
+
+		<page @on-page-size-change="handleSizeChange"
+			:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+			:current="page.getPageNumber()" show-total show-elevator show-sizer
+			:total="page.totalCount"> </page>
+			
+			
+		
+		<!-- 新增项目 -->			
+		<Modal v-model="dataAdd" title="项目新增" :mask-closable="false" :closable="false"
+			width= "80%" :styles="{top: '0px'}"> 
+			<div class = "dataAddStyle">
+				<!-- 左边 -->
+				<div style="float:left; width:14%; height:100%; text-align:center;margin-top:31px;" >
+					<i-menu ref = "iMenuAdd" :theme="dataAddMenuMess" active-name="baseMessAdd" style="width:100%;height:100%" @on-select="dataAddMenuSelect" ref = "active_name">			
+			            <menu-item name="baseMessAdd" >
+			                <Icon type="android-person" ></Icon>基本信息
+			            </menu-item>
+			             <menu-item name="interviewMessAdd" >
+			                <Icon type="android-person" ></Icon>面试信息
+			            </menu-item>			            
+				    </i-menu>
+				</div>
+				
+				<!--右边  -->
+				<div style="float:right;width:86%; height:100%; text-align:center;overflow:auto;" class = "detailRight">
+					<i-form ref="dataAddForm" :model="curRow" label-position="right" :label-width="90" :rules="ruleAddProject">
+					<!-- 项目基本信息 -->
+					<div class="baseMessAdd">
+						<Collapse v-model="baseMessAdd">
+							<Panel name = "1">项目基本信息	
+								<div slot="content" >					
+									<Row> 
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item  prop="proj_name" :required="true"> 
+												<Tag for="label_curRow_proj_name" style="height:32px;line-height:32px;font-size:14px;margin:0;">项目名称</Tag>
+												<i-input id="label_curRow_proj_name" v-model="curRow.proj_name" style="width: 200px;"></i-input>
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item  prop="proj_mgr"> 
+												<Tag  for="label_curRow_proj_mgr" style="height:32px;line-height:32px;font-size:14px;margin:0;">项目经理</Tag>
+												<i-input id="label_curRow_proj_mgr" v-model="curRow.proj_mgr" style="width: 200px;" readOnly></i-input>
+											</form-item>
+										</i-col> 					
+									</Row> 
+									<Row>
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item  prop="proj_scale"> 
+												<Tag for="label_curRow_proj_scale" style="height:32px;line-height:32px;font-size:14px;margin:0;">项目周期</Tag>
+												<i-input id="label_curRow_proj_scale" v-model="curRow.proj_scale" style="width: 200px;"></i-input>
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item  prop="start_date"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">开始时间</Tag>												
+												<Date-picker id="label_curRow_start_date" v-model="curRow.start_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+											</form-item>
+										</i-col> 
+									</Row>
+									<Row>
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item  prop="end_date"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">结束时间</Tag>
+												<Date-picker id="label_curRow_end_date" v-model="curRow.end_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item  prop="online_date"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">上线时间</Tag>
+												<Date-picker id="label_curRow_online_date" v-model="curRow.online_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+											</form-item>
+										</i-col> 
+									</Row>
+									<Row>
+										<form-item  prop="proj_state" id="state-tip">
+											<i-col span="3" style="margin:8px 4px 0 0;width:11.8%;text-align: right;">	
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">项目状态</Tag>
+											</i-col>
+											<i-col span="8" style="margin:8px 0 0 0 ;text-align: left;">																						
+												<i-select id="label_curRow_proj_state" v-model="curRow.proj_state"  style="width:200px">
+					                				<i-option value="1">需求分析</i-option>
+					                				<i-option value="2">编码实现</i-option>
+					                				<i-option value="3">测试阶段</i-option>
+					                				<i-option value="4">上线维护</i-option>
+				            					</i-select>
+											</i-col> 										
+										</form-item>											
+									</Row>									
+									<Row>
+										<form-item  prop="proj_intro"> 
+											<i-col span="3" style="text-align:right;width:11.8%">
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">项目描述</Tag>
+											</i-col>
+											<i-col span="21" style="text-align:left; width:0">	
+												<i-input type="textarea" :rows="4" v-model="curRow.proj_intro" style="margin-left: 6px;"></i-input>
+											</i-col>
+										</form-item> 													
+									</Row>			 																		
+							</div>
+							</Panel>
+							<Panel name="2">客户信息	
+								<div slot="content">								
+									<Row justify="center"> 
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item  prop="cust_name"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户名称</Tag>
+												<i-input type="text" v-model="curRow.cust_name"   @on-focus = "selectCust(index)" style="width: 200px">
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item prop="cust_nature"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户性质</Tag>
+												<i-input id="label_curRow_cust_nature" v-model="curRow.cust_nature" style="width: 200px;" readonly></i-input>
+											</form-item>
+										</i-col>																							
+									</Row> 
+									<Row>
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item prop="cust_phone"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户电话</Tag>
+												<i-input id="label_curRow_cust_phone" v-model="curRow.cust_phone" style="width: 200px;" readonly></i-input>
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item prop="cust_addr"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户地址</Tag>
+												<i-input id="label_curRow_cust_addre" v-model="curRow.cust_addr" style="width: 200px;" readonly></i-input>
+											</form-item>
+										</i-col> 
+									</Row>
+									<Row>
+										<form-item prop="cust_introduce"> 
+											<i-col span="3" style="text-align:right;width:11.8%">
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户简介</Tag>
+											</i-col>
+											<i-col span="21" style="text-align:left; width:0">	
+												<i-input type="textarea" :rows="4" v-model="curRow.cust_introduce" readonly style="margin-left: 6px;"></i-input>
+											</i-col>
+										</form-item> 													
+									</Row>														
+								</div>
+							</Panel>
+							<Panel name="3">人员信息
+								<div slot="content" style="text-align:center">
+								<i-form :model="curUsernumber" label-position="right" :label-width="90" ref="dataAddForm">
+									<Form-item style="width: 800px;">								       		
+										<Row>
+								       		<i-col span="4">姓名</i-col>
+								       		<i-col span="4" >项目角色</i-col>
+									   		<i-col span="4">联系电话</i-col>
+								       		<i-col span="7">任务</i-col>
+								       		<i-col span="5">
+								       			<!--  增加	-->
+								       			<form-item icon="plus-round">
+								       				<i-button type="primary" shape="circle" @click="selectUserNumber(index)" icon="plus-round" ></i-button>
+								       			</form-item>				       		
+								       		</i-col>
+								    	</Row>
+								    </Form-item>
+							    	<Form-item v-for="(item, index) in dataProjectNumber" :key="item.user_id" style="width: 800px;margin-bottom:15px;">
+										<Row>
+											<i-col span="4">												
+												<i-input type="text" v-model="item.user_name" placeholder="请输入..."  style="width: 110px" readonly>
+											</i-col>
+											<i-col span="4">
+												<!-- <i-input type="text" v-model="item.role_name" placeholder="请输入..." style="width: 110px"></i-input> -->
+												<Select v-model="item.role_name" style="font-size:12px;width:110px;height:32px; text-align:right;line-height:1.5;padding: 4px 7px;border-radius: 4px;border: 1px solid #dddee1;" size="large">
+											       <Option v-for="item in dataRoles" :value="item.role_name" :key="item.role_name">{{ item.role_name }}</Option>
+											    </Select>												
+											</i-col>
+											<i-col span="4">
+												<i-input type="text" v-model="item.user_mobile" placeholder="请输入..." style="width: 110px" readonly></i-input>
+											</i-col>
+											<i-col span="7">
+												<!-- <i-input v-model="item.proj_task" type="textarea" style="width:180px;" :rows="1" class="desc"></i-input> -->
+												<div class="desc"><i-input v-model="item.proj_task"  type="textarea" :rows="1" max-width="180px"></i-input></div>
+											</i-col>
+											<!-- 	       删除                  -->
+											<i-col span="5">
+												<form-item icon="plus-round">
+													<i-button type="primary" shape="circle" @click="handleRemove(index, 'ProjectNumber')" icon="minus-round"></i-button>
+												</form-item>
+											</i-col>
+										</Row>
+							    	</Form-item>
+							    </i-form>
+								</div>
+							</Panel>							
+						</Collapse>	
+					</div>
+					<!-- 面试信息 -->
+					<div class="interviewMessAdd" style="display:none">
+						<Collapse v-model="interviewMessAdd">
+							<Panel name="1">面试信息
+									<div slot="content">	
+									 <i-form :model="curQuestion" :label-width="90" style="width: 800px" ref="dataAddForm" >								       																	
+								            <Row>
+								            	<i-col span="7" style="margin:8px 0 0 0">
+													<form-item> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">录入问题</Tag>									
+								       					<i-button type="primary" shape="circle" @click="handleAdd('Question')" icon="plus-round" ></i-button>			       					
+													</form-item>			         
+												</i-col> 				               
+								            </Row>
+									        <Form-item v-for="(item,index) in dataQuestion">
+									        <Row> 
+												<i-col span="12" style="margin:8px 0 0 0">
+													<form-item  prop="inter_date"> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">面试时间</Tag>
+														<Date-picker v-model="item.inter_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+													</form-item>
+												</i-col> 					
+												<i-col span="12" style="margin:8px 0 0 0">								
+													<form-item  prop="inter_addr"> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">面试地址</Tag>
+														<i-input v-model="item.inter_addr" style="width: 200px;"></i-input>
+													</form-item>
+												</i-col> 					
+											</Row>	
+											<Row> 
+												<i-col span="12" style="margin:8px 0 0 0">
+													<form-item  prop="interviewer"> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">面试官</Tag>
+														<i-input v-model="item.interviewer" style="width: 200px;"></i-input>
+													</form-item>
+												</i-col> 					
+												<i-col span="12" style="margin:8px 0 0 0">								
+													<form-item  prop="interviewee"> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">面试人</Tag>
+														<i-input v-model="item.interviewee" style="width: 200px;"></i-input>
+													</form-item>
+												</i-col> 					
+											</Row>	  
+											<Row>												
+												<form-item  prop="question_direction"> 
+													<i-col span="3" style="width:14.5%">
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">问题方向</Tag>
+													</i-col>
+													<i-col span="21" style="width:0">	
+														<i-input type="textarea" :rows="4" v-model="item.question_direction"></i-input>
+													</i-col>
+												</form-item>
+											</Row>
+								            <Row>
+								            	<form-item  prop="inter_question"> 
+													<i-col span="3" style="width:14.5%">
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">问题</Tag>
+													</i-col>
+													<i-col span="21" style="width:0">	
+														<i-input type="textarea" :rows="4" v-model="item.inter_question"></i-input>
+													</i-col>
+												</form-item>								                				               
+								            </Row>
+								            <Row>
+								            	<form-item  prop="inter_answer"> 
+													<i-col span="3" style="width:14.5%">
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">答案</Tag>
+													</i-col>
+													<i-col span="21" style="width:0">	
+														<i-input type="textarea" :rows="4" v-model="item.inter_answer"></i-input>
+													</i-col>
+												</form-item>								                
+								                <i-col span="2">
+													<form-item icon="plus-round">
+														<i-button type="primary" shape="circle" @click="handleRemove(index, 'Question')" icon="minus-round"></i-button>
+													</form-item>
+												</i-col>		                
+								            </Row>		       
+									      </Form-item>
+									    </i-form>
+									</div>
+								</Panel>
+							</Collapse>						
+					</div>
+				</i-form>	
+				</div>
+			</div>
+			<div slot="footer">
+	           	<i-button type="primary" size="large"  @click="addDataCancel" shape="circle">取消</i-button>
+	           	<i-button type="primary" size="large"  @click="addDataSave" shape="circle">确定</i-button>
+        	</div>				
+		</Modal>
+		
+		
+		
+		
+		
+		
+		<!-- 编辑项目 -->
+		<Modal v-model="dataEdit" title="项目编辑" :mask-closable="false" :closable="false" width= "80%" :styles="{top: '0px'}"> 
+			<div class = "dataAddStyle">
+				<!-- 左边 -->
+				<div style="float:left; width:14%; height:100%; text-align:center;margin-top:31px;" >
+					<i-menu ref = "iMenuEdit" :theme="dataEditMenuMess" active-name="baseMessEdit" style="width:100%;height:100%" @on-select="dataEditMenuSelect" ref = "active_name">			
+			            <menu-item name="baseMessEdit" >
+			                <Icon type="android-person" ></Icon>基本信息
+			            </menu-item>
+			             <menu-item name="interviewMessEdit" >
+			                <Icon type="android-person" ></Icon>面试信息
+			            </menu-item>			            
+				    </i-menu>
+				</div>
+				
+				<!--右边  -->
+				<div style="float:right;width:86%; height:100%; text-align:center;overflow:auto;" class = "detailRight">
+					<i-form  ref="dataEditForm" :model="curRow" label-position="right" :label-width="90" :rules="ruleEditProject">
+					<!-- 项目基本信息 -->
+					<div class="baseMessEdit">
+						<Collapse v-model="baseMessEdit">
+							<Panel name = "1">项目基本信息	
+								<div slot="content" >					
+									<Row> 
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item  prop="proj_name"> 
+												<Tag for="label_curRow_proj_name" style="height:32px;line-height:32px;font-size:14px;margin:0;">项目名称</Tag>
+												<i-input id="label_curRow_proj_name" v-model="curRow.proj_name" style="width: 200px;"></i-input>
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item  prop="proj_mgr"> 
+												<Tag  for="label_curRow_proj_mgr" style="height:32px;line-height:32px;font-size:14px;margin:0;">项目经理</Tag>
+												<i-input id="label_curRow_proj_mgr" v-model="curRow.proj_mgr" style="width: 200px;" readOnly></i-input>
+											</form-item>
+										</i-col> 					
+									</Row> 
+									<Row>
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item  prop="proj_scale"> 
+												<Tag for="label_curRow_proj_scale" style="height:32px;line-height:32px;font-size:14px;margin:0;">项目周期</Tag>
+												<i-input id="label_curRow_proj_scale" v-model="curRow.proj_scale" style="width: 200px;"></i-input>
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item  prop="start_date"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">开始时间</Tag>												
+												<Date-picker id="label_curRow_start_date" v-model="curRow.start_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+											</form-item>
+										</i-col> 
+									</Row>
+									<Row>
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item  prop="end_date"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">结束时间</Tag>
+												<Date-picker id="label_curRow_end_date" v-model="curRow.end_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item  prop="online_date"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">上线时间</Tag>
+												<Date-picker id="label_curRow_online_date" v-model="curRow.online_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+											</form-item>
+										</i-col> 
+									</Row>
+									<Row>
+										<form-item  prop="proj_state" id="state-tip">
+											<i-col span="3" style="margin:8px 4px 0 0;width:11.8%;text-align: right;">	
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">项目状态</Tag>
+											</i-col>
+											<i-col span="8" style="margin:8px 0 0 0 ;text-align: left;">																						
+												<i-select id="label_curRow_proj_state" v-model="curRow.proj_state"  style="width:200px">
+					                				<i-option value="1">需求分析</i-option>
+					                				<i-option value="2">编码实现</i-option>
+					                				<i-option value="3">测试阶段</i-option>
+					                				<i-option value="4">上线维护</i-option>
+				            					</i-select>
+											</i-col> 										
+										</form-item>											
+									</Row>									
+									<Row>
+										<form-item  prop="proj_intro"> 
+											<i-col span="3" style="text-align:right;width:11.8%">
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">项目描述</Tag>
+											</i-col>
+											<i-col span="21" style="text-align:left; width:0">	
+												<i-input type="textarea" :rows="4" v-model="curRow.proj_intro" style="margin-left: 6px;"></i-input>
+											</i-col>
+										</form-item> 													
+									</Row>			 																		
+							</div>
+							</Panel>
+							<Panel name="2">客户信息	
+								<div slot="content">								
+									<Row justify="center"> 
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item  prop="cust_name"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户名称</Tag>
+												<i-input type="text" v-model="curRow.cust_name"   @on-focus = "selectCust(index)" style="width: 200px">
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item prop="cust_nature"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户性质</Tag>
+												<i-input id="label_curRow_cust_nature" v-model="curRow.cust_nature" style="width: 200px;" readonly></i-input>
+											</form-item>
+										</i-col>																							
+									</Row> 
+									<Row>
+										<i-col span="11" style="margin:8px 0 0 0">
+											<form-item prop="cust_phone"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户电话</Tag>
+												<i-input id="label_curRow_cust_phone" v-model="curRow.cust_phone" style="width: 200px;" readonly></i-input>
+											</form-item>
+										</i-col> 					
+										<i-col span="11" style="margin:8px 0 0 0" offset="2">
+											<form-item prop="cust_addr"> 
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户地址</Tag>
+												<i-input id="label_curRow_cust_addre" v-model="curRow.cust_addr" style="width: 200px;" readonly></i-input>
+											</form-item>
+										</i-col> 
+									</Row>
+									<Row>
+										<form-item prop="cust_introduce"> 
+											<i-col span="3" style="text-align:right;width:11.8%">
+												<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">客户简介</Tag>
+											</i-col>
+											<i-col span="21" style="text-align:left; width:0">	
+												<i-input type="textarea" :rows="4" v-model="curRow.cust_introduce" readonly style="margin-left: 6px;"></i-input>
+											</i-col>
+										</form-item> 													
+									</Row>														
+								</div>
+							</Panel>
+							<Panel name="3">人员信息
+								<div slot="content" style="text-align:center">
+								<i-form :model="curUsernumber" label-position="right" :label-width="90" ref="dataEditForm">
+									<Form-item style="width: 800px;">								       		
+										<Row>
+								       		<i-col span="4">姓名</i-col>
+								       		<i-col span="4" >项目角色</i-col>
+									   		<i-col span="4">联系电话</i-col>
+								       		<i-col span="7">任务</i-col>
+								       		<i-col span="5">
+								       			<!--  增加	-->
+								       			<form-item icon="plus-round">
+								       				<i-button type="primary" shape="circle" @click="selectUserNumber(index)" icon="plus-round" ></i-button>
+								       			</form-item>				       		
+								       		</i-col>
+								    	</Row>
+								    </Form-item>
+							    	<Form-item v-for="(item, index) in dataProjectNumber" :key="item.user_id" style="width: 800px;margin-bottom:15px;">
+										<Row>
+											<i-col span="4">												
+												<i-input type="text" v-model="item.user_name" placeholder="请输入..."  style="width: 110px" readonly>
+											</i-col>
+											<i-col span="4">
+												<!-- <i-input type="text" v-model="item.role_name" placeholder="请输入..." style="width: 110px"></i-input> -->
+												<Select v-model="item.role_name" style="font-size:12px;width:110px;height:32px; text-align:right;line-height:1.5;padding: 4px 7px;border-radius: 4px;border: 1px solid #dddee1;" size="large">
+											       <Option v-for="item in dataRoles" :value="item.role_name" :key="item.role_name">{{ item.role_name }}</Option>
+											    </Select>
+												
+											</i-col>
+											<i-col span="4">
+												<i-input type="text" v-model="item.user_mobile" placeholder="请输入..." style="width: 110px" readonly></i-input>
+											</i-col>
+											<i-col span="7">
+												<!-- <i-input v-model="item.proj_task" type="textarea" style="width:180px;" :rows="1" class="desc"></i-input> -->
+												<div class="desc"><i-input v-model="item.proj_task"  type="textarea" :rows="1" max-width="180px"></i-input></div>
+											</i-col>
+											<!-- 	       删除                  -->
+											<i-col span="5">
+												<form-item icon="plus-round">
+													<i-button type="primary" shape="circle" @click="handleRemove(index, 'ProjectNumber')" icon="minus-round"></i-button>
+												</form-item>
+											</i-col>
+										</Row>
+							    	</Form-item>
+							    </i-form>
+								</div>
+							</Panel>							
+						</Collapse>	
+					</div>
+					<!-- 面试信息 -->
+					<div class="interviewMessEdit" style="display:none">
+						<Collapse v-model="interviewMessEdit">
+							<Panel name="1">面试信息
+									<div slot="content">	
+									 <i-form :model="curQuestion" :label-width="90" style="width: 800px" ref="dataEditForm">								       																	
+								            <Row>
+								            	<i-col span="7" style="margin:8px 0 0 0">
+													<form-item> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">录入问题</Tag>									
+								       					<i-button type="primary" shape="circle" @click="handleAdd('Question')" icon="plus-round" ></i-button>			       					
+													</form-item>			         
+												</i-col> 				               
+								            </Row>
+									        <Form-item v-for="(item,index) in dataQuestion">
+									        <Row> 
+												<i-col span="12" style="margin:8px 0 0 0">
+													<form-item  prop="inter_date"> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">面试时间</Tag>
+														<Date-picker v-model="item.inter_date"  type="date" format="yyyy-MM-dd"  style="width: 200px;"></Date-picker>
+													</form-item>
+												</i-col> 					
+												<i-col span="12" style="margin:8px 0 0 0">								
+													<form-item  prop="inter_addr"> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">面试地址</Tag>
+														<i-input v-model="item.inter_addr" style="width: 200px;"></i-input>
+													</form-item>
+												</i-col> 					
+											</Row>	
+											<Row> 
+												<i-col span="12" style="margin:8px 0 0 0">
+													<form-item  prop="interviewer"> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">面试官</Tag>
+														<i-input v-model="item.interviewer" style="width: 200px;"></i-input>
+													</form-item>
+												</i-col> 					
+												<i-col span="12" style="margin:8px 0 0 0">								
+													<form-item  prop="interviewee"> 
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">面试人</Tag>
+														<i-input v-model="item.interviewee" style="width: 200px;"></i-input>
+													</form-item>
+												</i-col> 					
+											</Row>	  
+											<Row>												
+												<form-item  prop="question_direction"> 
+													<i-col span="3" style="width:14.5%">
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">问题方向</Tag>
+													</i-col>
+													<i-col span="21" style="width:0">	
+														<i-input type="textarea" :rows="4" v-model="item.question_direction"></i-input>
+													</i-col>
+												</form-item>
+											</Row>
+								            <Row>
+								            	<form-item  prop="inter_question"> 
+													<i-col span="3" style="width:14.5%">
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">问题</Tag>
+													</i-col>
+													<i-col span="21" style="width:0">	
+														<i-input type="textarea" :rows="4" v-model="item.inter_question"></i-input>
+													</i-col>
+												</form-item>								                				               
+								            </Row>
+								            <Row>
+								            	<form-item  prop="inter_answer"> 
+													<i-col span="3" style="width:14.5%">
+														<Tag style="height:32px;line-height:32px;font-size:14px;margin:0;">答案</Tag>
+													</i-col>
+													<i-col span="21" style="width:0">	
+														<i-input type="textarea" :rows="4" v-model="item.inter_answer"></i-input>
+													</i-col>
+												</form-item>								                
+								                <i-col span="2">
+													<form-item icon="plus-round">
+														<i-button type="primary" shape="circle" @click="handleRemove(index, 'Question')" icon="minus-round"></i-button>
+													</form-item>
+												</i-col>		                
+								            </Row>		       
+									      </Form-item>
+									    </i-form>
+									</div>
+								</Panel>
+						</Collapse>						
+					</div>
+				</i-form>
+				</div>	
+			</div>
+			
+			<div slot="footer">
+	           	<i-button type="primary" size="large"  @click="editDataCancel" shape="circle">取消</i-button>
+	           	<i-button type="primary" size="large"  @click="editDataSave" shape="circle">确定</i-button>
+        	</div>				
+		</Modal>
+		
+		
+		
+		<!-- 项目详情 -->
+		<Modal v-model="dataDetail" title="项目详情" :mask-closable="false" :closable="false"
+			@on-ok="detailDataCancel" @on-cancel="detailDataCancel" width= "80%" :styles="{top: '0px'}"> 
+			<div class = "dataAddStyle">
+				<!-- 左边 -->
+				<div style="float:left; width:14%; height:100%; text-align:center;margin-top:31px;" >
+					<i-menu ref = "iMenuDetail" :theme="dataDetailMenuMess" active-name="baseMessDetail" style="width:100%;height:100%" @on-select="dataDetailMenuSelect" ref = "active_name">			
+			            <menu-item name="baseMessDetail" >
+			                <Icon type="android-person" ></Icon>基本信息
+			            </menu-item>
+			             <menu-item name="interviewMessDetail" >
+			                <Icon type="android-person" ></Icon>面试信息
+			            </menu-item>
+			            <menu-item name="studyPlanMessDetail" >
+			                <Icon type="android-person" ></Icon>学习计划
+			            </menu-item>			            
+				    </i-menu>
+				</div>
+				
+				<!--右边  -->
+				<div style="float:right;width:86%; height:100%; text-align:center;overflow:auto;" class = "detailRight">
+					<div class="baseMessDetail">	
+						<Collapse v-model="collapseDetail1">
+							<Panel name = "1">工程信息
+							<div slot="content"  style="width:90%;min-height:100px; line-height: 40px;font-size: 13px;" >
+									<div id="right" style="min-height:100%;">	
+											 <div style = "text-align:center">
+											 <Row  type="flex" justify="center" class="code-row-bg">
+											 	<i-Col span="3">
+													<Tag>项目名称</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.proj_name}}</span>
+												</i-Col>
+												<i-Col span="3" offset="5">
+													<Tag>项目经理</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.proj_mgr}}</span>
+												</i-Col>
+											</Row>
+											 <Row  type="flex" justify="center" class="code-row-bg">											 	
+												<i-Col span="3">
+													<Tag>项目周期</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.proj_scale}}(月)</span>
+												</i-Col>
+												<i-Col span="3" offset="5">
+													<Tag>项目状态</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.proj_state}}</span>
+												</i-Col>														
+											</Row>
+											<Row  type="flex" justify="center" class="code-row-bg">
+											 	<i-Col span="3">
+													<Tag>开始时间</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.start_date}}</span>
+												</i-Col>
+												<i-Col span="3"  offset="5">
+													<Tag>上线时间</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.online_date}}</span>
+												</i-Col>
+											</Row>
+											<Row  type="flex" justify="center" class="code-row-bg">
+											 	<i-Col span="3">
+													<Tag>项目描述</Tag>
+												</i-Col>										
+												<i-Col span="14">
+													<i-input type="textarea" :rows="4" readonly v-model="curRow.proj_intro">
+												</i-Col>										
+											</Row>
+											</div>											
+									</div>
+								</div>	
+							</Panel>
+																		
+							<Panel name = "2">客户信息
+								<div slot="content"  style="width:90%;min-height:100px; line-height: 40px;font-size: 13px;" >
+									<div id="right" style="min-height:100%;">	
+											 <div style = "text-align:center">
+											 <Row  type="flex" justify="center" class="code-row-bg">
+											 	<i-Col span="3">
+													<Tag>客户名称</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.cust_name}}</span>
+												</i-Col>
+												<i-Col span="3"  offset="5">
+													<Tag>客户性质</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.cust_nature}}</span>
+												</i-Col>
+											</Row>
+											 <Row  type="flex" justify="center" class="code-row-bg">
+											 	<i-Col span="3">
+													<Tag>客户电话</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.cust_phone}}</span>
+												</i-Col>
+												<i-Col span="3"  offset="5">
+													<Tag>客户地址</Tag>
+												</i-Col>
+												<i-Col span="3">
+													<span class="cust">{{curRow.cust_addr}}</span>
+												</i-Col>
+											</Row>
+											<Row  type="flex" justify="center" class="code-row-bg">
+											 	<i-Col span="3">
+													<Tag>客户简介</Tag>
+												</i-Col>										
+												<i-Col span="14">
+													<i-input type="textarea" :rows="4" readonly v-model="curRow.cust_introduce">
+												</i-Col>
+											</Row>
+											</div>											
+									</div>
+								</div>	
+							</Panel>
+
+							<Panel name = "3" >人员信息
+								<div slot="content"><i-table :data='dataProjectNumber' :columns="columnUsernumber" ref="eduExperienceDate"  border highlight-row stripe > </i-table></div>
+							</Panel>
+						</Collapse>						
+					</div>
+					
+					<div class="interviewMessDetail" style="display:none">
+						<Collapse v-model="collapseDetail2">
+							<Panel name = "1">面试信息
+								<div slot="content" style="width:100%;min-height:100px; line-height: 40px;font-size: 13px;text-align:left">									
+									 <div id="cards">
+							            <div v-for="(item, index) in dataQuestion">
+							         	<card :padding="20"> 
+							            	<a>
+								                <span style="font-size: 20px;font-weight:bold;color:black">问题 {{index+1}}</span>
+								                <span>面试官：{{item.interviewer}}</span> 								                
+								                <span>面试时间：{{item.inter_date}}</span>	
+								                <span>面试地点：{{item.inter_addr}}</span>
+								                <span>面试人：{{item.interviewee}}</span>	
+								                <div class="dot">问题方向：{{item.question_direction}}</div>								                
+								                <div class="dot">问题：{{item.inter_question}}</div>
+								                <div class="dot">答案：{{item.inter_answer}}</div>
+							                </a>								                				                
+							             </card>
+							           </div>								      
+									</div>
+									<!-- 分页部分 -->
+									<page @on-page-size-change="handleInterSizeChange"
+										:page-size="inter_page.getPageRowCount()" @on-change="handleInterCurrentChange"
+										:current="inter_page.getPageNumber()" show-total show-elevator show-sizer
+										:total="inter_page.totalCount" :page-size-opts="[5, 10, 15, 20]" > </page>
+									</div>
+								</Panel>
+							</Collapse>			
+						</div>
+						
+						<div class="studyPlanMessDetail" style="display:none">
+							<Collapse v-model="collapseDetail3">
+								<Panel name = "1">学习计划
+								   <div slot="content" style="width:100%;min-height:100px; line-height: 40px;font-size: 13px;text-align:left">									
+									 <div id="cards">
+							            <div v-for="(item, index) in dataStudyPlan">
+							         	<card :padding="20"> 
+							            	<a>
+								                <span style="font-size: 20px;font-weight:bold;color:black">{{item.stu_name}}</span>
+								                <!-- <span>指派人：{{item.create_user}}</span>  -->								                
+								                <span>学习成员：{{item.users_name}}</span>
+								                <span>开始时间：{{item.start_date}}</span>
+								                <span>结束时间：{{item.end_date}}</span>	
+								                <div class="dot">任务描述：{{item.stu_details}}</div>								                								                		    	
+							                </a>
+							                
+							                <button-group class="button_group">
+							                    <i-button type="text" @click="studyNumberDetail(item)" >
+								                	 <Icon type="eye" size="16" style="color:#9ea7b4"></Icon>
+								                	学习进度详情
+								                </i-button>
+                 							</button-group>								                				                
+							             </card>
+							           </div>								      
+									</div>
+									<!-- 分页部分 -->
+									<page @on-page-size-change="handleInterSizeChange"
+										:page-size="plan_page.getPageRowCount()" @on-change="handleInterCurrentChange"
+										:current="plan_page.getPageNumber()" show-total show-elevator show-sizer
+										:total="plan_page.totalCount" :page-size-opts="[5, 10, 15, 20]" > </page>
+									</div>
+								</Panel>
+							</Collapse>
+						</div>
+						
+						<div class="studyPlanNumberDetail" style="display:none">
+						<div id="mainContainer" v-cloak>
+					        <div>
+					        <card :bordered="false" :key="">
+					            <p slot="title">
+					                <Icon type="social-vimeo-outline" size="20"></Icon>
+					                <font size="4">计划详情</font>
+					            </p>
+					          <row style="text-align:left">
+					              <i-col span="3"><h3>计划名称:</h3></i-col>
+					              <i-col span="21">{{curStudyPlan.stu_name}}</i-col>
+					          </row>
+					           <br/>
+					           <row style="text-align:left">
+					               <i-col span="3"><h3>计划时间:</h3></i-col>
+					               <i-col span="4">{{curStudyPlan.start_date}}</i-col>
+					               <i-col span="4"> —— </i-col>
+					               <i-col span="3">{{curStudyPlan.end_date}}</i-col>
+					           </row>
+					          <br/>					         
+					          <br/>
+					          <row style="text-align:left">
+					              <i-col span="3"><h3>计划描述:</h3></i-col>					       
+					              <i-col span="20">
+					                <i-input v-model="curStudyPlan.stu_details" type="textarea" :autosize="{minRows: 3,maxRows: 5}" :readonly="true"></i-input>
+					              </i-col>
+					            <!--   <i-col span="1">
+					              	<a @click="dataDetailMenuSelect('studyPlanMessDetail')">返回</a>
+					              </i-col> -->
+					          </row>
+					        </card>
+					        </div>
+					        <div>
+								<card :bordered="false">
+							        <p slot="title">
+							            <Icon type="ios-list-outline" size="20"></Icon>
+							            <font size="4">学习成员进度列表</font>
+							        </p>							        
+						                <card v-for="item in dataPlanDetail" :key=""> 
+						                <p slot="title">
+						                    <span style=" font-size: 15px;font-weight: bold;color:black">
+							                {{item.user_name}}
+							                </span>
+							               <!--  <span class="createDate">{{ }}</span> -->
+						                </p>
+						                <row>
+								               <i-col span="4" style="font-weight: bold;">计划名称</i-col>
+								               <i-col span="2" style="font-weight: bold;">所需时间</i-col>
+								               <i-col span="10" style="font-weight: bold;">学习详情</i-col>
+								               <i-col span="8" style="font-weight: bold;">学习进度</i-col>
+								        </row>
+						                <div v-for="data in item.items">
+						                	<!-- <p class="content">{{data.stu_detail}}</p> -->
+						                	<row>
+								               <i-col span="4">{{data.detail_name}}</i-col>
+								               <i-col span="2">{{data.stu_time}}天</i-col>
+								               <i-col span="10">{{data.stu_detail}}</i-col>
+								               <i-col span="8"> <i-progress :percent="data.stu_progress" status="active"></i-progress></i-col>
+								           </row>
+						                </div>						            
+						                </card>
+						        	</card>
+						        </div>
+					      </div>
+					    </div>					    
+					</div>
+				</div>		
+		</Modal>
+					
+		<!-- 客户选择 -->
+		<Modal v-model="custGet" title="客户选择" :mask-closable="false"
+				@on-ok="custGetOk" @on-cancel="custGetCancel" width= "55%" :styles="{top: '70px'}"> 
+			<i-table :data='dataCusts' :columns="columnCust" ref="selectCust" height="300"
+				border highlight-row @on-current-change="selectOneCust" @on-row-dblclick = "custGetOk"> </i-table>
+		</Modal>
+		
+		<!-- 项目成员选择 -->
+		<Modal v-model="userNumberGet" title="项目成员选择" :mask-closable="false"
+				@on-ok="userNumberGetOk" @on-cancel="userNumberGetCancel" width= "55%" :styles="{top: '70px'}"> 
+			<i-table :data='dataUsers' :columns="columnUser" ref="selectUserNumber" height="300"
+				border highlight-row @on-current-change="selectOneUserNumber" @on-row-dblclick = "userNumberGetOk"> </i-table>
+		</Modal>
+				
+	</div>
+</body>
+<script src="../../js/md5.js"></script>
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/jquery-migrate.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="projectList.js"></script>
+</html>

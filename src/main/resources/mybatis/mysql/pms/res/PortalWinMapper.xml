@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.portal.win">
+	<resultMap id="portalWinResultMap" type="com.lhq.pms.data.Row">
+		<id column="win_code" property="win_code" jdbcType="VARCHAR" />
+		<result column="win_name" property="win_name" jdbcType="VARCHAR" />
+		<result column="win_title" property="win_title" jdbcType="VARCHAR" />
+		<result column="win_icon" property="win_icon" jdbcType="VARCHAR" />
+		<result column="col_span" property="col_span" jdbcType="INTEGER" />
+		<result column="row_span" property="row_span" jdbcType="INTEGER" />
+		<result column="win_url" property="win_url" jdbcType="VARCHAR" />
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="portalWinListResultMap" type="com.lhq.pms.data.Row">
+		<id column="win_code" property="win_code" jdbcType="VARCHAR" />
+		<result column="win_name" property="win_name" jdbcType="VARCHAR" />
+		<result column="win_title" property="win_title" jdbcType="VARCHAR" />
+		<result column="win_icon" property="win_icon" jdbcType="VARCHAR" />
+		<result column="col_span" property="col_span" jdbcType="INTEGER" />
+		<result column="row_span" property="row_span" jdbcType="INTEGER" />
+		<result column="win_url" property="win_url" jdbcType="VARCHAR" />
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="is_del" property="is_del" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<resultMap id="portalWinRoleResultMap" type="com.lhq.pms.data.Row">
+		<id column="win_role_id" property="win_role_id" jdbcType="VARCHAR" />
+		<result column="win_code" property="win_code" jdbcType="VARCHAR" />
+		<result column="role_code" property="role_code" jdbcType="VARCHAR" />
+		<result column="role_name" property="role_name" jdbcType="VARCHAR" />
+		<result column="line_no" property="line_no" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap id="portalWinRoleListResultMap" type="com.lhq.pms.data.Row">
+		<id column="win_role_id" property="win_role_id" jdbcType="VARCHAR" />
+		<result column="win_code" property="win_code" jdbcType="VARCHAR" />
+		<result column="role_code" property="role_code" jdbcType="VARCHAR" />
+		<result column="role_name" property="role_name" jdbcType="VARCHAR" />
+		<result column="line_no" property="line_no" jdbcType="INTEGER" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<resultMap id="userPortalWinRoleResultMap" type="com.lhq.pms.data.Row">
+		<id column="role_code" property="role_code" jdbcType="VARCHAR" />
+		<collection property="wins" javaType="ArrayList" ofType="map">
+			<id column="win_role_id" property="win_role_id" jdbcType="VARCHAR" />
+			<result column="win_code" property="win_code" jdbcType="VARCHAR" />
+			<result column="line_no" property="line_no" jdbcType="INTEGER" />
+			<result column="win_title" property="win_title" jdbcType="VARCHAR" />
+			<result column="win_icon" property="win_icon" jdbcType="VARCHAR" />
+			<result column="col_span" property="col_span" jdbcType="INTEGER" />
+			<result column="row_span" property="row_span" jdbcType="INTEGER" />
+			<result column="win_url" property="win_url" jdbcType="VARCHAR" />
+			<result column="is_show" property="is_show" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+
+	<!-- 返回结果对象定义 -->
+	<resultMap id="portalUserCacheResultMap" type="com.lhq.pms.data.Row">
+		<id column="role_code" property="role_code" jdbcType="VARCHAR" />
+		<collection property="users" javaType="ArrayList" ofType="map">
+			<id column="user_code" property="user_code" jdbcType="VARCHAR" />
+			<collection property="wins" javaType="ArrayList" ofType="map">
+				<id column="pwu_id" property="pwu_id" jdbcType="VARCHAR" />
+				<result column="win_role_id" property="win_role_id" jdbcType="VARCHAR" />
+				<result column="win_code" property="win_code" jdbcType="VARCHAR" />
+				<result column="line_no" property="line_no" jdbcType="INTEGER" />
+				<result column="win_title" property="win_title" jdbcType="VARCHAR" />
+				<result column="win_icon" property="win_icon" jdbcType="VARCHAR" />
+				<result column="col_span" property="col_span" jdbcType="INTEGER" />
+				<result column="row_span" property="row_span" jdbcType="INTEGER" />
+				<result column="win_url" property="win_url" jdbcType="VARCHAR" />
+				<result column="is_show" property="is_show" jdbcType="VARCHAR" />
+				<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+			</collection>
+		</collection>
+	</resultMap>
+
+	<!-- 返回结果对象定义 -->
+	<resultMap id="portalRoleCacheResultMap" type="com.lhq.pms.data.Row">
+		<id column="role_code" property="role_code" jdbcType="VARCHAR" />
+		<collection property="items" javaType="ArrayList" ofType="map">
+			<id column="win_role_id" property="win_role_id" jdbcType="VARCHAR" />
+			<result column="win_code" property="win_code" jdbcType="VARCHAR" />
+			<result column="line_no" property="line_no" jdbcType="INTEGER" />
+			<result column="win_title" property="win_title" jdbcType="VARCHAR" />
+			<result column="win_icon" property="win_icon" jdbcType="VARCHAR" />
+			<result column="col_span" property="col_span" jdbcType="INTEGER" />
+			<result column="row_span" property="row_span" jdbcType="INTEGER" />
+			<result column="win_url" property="win_url" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+
+	<sql id="portal_win_column_list">
+		win_code,win_name,win_title,win_icon,col_span,row_span,win_url,system_code
+	</sql>
+	<sql id="portal_win_list_column_List">
+		win_code,win_name,win_title,win_icon,col_span,row_span,win_url,system_code,
+		create_date,create_user,update_date,update_user
+	</sql>
+
+	<!-- 查询窗体配置 -->
+	<select id="queryPortalWin" resultMap="portalWinListResultMap"
+		parameterType="map">
+		select
+		<include refid="portal_win_list_column_List" />
+		,
+		(case when (select count(*) from sdp_portal_win_role mr where
+		mr.win_code=sp.win_code)>0 then 'N' else 'Y' end) is_del
+		from
+		sdp_portal_win sp
+		<where>
+			<if test="win_name!=null">
+				(win_name like
+				CONCAT('%',#{win_name,jdbcType=VARCHAR},'%') or win_code like
+				CONCAT('%',#{win_code,jdbcType=VARCHAR},'%'))
+			</if>
+		</where>
+	</select>
+
+	<!-- 查询窗体授权配置 -->
+	<select id="queryPortalWinRole" resultMap="portalWinRoleListResultMap"
+		parameterType="map">
+		select
+		spr.win_role_id,spr.win_code,spr.role_code,r.role_name,spr.line_no
+		from sdp_portal_win_role spr left join sdp_role r on
+		spr.role_code=r.role_code
+		where
+		spr.win_code=#{win_code,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 查询角色窗体 -->
+	<select id="queryRolePortalWinByRoleCodes" resultMap="userPortalWinRoleResultMap"
+		parameterType="java.util.List">
+		select
+		pwr.win_role_id,pwr.win_code,pwr.role_code,pwr.line_no,
+		pw.win_title,pw.win_icon,pw.col_span,pw.row_span,pw.win_url,pw.system_code,'Y'
+		is_show
+		from
+		sdp_portal_win_role pwr inner join sdp_portal_win pw on
+		pwr.win_code=pw.win_code inner join sdp_role r on
+		pwr.role_code=r.role_code
+		where r.role_sts='Y' and
+		pwr.role_code in
+		<foreach collection="list" item="code" index="index" open="("
+			close=")" separator=",">
+			#{code}
+		</foreach>
+		order by pwr.line_no asc
+	</select>
+
+
+	<!-- 查询角色窗体 -->
+	<select id="queryAllUserPortalWin" resultMap="portalUserCacheResultMap">
+		select
+		wu.pwu_id,wu.win_role_id,wu.win_code,wu.role_code,wu.user_code,wu.line_no,
+		wu.win_title,wu.win_icon,wu.col_span,wu.row_span,wu.win_url,wu.system_code,wu.is_show
+		from
+		sdp_portal_win_user wu inner join sdp_role r on
+		wu.role_code=r.role_code
+		where r.role_sts='Y'
+		order by
+		wu.user_code,wu.line_no asc
+	</select>
+
+	<!-- 查询窗体配置更具编码集合 -->
+	<select id="queryPortalWinByCodes" resultMap="portalWinResultMap"
+		parameterType="java.util.List">
+		select
+		<include refid="portal_win_column_list" />
+		from
+		sdp_portal_win sp where
+		sp.win_code in
+		<foreach collection="list" item="code" index="index" open="("
+			close=")" separator=",">
+			#{code}
+		</foreach>
+	</select>
+
+	<!-- 插入窗体 -->
+	<insert id="addPortalWin" parameterType="map">
+		insert into
+		sdp_portal_win(win_code,win_name,win_title,win_icon,col_span,row_span,win_url,system_code,
+		create_date,create_user)
+		VALUES(#{$uuid,jdbcType=VARCHAR},#{win_name,jdbcType=VARCHAR},#{win_title,jdbcType=VARCHAR},#{win_icon
+		,jdbcType=VARCHAR},#{col_span,jdbcType=CHAR},#{row_span,jdbcType=CHAR},#{win_url,jdbcType=VARCHAR},#{system_code,jdbcType=VARCHAR},
+		now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 修改窗体 -->
+	<update id="updatePortalWin" parameterType="map">
+		update sdp_portal_win
+		<set>
+			<if test="win_name!=null">
+				win_name=#{win_name,jdbcType=VARCHAR},
+			</if>
+			<if test="win_title!=null">
+				win_title=#{win_title,jdbcType=VARCHAR},
+			</if>
+			<if test="win_icon!=null">
+				win_icon=#{win_icon,jdbcType=VARCHAR},
+			</if>
+			<if test="col_span!=null">
+				col_span=#{col_span,jdbcType=CHAR},
+			</if>
+			<if test="row_span!=null">
+				row_span=#{row_span,jdbcType=CHAR},
+			</if>
+			<if test="win_url!=null">
+				win_url=#{win_url,jdbcType=VARCHAR},
+			</if>
+			<if test="system_code!=null">
+				system_code=#{system_code,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where win_code=#{win_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 删除窗体配置 -->
+	<delete id="delPortalWin" parameterType="map">
+		delete from
+		sdp_portal_win
+		where
+		win_code=#{win_code,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 插入窗体授权 -->
+	<insert id="addPortalWinRole" parameterType="map">
+		insert into
+		sdp_portal_win_role(win_role_id,win_code,role_code,line_no,create_date,create_user)
+		VALUES(#{$uuid,jdbcType=VARCHAR},#{win_code,jdbcType=VARCHAR},#{role_code,jdbcType=VARCHAR},#{line_no
+		,jdbcType=CHAR},now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 修改窗体授权 -->
+	<update id="updatePortalWinRole" parameterType="map">
+		update
+		sdp_portal_win_role set line_no=#{line_no
+		,jdbcType=CHAR},update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		where
+		win_role_id=#{win_role_id,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 删除窗体授权 -->
+	<delete id="delPortalWinRole" parameterType="map">
+		delete from
+		sdp_portal_win_role
+		where
+		win_role_id=#{win_role_id,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 新增角色时，批量插入用户窗体 -->
+	<insert id="addPortalWinUserByRole" parameterType="map">
+		insert into
+		sdp_portal_win_user(pwu_id,win_code,role_code,user_code,line_no,col_span,row_span,win_url,win_title
+		,win_icon,win_role_id,system_code,create_date,create_user)
+		select
+		uuid(),pw.win_code,pwr.role_code,#{user_code,jdbcType=VARCHAR},pwr.line_no,pw.col_span,pw.row_span,
+		pw.win_url,pw.win_title,pw.win_icon,pwr.win_role_id,pw.system_code,now(),#{$user_code,jdbcType=VARCHAR}
+		from sdp_portal_win pw inner join
+		sdp_portal_win_role pwr on
+		pw.win_code=pwr.win_code
+		where
+		pwr.role_code in
+		<foreach collection="role_code" item="code" index="index"
+			open="(" close=")" separator=",">
+			#{code}
+		</foreach>
+	</insert>
+
+	<!-- 新增角色窗体权限时 -->
+	<insert id="addPortalWinUserByWin" parameterType="map">
+		insert into
+		sdp_portal_win_user(pwu_id,win_code,role_code,user_code,line_no,col_span,row_span,win_url,win_title
+		,win_icon,win_role_id,system_code,create_date,create_user)
+		select
+		uuid(),pw.win_code,pwr.role_code,ur.user_code,pwr.line_no,pw.col_span,pw.row_span,
+		pw.win_url,pw.win_title,pw.win_icon,pwr.win_role_id,pw.system_code,now(),#{$user_code,jdbcType=VARCHAR}
+		from sdp_portal_win pw inner join
+		sdp_portal_win_role pwr on
+		pw.win_code=pwr.win_code
+		inner join sdp_user_role ur on
+		pwr.role_code=ur.role_code
+		where
+		pwr.role_code=#{role_code,jdbcType=VARCHAR} and
+		pwr.win_code=#{win_code,jdbcType=VARCHAR}
+	</insert>
+
+	<!-- 用户删除角色时，移除角色窗体授权 -->
+	<delete id="delPortalWinByUserRole" parameterType="map">
+		delete from
+		sdp_portal_win_user
+		where
+		user_code=#{user_code,jdbcType=VARCHAR}
+		and
+		role_code in
+		<foreach collection="role_code" item="code" index="index"
+			open="(" close=")" separator=",">
+			#{code}
+		</foreach>
+	</delete>
+
+	<!-- 窗体删除角色时，移除角色窗体授权 -->
+	<delete id="delPortalWinByWinRole" parameterType="map">
+		delete from
+		sdp_portal_win_user
+		where
+		win_role_id in
+		<foreach collection="win_role_id" item="code" index="index"
+			open="(" close=")" separator=",">
+			#{code}
+		</foreach>
+	</delete>
+
+	<!-- 修改用户窗体信息 -->
+	<update id="updateUserWinInfoByWinRoleId" parameterType="map">
+		update
+		sdp_portal_win_user
+		<set>
+			<if test="col_span!=null">col_span=#{col_span,jdbcType=CHAR},</if>
+			<if test="row_span!=null">row_span=#{row_span,jdbcType=CHAR},</if>
+			<if test="win_url!=null">win_url=#{win_url,jdbcType=CHAR},</if>
+			<if test="win_title!=null">win_title=#{win_title,jdbcType=CHAR},</if>
+			<if test="win_icon!=null">win_icon=#{win_icon,jdbcType=CHAR},</if>
+			<if test="line_no!=null">line_no=#{line_no,jdbcType=CHAR},</if>
+			<if test="system_code!=null">line_no=#{system_code,jdbcType=CHAR},</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where
+		win_role_id=#{win_role_id,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 修改用户窗体信息 -->
+	<update id="updateUserWinInfo" parameterType="map">
+		update
+		sdp_portal_win_user
+		<set>
+			<if test="col_span!=null">col_span=#{col_span,jdbcType=CHAR},</if>
+			<if test="row_span!=null">row_span=#{row_span,jdbcType=CHAR},</if>
+			<if test="win_title!=null">win_title=#{win_title,jdbcType=CHAR},</if>
+			<if test="win_icon!=null">win_icon=#{win_icon,jdbcType=CHAR},</if>
+			<if test="line_no!=null">line_no=#{line_no,jdbcType=CHAR},</if>
+			<if test="is_show!=null">is_show=#{is_show,jdbcType=CHAR},</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where
+		pwu_id=#{pwu_id,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 查询角色窗体 -->
+	<select id="queryAllRolePortalWin" resultMap="portalRoleCacheResultMap">
+		select
+		pwr.win_role_id,pwr.win_code,pwr.role_code,r.role_name,pwr.line_no,
+		pw.win_title,pw.win_icon,pw.col_span,pw.row_span,pw.win_url,pw.system_code
+		from
+		sdp_portal_win_role pwr inner join sdp_portal_win pw on
+		pwr.win_code=pw.win_code
+		inner join sdp_role r on
+		pwr.role_code=r.role_code inner join sdp_user_role ur on
+		ur.role_code=r.role_code
+		order by pwr.role_code,pwr.line_no asc
+	</select>
+
+	<!-- #查询选中角色窗体 -->
+	<select id="queryRolePortalWin" parameterType="map"
+		resultType="com.lhq.pms.data.Row">
+		select
+		pw.win_code,pw.win_name,pw.win_title,pw.win_url,pwr.line_no,pwr.win_role_id
+		from sdp_portal_win pw
+		left join sdp_portal_win_role pwr on
+		pw.win_code=pwr.win_code
+		where
+		pwr.role_code=#{role_code,jdbcType=VARCHAR}
+	</select>
+
+
+	<!--#查询当前角色未授权窗体 -->
+	<select id="queryRoleNotExistWin" parameterType="map"
+		resultType="com.lhq.pms.data.Row">
+		select
+		win_code,win_name,win_title,win_url from sdp_portal_win pw
+		where
+		not
+		exists(select 1 from
+		sdp_portal_win_role pwr where
+		pwr.win_code=pw.win_code
+		and
+		pwr.role_code=#{role_code,jdbcType=CHAR})
+		<if test="role_name!=null">
+			and (pw.win_code like
+			CONCAT('%',#{win_name,jdbcType=CHAR},'%')
+			or pw.win_name like
+			CONCAT('%',#{win_name,jdbcType=CHAR},'%'))
+		</if>
+	</select>
+
+	<!-- #删除选中角色窗体 -->
+	<delete id="delPorWinRole" parameterType="map">
+		delete from sdp_portal_win_role where
+		win_role_id in
+		<foreach collection="win_role_id" item="win" index="index"
+			open="(" close=")" separator=",">
+			#{win}
+		</foreach>
+	</delete>
+
+	<!-- 查询用户窗体配置 -->
+	<select id="queryUserPortalWins" parameterType="map"
+		resultType="com.lhq.pms.data.Row">
+		select
+		pwu_id,win_code,line_no,role_code,user_code,win_role_id,
+		win_title,win_icon,col_span,row_span,is_show
+		from
+		sdp_portal_win_user
+		where
+		user_code=#{$user_code,jdbcType=VARCHAR}
+		order by line_no asc
+	</select>
+	
+	<!-- 角色删除用户时，移除角色窗体授权 -->
+	<delete id="delPortalWinByRoleUser" parameterType="map">
+		delete from
+		sdp_portal_win_user
+		where
+		role_code=#{role_code,jdbcType=VARCHAR}
+		and
+		user_code in
+		<foreach collection="user_code" item="user" index="index"
+			open="(" close=")" separator=",">
+			#{user}
+		</foreach>
+	</delete>
+	
+	<!-- 新增角色下用户时，批量插入用户窗体
+		可以再select中使用foreach，有些版本不支持外部foreach
+		<foreach collection="user_codes" item="user_code" separator="UNION ALL">
+	 -->
+	<insert id="addPortalWinRoleOfUser" parameterType="map">
+		<foreach collection="user_codes" item="user_code" index="index"  separator=";">
+			insert into
+			sdp_portal_win_user(pwu_id,win_code,role_code,user_code,line_no,col_span,row_span,win_url,win_title
+			,win_icon,win_role_id,system_code,create_date,create_user)
+			select
+			uuid(),pw.win_code,pwr.role_code,#{user_code,jdbcType=VARCHAR},pwr.line_no,pw.col_span,pw.row_span,
+			pw.win_url,pw.win_title,pw.win_icon,pwr.win_role_id,pw.system_code,now(),#{$user_code,jdbcType=VARCHAR}
+			from sdp_portal_win pw inner join
+			sdp_portal_win_role pwr on
+			pw.win_code=pwr.win_code
+			where pwr.role_code = #{role_code,jdbcType=VARCHAR}
+		</foreach>
+	</insert>
+</mapper>

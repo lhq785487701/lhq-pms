@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<meta name="renderer" content="webkit|ie-comp|ie-stand"/>
+	<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+	<meta http-equiv="Cache-Control" content="no-siteapp" />
+	<meta name="description" content="sdp"/>
+	<meta name="keywords" content="SDP"/>
+	<title>笔记详情</title>
+
+	<link rel="stylesheet" href="../../../js/jquery/layer/skin/default/layer.css"/>
+	<link rel="stylesheet" href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+	<link rel="stylesheet" href="../../../css/fonts/awesome/font-awesome.min.css" />
+	<link rel="stylesheet" href="../../../css/iview.css"/>
+	<link rel="stylesheet" type="text/css" href="noteDetail.css" media="screen" />
+</head>
+
+<body id="top">
+<div id="layout_wrapper" >
+<div id="layout_wrapper2">
+<div id="layout_wrapper3">
+<div id="layout_wrapper4">
+<div id="mainContainer" v-cloak>
+<!-- 大标题 -->
+	<div id="header_wrapper">
+		<div id="header">
+			<div id="site_title">
+				<h1><a href="#">E享平台</a></h1>
+				<h2>超越，本应如此</h2>
+			</div>
+		</div>
+	</div>
+<!-- 导航 -->
+	<div id="navigation">
+		<div id="nav">
+			<ul class="tabbed">
+				<li><a href="../note/myNote.html" target="_blank">我的笔记</a></li>
+				<li class="current_page_item"><a href="../note/noteShare.html" target="_blank">笔记分享</a></li>
+				<li><a href="../note/noteCollect.html" target="_blank">笔记收藏</a></li>
+				<li><a href="../note/stuPlan.html" target="_blank">学习计划</a></li>
+				<li><a href="../createNote/createNote.html" target="_blank">创建笔记</a></li>
+			</ul>
+			<div class="clearer">&nbsp;</div>
+		</div>
+
+	</div>
+
+
+<!-- 正文内容 -->
+	<div id="main_wrapper"  v-for="data in datas">
+		<div id="main">
+		<!-- 正文左侧主体内容 -->
+			<div class="left" id="content_wrapper">
+				<div id="content">
+					<div class="post">
+
+						<div class="post_title">
+							<h1>{{data.note_title}}</h1>
+							<i-button @click="cancelCollect()" type="ghost" style="float:right" v-if="ifcollect"> 
+								<icon type="ios-heart"></icon> 
+								<span >取消收藏<span/>
+							</i-button>
+							<i-button @click="collect()" type="ghost" style="float:right" v-else> 
+								<icon type="ios-heart"></icon> 
+								<span >收藏<span/>
+							</i-button>
+							
+						</div>
+						
+						<div>综合评分：
+						    <Rate class="score" show-text disabled allow-half v-model="data.note_score">
+						    	<span style="color: #f5a623">{{data.note_score}}分</span>
+						    </Rate>
+						</div>	
+						<div class="post_date">分享于 {{ data.note_share_date}}&nbsp;&nbsp;&nbsp;&nbsp;作者： <a href="#">{{data.user_name}}</a></div>
+						
+						<!-- 文章内容 -->
+						<div class="post_body">	<p>{{data.note_text}}</p></div>
+						
+						<!-- 文章标签 -->
+						<div class="post_meta">
+							类型： <a href="#">java</a>,<a href="#">html</a>,<a href="#">css</a>
+						</div>
+					</div>
+					
+					<div v-if="ifScore">
+					 	<h5>你已经对该文章做了评分 :</h5>
+							<Rate show-text  allow-half v-model="pScore" disabled>	
+								<span style="color: #f5a623">{{pScore}}</span>
+							</Rate>
+					</div>
+					<div v-else>
+					 <h5>评分 :</h5>
+						<Rate  allow-half @on-change="doScore">	
+						</Rate>
+					</div>
+					
+					<br/>
+
+					<h3 class="left">评论区</h3>
+					<p class="right large"><a href="#reply">我也要评论 &#187;</a></p>
+					<div class="clearer">&nbsp;</div>
+					
+				<!-- 	评论列表 -->
+					<div class="comment_list"  v-for="com in commentDatas">
+						<div class="comment alt">
+							<div class="comment_gravatar left"><img alt="" src="sample-gravatar.jpg" height="32" width="32" /></div>
+							<div class="comment_author left">
+								{{com.user_name}}
+								<div class="comment_date">评论时间：{{com.create_date}}</div>
+							</div>
+							<div class="clearer">&nbsp;</div>
+							<div class="comment_body">									
+								<p>{{com.comment_text}}</p>
+							</div>
+						</div>
+					</div>
+					
+				<!-- 分页部分 -->
+				<page @on-page-size-change="handleSizeChange" size="small" 
+					:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+					:current="page.getPageNumber()" show-total 
+					:total="page.totalCount" > </page>
+
+	<!-- 	评论回复 -->
+					<div id="reply">
+							<div class="legend">留下你的评论</div>
+							<div class="form_row">
+								<div class="form_property form_required"><label for="comment">评论内容：</label></div>
+									<div class="form_value">
+										<textarea rows="8" cols="46" name="comment" id="comment" v-model="textarea"></textarea>
+										<i-button type="ghost"  style="position:relative;right:0px;bottom:12px;" @click="submitText">提交
+											<Icon type="chevron-right"></Icon>
+										</i-button>
+									</div>
+									
+								<div class="clearer"></div>
+							</div>
+					</div>
+				</div>
+			</div>
+<!-- 正文右侧 -->
+			<div class="right" id="sidebar_wrapper">
+				<div id="sidebar">
+
+					<div class="box">
+
+						<div class="box_title">作者介绍</div>
+
+						<div class="box_content">
+							<p>Aenean sit amet dui at felis lobortis dignissim. Pellentesque risus nibh, feugiat in, convallis id, congue ac, sem. Sed tempor neque in quam.</p>
+						</div>
+
+					</div>
+
+					<div class="box">
+
+						<div class="box_title">作者相关的文章</div>
+
+						<div class="box_content">
+							<ul>
+								<li><a href="#">Website Templates</a></li>
+								<li><a href="#">Wordpress Themes</a></li>
+								<li><a href="#">Professional Templates</a></li>
+								<li><a href="#">Blogger Templates</a></li>
+								<li><a href="#">Joomla Templates</a></li>
+							</ul>            
+						</div>
+
+					</div>
+
+					<div class="box">
+
+						<div class="box_title">热门文章推荐</div>
+
+						<div class="box_content">
+							<ul>
+								<li><a href="#">Web Templates</a></li>
+								<li><a href="#">Google</a> - Web Search</li>
+								<li><a href="#">W3Schools</a> - Online Web Tutorials</li>
+								<li><a href="#">WordPress</a> - Blog Platform</li>
+								<li><a href="#">CakePHP</a> - PHP Framework</li>
+							</ul>
+						</div>
+
+					</div>
+
+					<div class="box">
+
+						<div class="box_title">最近访问人</div>
+
+						<div class="box_content">
+
+							<div class="thumbnails">
+								
+								<a href="#" class="thumb"><img src="sample-thumbnail.jpg" width="64" height="64" alt="" /></a>
+								<a href="#" class="thumb"><img src="sample-thumbnail.jpg" width="64" height="64" alt="" /></a>
+								<a href="#" class="thumb"><img src="sample-thumbnail.jpg" width="64" height="64" alt="" /></a>
+								<a href="#" class="thumb"><img src="sample-thumbnail.jpg" width="64" height="64" alt="" /></a>
+								<a href="#" class="thumb"><img src="sample-thumbnail.jpg" width="64" height="64" alt="" /></a>
+								<a href="#" class="thumb"><img src="sample-thumbnail.jpg" width="64" height="64" alt="" /></a>
+
+								<div class="clearer">&nbsp;</div>
+
+							</div>
+
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+
+			<div class="clearer">&nbsp;</div>
+
+		</div>
+	</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+</body>
+
+<!-- 引入 jquery -->
+	<script src="../../../js/jquery/jquery.js"></script>
+	<script src="../../../js/jquery/jquery-migrate.js"></script>
+	<script src="../../../js/jquery/layer/layer.js"></script>
+	<!-- 引入 Vue -->
+	<script src="../../../js/vue/vue.js"></script>
+	<!-- 引入组件库 -->
+	<script src="../../../js/vue/ui/iview.js"></script>
+	<script src="../../../js/sdp/SDPUrl.js"></script>
+	<script src="../../../js/sdp/SDPContext.js"></script>
+	<script src="../../../js/sdp/Page.js"></script>
+	<script src="../../../js/sdp/Row.js"></script>
+	<script src="../../../js/sdp/RowSet.js"></script>
+	<script src="../../../js/sdp/DataStore.js"></script>
+	<script src="../../../js/sdp/SDPDic.js"></script>
+	<script src="noteDetail.js"></script>
+
+</html>

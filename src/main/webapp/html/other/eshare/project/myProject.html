@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="sdp">
+<meta name="keywords" content="SDP">
+<title>我的项目</title>
+<!-- 引入css -->
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet"
+	href="../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet"
+	href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../css/fonts/awesome/font-awesome.min.css" />
+<style type="text/css">
+.cust{
+     display:inline-block;
+     height:25px;
+     width:260px;
+     font-size:15px;
+     color:#495060;
+     border-bottom:1px solid #B9BCBF;
+}
+.div{
+    border:1px solid;
+    border-color: #D5D6E2;
+    width: 80px;
+    height: auto;
+    text-align: center;
+    background-color: #f7f7f9;
+    border-top-left-radius:2em;
+    border-top-right-radius:2em;
+    border-bottom-left-radius:2em;
+    border-bottom-right-radius:2em;
+}
+.expand-row{
+    margin-bottom: 16px;
+}
+
+</style>
+</head>
+<body>
+	<div id="myProject" align="center" class="heightStyle">
+		<!-- 导航栏 -->
+		<div
+			style="float: left; width: 14%; height: 100%; text-align: center; margin-top: 275px">
+			<i-menu ref="iMenu" active-name="projMess"
+				style="width:100%;height:100%" @on-select="menuSelect">
+			<menu-item name="projMess"> <Icon
+				type="chatbubble-working"></Icon>项目信息 </menu-item> <menu-item name="stuMess">
+			<Icon type="pricetags"></Icon>学习计划 </menu-item> <menu-item name="inteMess">
+			<Icon type="person-stalker"></Icon>面试信息 </menu-item> </i-menu>
+		</div>
+
+		<!-- 内容栏 -->
+		<div
+			style="float: left; width: 86%; height: 635px; text-align: center; overflow: auto;">
+			<Card style="width:auto;height:auto">
+			
+			<!-- 我的项目列表 -->
+			<div class="projMess" align="center">
+			     <Card style="width:auto;height:auto" :bordered="false">
+                    <p slot="title">
+                        <Icon type="ios-navigate-outline" color="#2d8cf0" size="20"></Icon>&nbsp;&nbsp;
+                        <font size="3">当前项目</font>
+                    </p>
+			        <i-table ref="currentRowTable" :columns="columnsCur" :data="dataCur" width="1082" height="190" highlight-row></i-table><br>
+			     </Card>
+			    <!--  <hr style="border:1px dotted;border-color: #abd9fe">  -->
+			     <Card style="width:auto;height:auto" :bordered="false">
+                    <p slot="title">
+                        <Icon type="ios-timer-outline" color="#2d8cf0" size="20"></Icon>&nbsp;&nbsp;
+                        <font size="3">历史项目</font>
+                    </p>
+                         <i-table ref="currentRowTable" :columns="columnsHis" :data="dataHis" width="1082" height="297" highlight-row></i-table>
+	                     <div style="margin-top: 10px;" align="left">
+			                  <page @on-page-size-change="handleSizeChange1"
+			                  :page-size="page1.getPageRowCount()" @on-change="handleCurrentChange1"
+			                  :current="page1.getPageNumber()" show-total show-elevator show-sizer
+			                  :total="page1.totalCount" :page-size-opts="[5, 10, 20, 50]"> </page>
+	                     </div>
+                 </Card>
+			</div>
+            
+            <!-- 当前项目详细 -->
+            <div class="curProj" style="display: none" align="left">
+                <Card style="width:auto;height:200" :bordered="false">
+                <p slot="title">
+                    <Icon type="ios-arrow-back" color="#2d8cf0" size="15"></Icon>&nbsp;
+                        <font size="3">基本信息</font>&nbsp;
+                    <Icon type="ios-arrow-forward" color="#2d8cf0" size="15"></Icon>
+                </p>
+                <div v-for="(item,index) in dataDetail" :key="index">
+                     <Row>
+	                     <i-col span="3" offset="1"><div class="div">项目编号</div></i-col>
+	                     <i-col span="8"><span class="cust" style="text-align: center">{{ item.proj_code }}</span></i-col>
+	                     <i-col span="3" offset="1"><div class="div">项目名称</div></i-col>
+                         <i-col span="8"><span class="cust" style="text-align: center">{{ item.proj_name }}</span></i-col>
+                     </Row><br>
+                     <Row>
+	                     <i-col span="3" offset="1"><div class="div">客户名称</div></i-col>
+                            <i-col span="8"><span class="cust" style="text-align: center">{{ item.cust_name }}</span></i-col>
+                            <i-col span="3" offset="1"><div class="div">项目经理</div></i-col>
+                            <i-col span="8"><span class="cust" style="text-align: center">{{ item.proj_mgr }}</span></i-col>
+                        </Row><br>
+                        <Row>
+                            <i-col span="3" offset="1"><div class="div">项目规模</div></i-col>
+                            <i-col span="8"><span class="cust" style="text-align: center">{{ item.proj_scale }}</span></i-col>
+                            <i-col span="3" offset="1"><div class="div">项目周期</div></i-col>
+                            <i-col span="8"><span class="cust" style="text-align: center">{{ item.proj_period }}个月</span></i-col>
+                        </Row><br>
+                        <Row>
+                            <i-col span="3" offset="1"><div class="div">开始时间</div></i-col>
+                            <i-col span="8"><span class="cust" style="text-align: center">{{ item.start_date }}</span></i-col>
+                            <i-col span="3" offset="1"><div class="div">所处阶段</div></i-col>
+                            <i-col span="8"><span class="cust" style="text-align: center">{{ item.proj_step }}</span></i-col>
+                        </Row><br>
+                         <Row>
+                            <i-col span="3" offset="1"><div class="div">项目信息</div></i-col>
+                            <i-col span="20"><div style="width:810px;height:120px;overflow: auto;border:1px solid #e6e6e6">{{ item.proj_intro }}</div></i-col>
+                        </Row><br>
+                    </div>
+                </Card>
+                <Card style="width:auto;height:200" :bordered="false">
+                    <p slot="title">
+                        <Icon type="ios-arrow-back" color="#2d8cf0" size="15"></Icon>&nbsp;
+                        <font size="3">我的任务</font>&nbsp;
+                        <Icon type="ios-arrow-forward" color="#2d8cf0" size="15"></Icon>
+                    </p>
+                    <div v-for="(item,index) in dataDetail" :key="index">
+                    <Row>
+                        <i-col span="3" offset="1"><div class="div">任务内容</div></i-col>
+                        <i-col span="20">{{ item.proj_task }}</i-col>
+                    </Row><br>
+                     <Row>
+                        <i-col span="3" offset="1"><div class="div">项目心得</div></i-col>
+                        <i-col span="18"><div style="width:810px;height:150px;overflow: auto;border:1px solid #e6e6e6">{{ item.proj_learned }}</div></i-col>
+                        <i-col span="2">
+                            <i-button type="primary" shape="circle" size="small" icon="ios-compose-outline" :id="item.proj_learned" @click="updateProjLearned(item.proj_learned)">编辑</i-button><br><br>
+                            <Upload multiple action="//jsonplaceholder.typicode.com/posts/">
+                                <i-button type="primary" shape="circle" size="small" icon="android-upload">上传</i-button>
+                            </Upload>
+                        </i-col>
+                    </Row><br>
+                    <Row>
+                        <i-col span="3" offset="1"><div class="div"><Icon type="ios-download" size="15"></Icon>&nbsp;附件</div></i-col>
+                        <i-col span="20">附件名字（只提供下载功能，无法预览）</i-col>
+                    </Row><br><br>
+                    </div>
+                </Card>
+                <Card style="width:auto;height:200" :bordered="false">
+                    <p slot="title">
+                        <Icon type="ios-arrow-back" color="#2d8cf0" size="15"></Icon>&nbsp;
+                        <font size="3">疑难突破</font>&nbsp;
+                        <Icon type="ios-arrow-forward" color="#2d8cf0" size="15"></Icon>
+                    </p>
+                    <div v-for="(item,index) in dataProbSol">
+	                    <Row>
+	                        <i-col span="3" offset="1"><div class="div">疑难标题</div></i-col>
+	                        <i-col span="20">{{ item.problem_name }}</i-col>
+	                    </Row><br>
+	                    <Row>
+	                        <i-col span="3" offset="1"><div class="div">解决方案</div></i-col>
+	                        <i-col span="18"><div style="width:810px;height:150px;overflow: auto;border:1px solid #e6e6e6">{{ delHtmlTag(item.problem_detail) }}</div></i-col>
+	                        <i-col span="2">
+                                <i-button type="primary" shape="circle" size="small" icon="ios-compose-outline" :id="item.problem_id" :name="item.problem_name" 
+                                :key="item.problem_detail" @click="editorProbSol(item.problem_id,item.problem_name,item.problem_detail)">编辑
+                                </i-button><br><br>
+                            </i-col>
+	                    </Row><br><br>
+                    </div>
+                    <Row>
+                        <i-col span="3" offset="1"><div class="div"><Icon type="ios-download" size="15"></Icon>&nbsp;附件</div></i-col>
+                        <i-col span="20">附件名字（只提供下载功能，无法预览）</i-col>
+                    </Row>
+                     <Row>
+                        <i-col span="2" offset="20">
+                            <Upload multiple action="http://localhost:8080/update">
+                                <i-button type="primary" shape="circle" size="small" icon="android-upload">上传</i-button>
+                            </Upload>
+                        </i-col>
+                        <i-col span="2">
+                            <i-button type="primary" shape="circle" size="small" icon="plus-round" @click="addProbSol">添加</i-button>
+                        </i-col>
+                     </Row><br>
+                </Card>
+            </div>			
+			
+			<!-- 我的学习计划 -->
+			<div class="stuMess" style="display: none">
+			<div>
+                 <Row style = "margin-top: 19px">
+                     <i-form inline :label-width="80" :model="params"> 
+                     <i-col span="5" offset="1" >
+                        <form-item  label="计划名称" prop="stu_name">
+                            <i-input v-model="params.stu_name" type="text" placeholder="输入计划名称" style="width: 200px"></i-input>
+                        </form-item>
+                     </i-col>
+                     <i-col span="5" offset="2" >
+                        <form-item  label="项目名称" prop="proj_name">
+                            <i-input v-model="params.proj_name" type="text" placeholder="输入项目名称" style="width: 200px"></i-input>
+                        </form-item>
+                     </i-col>
+                     <i-col span="5" offset="2">
+                        <form-item label="日期区间" prop="section_date">
+                            <date-picker format="yyyy-MM-dd" type="daterange" :value="params.section_date" placement="bottom-end" placeholder="选择日期区间" @on-change="fomatDates" style="width: 230px"></date-picker>
+                        </form-item>
+                     </i-col>
+                     </i-form>
+                     <i-col span="2" offset="2">
+                        <i-button icon="ios-search" shape="circle" @click="queryStuPlan">搜索</i-button>
+                     </i-col>
+                 </Row>
+                 </div><br>
+                 <!-- 计划列表 -->
+                 <div>
+                    <card>
+                         <p slot="title" align="center">
+                           <Icon type="ios-list-outline" size="20" color="#2d8cf0"></Icon>&nbsp;&nbsp;
+                           <font size="3">计划列表</font>
+                         </p>
+                         <div style="width:auto;height:340px" align="left">                 
+                         <Row style = "margin-top: 15px" v-for="(item,index) in stuData" :key="index">
+                            <i-col span="5">
+                               <a href="javascript:void(0);" id="item.plan_id" @click="planDetail(item.plan_id)">
+                                <span style=" font-size: 20px;font-weight: bold;">{{ item.stu_name }}</span>
+                               </a>
+                            </i-col>
+                            <i-col span="4" offset="2">
+                                <span>{{ item.start_date }}--</span>
+                                <span>{{ item.end_date }}</span>
+                            </i-col>
+                            <i-col span="4" offset="3">
+                                <span>{{ item.proj_name }}</span>
+                            </i-col>
+                            <i-col span="3" offset="3">
+                                <i-progress :percent="params.percent"></i-progress>
+                            </i-col>
+                        </Row><br>
+                        </div>
+                        <!-- 分页部分 -->
+                        <div style="margin-top: 10px;" align="left">
+                              <page @on-page-size-change="handleSizeChange2"
+                              :page-size="page2.getPageRowCount()" @on-change="handleCurrentChange2"
+                              :current="page2.getPageNumber()" show-total show-elevator show-sizer
+                              :total="page2.totalCount" :page-size-opts="[5, 10, 20, 50]"> </page>
+                         </div>
+                    </card>
+                </div><br>
+			</div>
+			
+			 <!-- 学习计划明细细 -->
+            <div class="planDetail" style="display: none" align="left">
+               <Card style="width:auto;height:200" :bordered="false">
+                <p slot="title">
+                    <Icon type="ios-arrow-back" color="#2d8cf0" size="15"></Icon>&nbsp;
+                        <font size="3">计划详情</font>&nbsp;
+                    <Icon type="ios-arrow-forward" color="#2d8cf0" size="15"></Icon>
+                </p>
+                <div v-for="(item,index) in stuPlanData" :key="index">
+                     <Row>
+                         <i-col span="3" offset="1"><div class="div">计划名称</div></i-col>
+                         <i-col span="8"><span class="cust" style="text-align: center">{{ item.stu_name }}</span></i-col>
+                         <i-col span="3" offset="1"><div class="div">项目经理</div></i-col>
+                         <i-col span="8"><span class="cust" style="text-align: center">{{ item.proj_mgr }}</span></i-col>
+                     </Row><br>
+                     <Row>
+                         <i-col span="3" offset="1"><div class="div">所属项目</div></i-col>
+                         <i-col span="8"><span class="cust" style="text-align: center">{{ item.proj_name }}</span></i-col>
+                         <i-col span="3" offset="1"><div class="div">学习状态</div></i-col>
+                         <i-col span="8"><span class="cust" style="text-align: center">{{ item.stu_progress }}</span></i-col>
+                     </Row><br>
+                     <Row>
+                         <i-col span="3" offset="1"><div class="div">开始时间</div></i-col>
+                         <i-col span="8"><span class="cust" style="text-align: center">{{ item.start_date }}</span></i-col>
+                         <i-col span="3" offset="1"><div class="div">结束时间</div></i-col>
+                         <i-col span="8"><span class="cust" style="text-align: center">{{ item.end_date }}</span></i-col>
+                     </Row><br>
+                     <Row>
+                         <i-col span="3" offset="1"><div class="div">计划内容</div></i-col>
+                         <i-col span="18"><div style="width:810px;height:150px;overflow: auto;border:1px solid #e6e6e6">{{ item.stu_details }}</div></i-col>
+                         <i-col span="2">
+                            <i-button type="primary" shape="circle" size="small" icon="ios-compose-outline" :key="item.stu_details" @click="editStuDetail(item.stu_details)">编辑</i-button><br><br>
+                        </i-col>
+                     </Row><br>
+                    </div>
+                </Card>
+                <Card style="width:auto;height:200" :bordered="false">
+                    <p slot="title">
+                        <Icon type="ios-arrow-back" color="#2d8cf0" size="15"></Icon>&nbsp;
+                        <font size="3">每天任务</font>&nbsp;
+                        <Icon type="ios-arrow-forward" color="#2d8cf0" size="15"></Icon>
+                    </p>
+                    <div v-for="(item,index) in stuDateData" :key="index">
+                    <Row>
+                         <i-col span="3" offset="1"><div class="div">日&nbsp;&nbsp;期</div></i-col>
+                         <i-col span="8"><span class="cust" style="text-align: center">{{ item.create_date }}</span></i-col>
+                         <i-col span="3" offset="1"><div class="div">学习用时</div></i-col>
+                         <i-col span="8"><span class="cust" style="text-align: center">{{ item.stu_time }}/小时</span></i-col>
+                     </Row><br>
+                     <Row>
+                        <i-col span="3" offset="1"><div class="div">学习内容</div></i-col>
+                        <i-col span="20"><div style="width:810px;height:150px;overflow: auto;border:1px solid #e6e6e6">{{ item.stu_detail }}</div></i-col>
+                    </Row><br>
+                    </div>
+                    <Row>
+                        <i-col span="1" offset="20">
+                            <i-button type="primary" shape="circle" size="small" icon="plus-round" @click="addDateStu">添加任务</i-button>
+                        </i-col>
+                        <i-col span="2" offset="1">
+                            <Upload multiple action="//jsonplaceholder.typicode.com/posts/">
+                                <i-button type="primary" shape="circle" size="small" icon="android-upload">上传笔记</i-button>
+                            </Upload>
+                        </i-col>
+                    </Row><br>
+                </Card>
+                <Card style="width:auto;height:200" :bordered="false">
+                    <p slot="title">
+                        <Icon type="ios-arrow-back" color="#2d8cf0" size="15"></Icon>&nbsp;
+                        <font size="3">学习笔记</font>&nbsp;
+                        <Icon type="ios-arrow-forward" color="#2d8cf0" size="15"></Icon>
+                    </p>
+                    <div v-for="(item,index) in dataStuNote">
+                        <Row>
+                            <a href="javascript:void(0);" @click="downloadNote">
+                                <span style=" font-size: 12px;font-weight: bold;">{{item.stu_noteName}}</span>
+                            </a>
+                        </Row><br>
+                    </div>
+                </Card>
+            </div>
+            
+            <!-- 我的面试信息 -->
+			<div class="inteMess" style="display: none">
+                    <div >
+                        <Row style = "margin-top: 19px">
+		                     <i-form inline :label-width="80" :model="params"> 
+		                     <i-col span="4" offset="1" >
+		                        <form-item  label="项目名称" prop="proj_name">
+		                            <i-input v-model="params.proj_name" type="text" placeholder="输入项目名称" style="width: 200px"></i-input>
+		                        </form-item>
+		                     </i-col>
+		                     <i-col span="4" offset="2" >
+		                        <form-item  label="面试信息" prop="inter_answer">
+		                            <i-input v-model="params.inter_answer" type="text" placeholder="输入面试信息" style="width: 200px"></i-input>
+		                        </form-item>
+		                     </i-col>
+		                     <i-col span="4" offset="2">
+		                        <form-item label="日期区间" prop="section_date">
+		                            <date-picker format="yyyy-MM-dd" type="daterange" :value="params.section_date" placement="bottom-end" placeholder="选择日期区间" @on-change="fomatDates" style="width: 200px"></date-picker>
+		                        </form-item>
+		                     </i-col>
+		                     </i-form>
+		                     <i-col span="2" offset="2">
+		                        <i-button icon="ios-search" shape="circle" @click="queryInteMess">搜索</i-button>
+		                     </i-col>
+		                     <i-col span="2" offset="1">
+		                        <i-button icon="plus-round" id="add_info" shape="circle" @click="addData">添加面试</i-button> 
+		                     </i-col>
+		                 </Row>
+                    </div>
+                    <!-- 面试信息 -->
+                    <div>
+	                    <Card style="width:auto;height:auto" :bordered="false">
+		                    <p slot="title">
+		                        <Icon type="ios-list-outline" color="#2d8cf0" size="20"></Icon>&nbsp;&nbsp;
+		                        <font size="3">面试信息</font>
+		                    </p>
+	                        <i-Table :columns="columnsInte" :data="inteMessData" width="1092" highlight-row></i-Table>
+	                        <div style="width: 1090;height: auto;" id="aaa">
+                                <Row class="expand-row">
+                                    <i-Col span="24">
+                                        <span class="expand-key">面试问题: </span>
+                                        <span class="expand-value">{{ row.inter_question }}</span>
+                                    </i-Col>
+                                </Row>
+                                <Row class="expand-row">
+                                    <i-Col span="24">
+                                        <span class="expand-key">问题答案: </span>
+                                        <span class="expand-value">{{ row.inter_answer }}</span>
+                                    </i-Col>
+                                </Row>
+                            </div> 
+	                        <div style="margin-top: 10px;" align="left">
+                              <page @on-page-size-change="handleSizeChange3"
+                              :page-size="page3.getPageRowCount()" @on-change="handleCurrentChange3"
+                              :current="page3.getPageNumber()" show-total show-elevator show-sizer
+                              :total="page3.totalCount" :page-size-opts="[10, 20, 50, 100]"></page>
+                            </div>
+                        </Card>
+                    </div>
+			</div>
+		
+		</div>
+		
+		<!-- 新增/编辑项目心得 -->
+        <Modal v-model="projLearnedEditor" title="项目心得" @on-ok="projLearnedSave" @on-cancel="projLearnedCancel" width="800px">
+            <div style="width: 100%; height: 350px;overflow: auto;">
+	            <i-form ref="projLearnedForm" :model="learnedData">
+	                <form-item prop="proj_learned" :required="true">
+	                    <i-Input v-model="learnedData.proj_learned" type="textarea" placeholder="请输入项目心得体会，字数不要超过1000字" :rows="15"></i-Input>
+	                </form-item>
+	            </i-form>
+            </div>
+        </Modal>
+        <!-- 新增/编辑疑难突破 -->
+        <Modal v-model="projProbEditor" title="项目疑难突破" @on-ok="projProbSave" @on-cancel="projProbCancel" width="1080px" :styles="{top: '20px'}">
+            <div style="width: 100%; height: 470px;overflow: auto;">
+                <i-form ref="probSolForm" :model="probData" :rules="ruleProbForm">
+                     <form-item label="疑难标题" prop="problem_name" required >
+                         <i-input v-model="probData.problem_name" icon="android-list"></i-input>
+                     </form-item>
+                     <form-item label="解决方案" required style="margin:0px;padding:0px;">
+                     </form-item>
+                </i-form>
+                <div>
+                    <textarea id="projProbEditor"></textarea>
+                </div>
+            </div>
+        </Modal>
+        
+        <!-- 编辑学习计划内容 -->
+        <Modal v-model="stuPlanEditor" title="学习计划内容" @on-ok="stuPlanDetailsSave" @on-cancel="stuPlanDetailsCancel" width="800px">
+            <div style="width: 100%; height: 350px;overflow: auto;">
+                <i-form ref="stuPlanDetailsForm" :model="stuDetails">
+                    <form-item prop="stu_details" :required="true">
+                        <i-Input v-model="stuDetails.stu_details" type="textarea" placeholder="请输入学习计划内容" :rows="15"></i-Input>
+                    </form-item>
+                </i-form>
+            </div>
+        </Modal>
+        
+        <!-- 新增每天学习内容 -->
+        <modal v-model="addStuDetail" title="添加学习内容" @on-ok="addStuDetailSave" @on-cancel="addStuDetailCancel" width="800px" :styles="{top: '20px'}">
+             <div style="width: 100%; height: 350px;overflow: auto;">
+             <i-form :model="stuDateDetail" ref="stuDateDetailForm">
+                 <form-item label="学习用时" prop="stu_time" required>
+                       <i-input  placeholder="请填写学习用时" v-model="stuDateDetail.stu_time"  style="width: 200px"></i-input>
+                 </form-item>
+                 <form-item label="学习内容" prop="inter_answer" required>
+                       <i-input  placeholder="请填写学习内容" v-model="stuDateDetail.stu_detail" type="textarea" :rows="10"></i-input>
+                 </form-item>
+             </i-form>
+             </div>
+        </modal>
+        
+        <!-- 新增面试信息 -->
+        <modal v-model="addInteMess" title="添加面试信息" @on-ok="addDataSave" @on-cancel="addDataCancel" width="1080px" :styles="{top: '20px'}">
+             <div style="width: 100%; height: 470px;overflow: auto;">
+             <i-form :model="inteInfo" ref="inteForm" :rules="ruleInteForm">
+                 <form-item label="项目编号" prop="proj_code" required>
+                        <i-select v-model="inteInfo.proj_code" style="width:200px">
+                             <i-option v-for="(item,index) in dataCur" :value="item.proj_code" :key="index">{{ item.proj_code }}</i-option>
+                        </i-select>
+                 </form-item>
+                 <form-item label="面试时间" prop="inter_date" required>
+                       <date-picker type="date" v-model="inteInfo.inter_date" placeholder="选择日期" style="width: 200px" @on-change="inteDateChange"></date-picker>
+                 </form-item>
+                 <form-item label="面试地点" prop="inter_addr" required>
+                       <i-input  placeholder="请输入面试地点" v-model="inteInfo.inter_addr" style="width: 200px"></i-input>
+                 </form-item>
+                 <form-item label="面试经理" prop="inter_interviewer">
+                       <i-input  placeholder="请输入面试官名字" v-model="inteInfo.interviewer" style="width: 200px"></i-input>
+                 </form-item>
+                 <form-item label="面试领域" prop="question_direction" required>
+                       <i-input  placeholder="请输入问题所属领域" v-model="inteInfo.question_direction" style="width: 200px"></i-input>
+                 </form-item>
+                 <form-item label="问题小标题" prop="inter_name" required>
+                       <i-input  placeholder="请输入问题小标题" v-model="inteInfo.inter_name"></i-input>
+                 </form-item>
+                 <form-item label="面试问题" prop="inter_question" required>
+                       <i-input  placeholder="请输入面试问题" v-model="inteInfo.inter_question" type="textarea" :rows="3"></i-input>
+                 </form-item>
+                 <form-item label="问题答案" prop="inter_answer" required>
+                       <i-input  placeholder="请输入问题答案" v-model="inteInfo.inter_answer" type="textarea" :rows="8"></i-input>
+                 </form-item>
+             </i-form>
+             </div>
+        </modal>
+        
+	</div>
+</body>
+
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/jquery-migrate.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="../../js/tinymce/tinymce.min.js"></script>
+<script type="text/javascript" src="myProject.js"></script>
+
+</html>

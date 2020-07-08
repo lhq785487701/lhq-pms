@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="../css/iview.css">
+<link rel="stylesheet" href="../css/index/a.css">
+</head>
+<body onload="iframeHeight()">
+<div id="mc">
+	<!-- 轮播图  -->
+	<carousel autoplay v-model="value2" id="imgChange" style="width:100%;height:200px" >
+	    <carousel-item>
+			<div class="demo-carousel"><img src="../img/1.jpg" style="width:100%;height:200px"></img></div>
+		</carousel-item>
+	</carousel> 
+	
+	<div style="height:8px"></div> 
+	
+	<!-- 下 -->
+	<div id="down-cards">
+		<!-- 热点技术 -->
+		<div id="rightcards" >
+			<card>
+				<p slot="title"><Icon type="fireball"></Icon>热点技术</p>
+		    	<i-button type="ghost" class="tags" v-for="item in itemsList"  @click="selectHotTags(item.esp_hot_code)">{{ item.esp_hot }}</i-button>
+			</card>
+			<div class="brs"></div>
+			<card>
+				<p slot="title"><Icon type="thumbsup">
+					</Icon>大神推荐
+				</p>
+				<a href="#" slot="extra" @click.prevent="changeLimit">
+            		<Icon type="ios-loop-strong"></Icon> 换一批
+        		</a>
+				<ul>
+					<li v-for="person in personList">
+	               		<a @click="queryP(person.resume_id)">{{ person.name }}</a>
+	                	<div style="float:right;text-align:right;">
+	                		<a @click="queryP(person.resume_id)">
+	                			{{ person.department }}
+	                		</a>
+	                	</div>
+	           		</li>
+				</ul>
+			</card>
+		</div>
+		
+		<!-- 文章分类标签 -->
+		<card id="esp_tags">
+			<i-button type="ghost" class="tags" v-for="esp_tag in tagList" @click="selectTags(esp_tag.tags_id)">{{ esp_tag.tags_name}}</i-button>
+		</card>
+		<!-- 文章card -->
+		<div v-for="data in datas" id="notecards">
+			<card  :padding="20" >
+				<a @click="queryNote(data.note_id)">
+					<span  class="title">{{ data.note_title }}</span>
+					<span class="authors">{{ data.create_user }}</span>
+					<span class="authors">{{ data.create_date }}</span>
+					<p class="note_text" style="height: 84px;overflow: hidden;display: block;">  {{ data.note_text }}</p>
+				</a>
+				<Icon type="eye" size="16"  class="assists"></Icon><label  class="assist">{{data.read_num }}</label>
+				<Icon type="android-favorite" size="16" class="assists"></Icon><label class="assist">{{ data.note_collect }}</label>
+				<Icon type="ios-chatbubble" size="16" class="assists"></Icon><label class="assist">{{ data.comment_num }}</label>
+			</card>
+			<div class="brs"></div>
+		</div><!-- v-for -->
+		<page @on-page-size-change="handleSizeChange"
+		:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+		:current="page.getPageNumber()"	show-total show-elevator show-sizer 
+		:total="page.totalCount" :page-size-opts="[5, 6, 10, 15, 20]" id="pagecards"></page>
+		
+	</div>
+	<back-top></back-top>
+</div>
+</body>
+<script src="../js/md5.js"></script>
+<script src="../js/jquery/jquery.js"></script>
+<script src="../js/jquery/layer/layer.js"></script>
+<script src="../js/vue/vue.js"></script>
+<script src="../js/vue/ui/iview.js"></script>
+<script src="../js/sdp/SDPUrl.js"></script>
+<script src="../js/sdp/SDPContext.js"></script>
+<script src="../js/sdp/Page.js"></script>
+<script src="../js/sdp/Row.js"></script>
+<script src="../js/sdp/RowSet.js"></script>
+<script src="../js/sdp/DataStore.js"></script>
+<script src="../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="c.js"></script>
+</html>

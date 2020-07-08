@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">    
+	<meta name="renderer" content="webkit|ie-comp|ie-stand">
+	<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<meta http-equiv="Cache-Control" content="no-siteapp" />
+	<meta name="description" content="sdp">
+	<meta name="keywords" content="SDP">
+	<meta charset="utf-8">
+		<title>大神详情</title>
+		<link rel="stylesheet" href="../../css/iview.css">
+		<link rel="stylesheet"
+			  href="../../js/jquery/layer/skin/default/layer.css">
+		<link rel="stylesheet" href="../../css/sdp-ui.css" />
+		<link rel="stylesheet" href="../../css/sdp-admin.css" />
+		<link rel="stylesheet" href="../../css/sdp-skin.css" />
+		<link rel="stylesheet"
+			  href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+		<link rel="stylesheet"
+	href="../../css/fonts/awesome/font-awesome.min.css" />
+	<script src="../../js/echarts/dist/echarts-all.js"></script>
+		<style>
+				button {font-size:15px;font-weight:bold;}	
+				p      {font-size: 14px;}
+	            #mainContainer  {width: 1024px;
+					             margin: 0 auto;}   
+		</style>
+</head>
+	<body>
+		<div id="mainContainer">
+			<div id="app1">
+				 <Collapse v-model="value5">
+					<Panel name="value6">
+						大神小窺
+            <div slot="content" v-for="item in godatas">
+			<i-form > 
+			   <p> <span> <i-button type="info" style="width:140px; height:30px;background-color:#009F95">我的名字</i-button> </span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <span > {{item.name}}<span/>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+			    <span> <i-button type="info" style="width:140px; height:30px;background-color:#009F95">所属部门</i-button> </span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <span > {{item.department}}<span/>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+			    <span> <i-button type="info" style="width:140px; height:30px;background-color:#009F95">企业邮箱</i-button> </span>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <span > {{item.mail}}<span/></p><br/>			    
+			   <h3 style="color:#663300; font-weight:bold">大神简介</h3>
+			   <textarea v-model="item.self_remark" style="height:80px; width:1024px; font-size:15px;" placeholder="多行文本输入……"></textarea>
+			   <h3 style="color:#663300; font-weight:bold">职业心得</h3>
+               <textarea v-model="item.posd_know" style="height:80px; width:1024px; font-size:15px;" placeholder="多行文本输入……"></textarea>
+            </i-form>
+       	    </div>
+			</Panel>
+			</Collapse>
+           </div>		
+			  <div id="cards">	
+			  	 <Collapse v-model="value3">
+					<Panel name="value4">
+						大神笔记
+            <div slot="content" v-for="data in datas1">
+         	<card :padding="20"> 
+            	<a @click="queryRow(data.note_id)"><!-- queryRow(data.note_id) -->
+	                <span style="font-size: 18px;font-weight:bold;color:black"> {{data.note_title }}</span>
+	                <span>{{data.create_user}}</span>
+	               &nbsp&nbsp&nbsp&nbsp&nbsp
+	                <span>{{data.create_date}}</span>
+	                <p v-if="noteLength(data.note_text)">{{ data.note_text }}</p>
+	                <div class="dot" v-else>{{ data.note_text }}</div>
+                </a>
+	                <Icon type="eye" size="16" style="color:#9ea7b4"></Icon>
+	                <label style="font-size: 15px; color: #666666" class="assist">{{data.read_num}}</label>
+	                
+	                <Icon type="android-favorite" size="16" style="color:#9ea7b4" class="assists"></Icon>
+	                <label style="font-size: 15px; color:#666666" class="assist">{{data.note_collect }}</label>
+	                
+	                <Icon type="ios-chatbubble" size="16" style="color:#9ea7b4" class="assists"></Icon>
+	                <label style="font-size: 15px; color:#666666" class="assist">{{data.note_score}}</label>
+             </card>
+             <page @on-page-size-change="handleSizeChange"
+					:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+					:current="page.getPageNumber()" show-total show-elevator show-sizer
+					:total="page.totalCount" :page-size-opts="[5, 10, 15, 20]" > 
+			</page>
+	       </div>
+			</Panel>
+			</Collapse>
+           </div>
+			 <div id="app2">	
+			  	 <Collapse v-model="value1">
+					<Panel name="value2">
+						最牛项目
+            <div slot="content" v-for="data in datas2">
+         	<card :padding="20"> 
+            	<a >
+	                <span style="font-size: 17px;font-weight:bold;color:black"> {{data.proj_name }}</span>
+	                  <span>{{data.create_user}}</span>
+	                  &nbsp&nbsp&nbsp&nbsp&nbsp	             
+	                <span>{{data.proj_start_date}}</span>
+	                 <h3 style="color:#663300; font-size: 13px;">项目概况</h3>
+	                <p>{{ data.proj_intro }}</p>       
+	                 <h3 style="color:#663300; font-size: 13px;">主要负责</h3>
+	                <p >{{ data.proj_major }}</p>   
+	                  <h3 style="color:#663300; font-size: 13px;">客戶评价</h3>
+	                <p >{{ data.remark }}</p>            
+                </a>         
+             </card>
+             <page @on-page-size-change="handleSizeChange"
+					:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+					:current="page.getPageNumber()" show-total show-elevator show-sizer
+					:total="page.totalCount" :page-size-opts="[5, 10, 15, 20]" > 
+			</page>
+	       </div>	     
+			</Panel>
+			</Collapse>
+           </div>
+			<div id="bar" style="width: 1180px;height: 300px;position:relative; left:-80px;"></div>	
+       </div>			
+</body>
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/jquery-migrate.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="goddetail.js"></script>
+</html>
+

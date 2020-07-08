@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.task">
+	<!-- 返回结果对象定义 -->
+	<resultMap id="taskResultMap" type="com.lhq.pms.data.Row">
+		<id column="task_code" property="task_code" jdbcType="VARCHAR" />
+		<result column="task_name" property="task_name" jdbcType="VARCHAR" />
+		<result column="task_remark" property="task_remark" jdbcType="VARCHAR" />
+		<result column="task_sts" property="task_sts" jdbcType="VARCHAR" />
+		<result column="cron_exp" property="cron_exp" jdbcType="VARCHAR" />
+		<result column="run_sts" property="run_sts" jdbcType="VARCHAR" />
+		<result column="do_type" property="do_type" jdbcType="VARCHAR" />
+		<result column="do_content" property="do_content" jdbcType="VARCHAR" />
+		<result column="do_param" property="do_param" jdbcType="VARCHAR" />
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="task_group" property="task_group" jdbcType="VARCHAR" />
+		<result column="server_ip" property="server_ip" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 返回字段 -->
+	<sql id="task_column_list">
+		t.task_code,t.task_name,t.task_remark,t.task_sts,
+		t.cron_exp,t.run_sts,t.do_type,t.do_content,t.do_param,t.system_code,t.task_group,t.server_ip,
+		t.create_date,t.create_user,t.update_date,t.update_user
+	</sql>
+
+	<!-- 查询任务列表 -->
+	<select id="queryTasks" parameterType="map" resultMap="taskResultMap">
+		select
+		<include refid="task_column_list" />
+		from sdp_schedule_task
+		t where t.task_sts <![CDATA[<>]]>'D'
+		<if test="task_code!=null">
+			and ( t.task_code like CONCAT('%',#{task_code,jdbcType=VARCHAR},'%')  or  t.task_name like CONCAT('%',#{task_code,jdbcType=VARCHAR},'%') )
+		</if>
+		<if test="run_sts!=null">
+			and t.run_sts =#{run_sts,jdbcType=CHAR}
+		</if>
+		<if test="do_type!=null">
+			and t.do_type =#{do_type,jdbcType=CHAR}
+		</if>
+		<if test="system_code!=null">
+			and t.system_code =#{system_code,jdbcType=CHAR}
+		</if>
+	</select>
+
+	<!-- 查询任务信息 -->
+	<select id="queryTask" parameterType="map" resultMap="taskResultMap">
+		select
+		<include refid="task_column_list" />
+		from sdp_schedule_task
+		t where t.task_code=#{task_code,jdbcType=CHAR}
+	</select>
+
+	<!-- 新增任务 -->
+	<insert id="addTask" parameterType="map">
+		insert into
+		sdp_schedule_task(task_code,task_name,task_remark,task_sts,cron_exp,run_sts,do_type,do_content,do_param,system_code,task_group,server_ip,create_date,create_user)
+		VALUES(
+		#{task_code,jdbcType=CHAR},#{task_name,jdbcType=CHAR},#{task_remark,jdbcType=CHAR},#{task_sts,jdbcType=CHAR},#{cron_exp,jdbcType=CHAR},
+		#{run_sts,jdbcType=CHAR},#{do_type,jdbcType=CHAR},#{do_content,jdbcType=CHAR},#{do_param,jdbcType=CHAR},#{system_code,jdbcType=CHAR},#{task_group,jdbcType=CHAR},
+		#{server_ip,jdbcType=CHAR},now(),#{user_code,jdbcType=CHAR})
+	</insert>
+
+	<!-- 更新任务信息 -->
+	<update id="updateTask" parameterType="map">
+		update sdp_schedule_task
+		<set>
+			<if test="task_name!=null">
+				task_name=#{task_name,jdbcType=CHAR},
+			</if>
+			<if test="task_remark!=null">
+				task_remark=#{task_remark,jdbcType=CHAR},
+			</if>
+			<if test="task_sts!=null">
+				task_sts=#{task_sts,jdbcType=CHAR},
+			</if>
+			<if test="cron_exp!=null">
+				cron_exp=#{cron_exp,jdbcType=CHAR},
+			</if>
+			<if test="run_sts!=null">
+				run_sts=#{run_sts,jdbcType=CHAR},
+			</if>
+			<if test="do_type!=null">
+				do_type=#{do_type,jdbcType=CHAR},
+			</if>
+			<if test="do_content!=null">
+				do_content=#{do_content,jdbcType=CHAR},
+			</if>
+			<if test="do_param!=null">
+				do_param=#{do_param,jdbcType=CHAR},
+			</if>
+			<if test="system_code!=null">
+				system_code=#{system_code,jdbcType=CHAR},
+			</if>
+			<if test="task_group!=null">
+				task_group=#{task_group,jdbcType=CHAR},
+			</if>
+			update_date=now(),update_user=#{user_code,jdbcType=CHAR}
+		</set>
+		where task_code=#{task_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 更改运行状态 -->
+	<update id="updateTaskRunSts" parameterType="map">
+		update
+		sdp_schedule_task set
+		run_sts=#{run_sts,jdbcType=CHAR},update_date=now(),update_user=#{user_code,jdbcType=CHAR}
+		where task_code=#{task_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 更改任务状态 -->
+	<update id="updateTaskSts" parameterType="map">
+		update
+		sdp_schedule_task set
+		task_sts=#{task_sts,jdbcType=CHAR},update_date=now(),update_user=#{user_code,jdbcType=CHAR}
+		where task_code=#{task_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 更改地址 -->
+	<update id="updateAddress" parameterType="map">
+		update
+		sdp_schedule_task set
+		system_code=#{system_code,jdbcType=CHAR},server_ip=#{server_ip,jdbcType=CHAR},update_date=now(),update_user=#{user_code,jdbcType=CHAR}
+		where task_code=#{task_code,jdbcType=CHAR}
+	</update>
+</mapper>

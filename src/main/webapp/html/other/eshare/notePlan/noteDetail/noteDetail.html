@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<title>笔记详情页面</title>
+<link rel="stylesheet"
+    href="../../../js/jquery/layer/skin/default/layer.css" />
+<link rel="stylesheet"
+    href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+    href="../../../css/fonts/awesome/font-awesome.min.css" />
+<link rel="stylesheet" href="../../../css/iview.css" />
+<style type="text/css">
+[v-cloak] {
+  display: none;
+}
+body {
+    background-color: rgb(243, 243, 243);
+    width: 1024px;
+    margin: 0 auto;
+    padding-top: 20px;
+}
+.comment_list{
+    margin-bottom:5px;
+    padding:10px 0;
+    border-bottom:1px solid #ccc
+}
+a{
+    color:#666666;
+    margin-right: 5px;
+} 
+a:hover {color:red;} /*悬浮（鼠标经过）时颜色*/
+.top{
+    padding: 10px;
+    background: rgba(0, 153, 229, .7);
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+}
+#rate{
+    border-top: 1px solid #D5D5D5;
+    padding: 8px 0 12px;
+    margin-top:25px;
+}
+</style>
+</head>
+<body>
+    <div id="mainContainer" v-cloak >
+        <div v-for="data in datas" :key="data.note_id">
+            <row>
+                <i-col span="18" >
+                    <!-- 笔记详情 -->
+                    <card shadow>
+                        <div slot="title">
+                            <row>
+                                <strong><font size="5">{{data.note_title}}</font></strong>
+                            </row>
+                            <row style="padding-top:10px;" :gutter="16">
+                                <span v-if="data.note_share=='Y'">&emsp;分享于: {{ data.note_share_date}}&emsp;</span>
+                                <span v-else=>&emsp;创建于: {{ data.create_date}}&emsp;</span>
+                                <span>&emsp;标签：</span>
+                                 <tag v-for="item in datasNoteTags" :key="item.tags_id">{{item.tags_name}}</tag>
+                             </row>
+                        </div>
+                        <div slot="extra">
+                            <div v-if="params.user_id != data.create_user && data.note_share=='Y'">
+                                <row>
+                                    综合评分：
+                                    <span style="color: #f5a623">{{data.note_score==null||data.note_score==''?0:data.note_score}}分</span>
+                                </row>
+                                <row>
+                                    <i-button type="ghost" shape="circle" icon="ios-heart" @click="cancelCollect()" title="取消收藏" v-if="ifcollect"></i-button>
+                                    <i-button type="ghost" shape="circle" icon="ios-heart-outline"  @click="collect()" title="收藏" v-else></i-button>
+                                    <a href="#rate">
+                                        <i-button type="ghost" shape="circle" icon="star" title="评分" @click=""></i-button>
+                                    </a>
+                                    <a href="#commont">
+                                        <i-button type="ghost" shape="circle" icon="compose" title="评论"></i-button>
+                                    </a>
+                                </row>
+                            </div>
+                            <div v-else>
+                                <div v-if="data.note_share=='Y'">
+                                    <row>
+                                                 综合评分：
+                                        <span style="color: #f5a623">{{data.note_score}}分</span>
+                                    </row>
+                                    <row style="margin-top:10px;">
+                                         <i-button type="ghost" shape="circle" icon="edit" @click="editRow(data)"></i-button>
+                                    </row>
+                                </div>
+                                <div v-else>
+                                    <row>&nbsp;</row>
+                                    <row style="margin-top:10px;">
+                                        <i-button type="ghost" shape="circle" icon="edit" @click="editRow(data)"></i-button>
+                                        <i-button type="ghost" shape="circle" icon="ios-trash" @click="deleteRow(data)"></i-button>
+                                        <i-button type="ghost" shape="circle" icon="android-share-alt" @click="shareRow(data)"></i-button>
+                                    </row>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 解析文本中的html标签 -->
+                        <div id="text_content" v-html="data.note_text"></div>
+                        
+                        <div id="edit_content"></div>
+                        
+                        <!-- 评分区域 -->
+                        <row id="rate" >
+                            <div v-show="params.user_id != data.create_user">
+                                <p v-if="ifScore">
+                                     <span><strong>已评分: &nbsp;</strong></span>
+                                     <Rate show-text allow-half v-model="pScore" disabled>   
+                                         <span style="color: #f5a623">{{pScore}}分</span>
+                                     </Rate>
+                                 </p>
+                                 <p v-else>
+                                  <span><strong>评分 :</strong></span>
+                                     <Rate show-text allow-half @on-change="doScore"></Rate>
+                                 </p>
+                            </div>
+                        </row>
+                        
+                        <!-- 上下篇  -->
+                        <div v-for="item in datasUpAndDown" :key="item.note_id">
+                           <div v-if="datasUpAndDown.length==1">
+                               <row v-if="item.pre=='pre'">
+                                  <span>上一篇：当前已是最前一篇</span>
+                               </row>
+                               <row v-else>
+                                   <a @click="redirect(item.pre)">上一篇: {{item.note_title}}</a>
+                               </row>
+                               <row v-if="item.next=='next'">
+                                  <span>下一篇：当前已是最后一篇</span>
+                               </row>
+                               <row v-else>
+                                   <a @click="redirect(item.next)">下一篇: {{item.note_title}}</a>
+                               </row>
+                           </div>
+                           <div v-else>
+                                <row v-if="item.pre != 'pre'">
+                                    <a @click="redirect(item.pre)">上一篇: {{item.note_title}}</a>
+                                </row>
+                                <row v-if="item.next != 'next'">
+                                    <a @click="redirect(item.next)">下一篇: {{item.note_title}}</a>
+                                </row>
+                           </div>
+                        </div>
+                         
+                    </card>
+                    
+                    <!-- 评论区域 -->
+                    <div style="margin-top:20px;">
+                        <card shadow>
+                            <p slot="title">
+                                <font size="4">评论区</font>
+                            </p>
+                            <p slot="extra" v-show="params.user_id != data.create_user">
+                                <a href="#commont">我也要评论 &#187;</a>
+                            </p>
+                            
+                            <!-- 评论内容列表 -->
+                            <div class="comment_list" v-for="com in commentDatas">
+                                <row>
+                                    <i-col span="2">
+                                        <Avatar size="large" src="sample-gravatar.jpg" />
+                                    </i-col>
+                                    <i-col span="8">
+                                        <row>{{com.user_name}}</row>
+                                        <row>评论时间:{{com.create_date}}</row>
+                                    </i-col>
+                                </row>
+                                <row>
+                                    <p>{{com.comment_text}}</p>
+                                </row>
+                            </div>
+                            
+                            <!-- 分页部分 -->
+                            <p v-if="page.totalCount != 0">
+                              <page @on-page-size-change="handleSizeChange" size="small" 
+                                :page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+                                :current="page.getPageNumber()" show-total 
+                                :total="page.totalCount" > </page>
+                            </p>
+                            <p v-else>当前暂无评论</p>
+                            
+                            <br/>    
+                            
+                            <!-- 评论框 -->
+                            <card id="commont" style="background-color:rgb(245,245,245);" dis-hover v-show="params.user_id !== data.create_user">
+                                <p slot="title">发表评论</p>
+                                <i-form :label-width="80">
+                                    <form-item label="用户名：">
+                                        {{params.user_id}}
+                                    </form-item>
+                                    <form-item label="评论内容：">
+                                        <i-input type="textarea" v-model="textarea" :autosize="{minRows: 3,maxRows: 5}" placeholder="请输入你的评论内容"/>
+                                    </form-item>
+                                    <form-item>
+                                        <i-button @click="submitText">
+                                            提交
+                                            <Icon type="chevron-right"></Icon>
+                                        </i-button>
+                                    </form-item>
+                                </i-form>
+                            </card>
+                        </card>
+                    </div>
+                </i-col>
+                
+                <!-- 右边侧边栏相关信息 -->
+                <i-col span="6" style="padding-left:10px;">
+                    <card shadow>
+                        <p slot="title"><font size="2">作者介绍</font></p>
+                        <row style="text-align:center;margin-bottom:5px;">
+                            <strong>{{data.user_name}}</strong>
+                        </row>
+                        <row>
+                           <span>作者的具体介绍</span>
+                        </row>
+                    </card>
+                    <div style="margin-top:20px;">
+                        <card shadow>
+                            <p slot="title"><font size="2">作者相关文章</font></p>
+                            <p slot="extra"><a @click="refreshNoteList" style="color:blue"><Icon type="android-refresh"></Icon>换一换</a></p>
+                            <row v-for="item in otherNoteDatas" :key="item.note_id" style="margin-bottom:5px;">
+                               <a @click="redirect(item.note_id)">{{item.note_title}}</a>
+                               <span style="color:#f5a623;">&emsp;{{item.note_score}}分</span>
+                            </row>
+                        </card>
+                    </div>
+                    <!-- <div style="margin-top:20px;">
+                        <card shadow>
+                            <p slot="title"><font size="2">热门文章推荐</font></p>
+                        </card>
+                    </div> -->
+                </i-col>
+            </row>
+            
+            <back-top :height="400" :bottom="200" :right="90">
+                <div class="top">返回顶端</div>
+            </back-top>
+        </div>
+    </div>
+
+</body>
+<!--[if lte IE 9]>
+    <script src="../../../js/jquery/respond.js"></script>
+    <script src="../../../js/jquery/html5shiv.js"></script>    
+<![endif]-->
+
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.js"></script>
+<script src="../../../js/jquery/jquery-migrate.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.js"></script>
+
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+
+<script type="text/javascript" src="noteDetail.js"></script>
+</html>

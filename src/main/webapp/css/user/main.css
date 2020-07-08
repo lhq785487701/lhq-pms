@@ -1,0 +1,18 @@
+html,body{height:100%}
+.sdp-main-container{height:100%}
+.ivu-tabs{height:100%}
+.ivu-tabs .ivu-tabs-content-animated{height:100%}
+
+.iframeClass {
+	z-index: 1;
+	visibility: inherit;
+	width: 100%;
+	height: 100%;
+	frameborder: no;
+	border: 0;
+	marginwidth: 0;
+	marginheight: 0;
+	scrolling-x: no;
+	scrolling-y: auto;
+	allowtransparency: true;
+}

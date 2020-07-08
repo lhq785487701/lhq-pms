@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="pms">
+<meta name="keywords" content="PMS">
+<title>后台主页面</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet" href="../../js/jquery/layer/theme/default/layer.css">
+<link rel="stylesheet" href="../../css/sdp-main.css" />
+<link rel="stylesheet" href="../../css/sdp-ui.css" />
+<link rel="stylesheet"
+	href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet" href="../../css/fonts/awesome/font-awesome.min.css" />
+</head>
+<body>
+	<div class="main" :class="{'main-hide-text': shrink}"
+		id="mainContainer" v-cloak>
+		<div class="main-header" :style="{'padding-left': shrink?'60px':'180px'}">
+			<div class="navicon-con">
+				<row type="flex" justify="start"> <i-col :span="4"> <i-button
+					:style="{transform: 'rotateZ(' + (this.shrink ? '-90' : '0') + 'deg)'}"
+					type="text" @click="toggleClick"> <icon type="navicon"
+					size="32"></icon> </i-button> </i-col></row>
+			</div>
+			<div class="header-middle-con"></div>
+			<div class="header-avator-con">
+				<!-- tab单或者多切换 -->
+				<div @click="handleOneOrMoreTab" class="arrow-swap-btn-con">
+					<tooltip :content="isFullscreen ? '切换单tab' : '切换多tab'" placement="bottom">
+					<icon type="arrow-swap" :size="22"></icon> </tooltip>
+				</div>
+			
+				<!-- 是否全屏 -->
+				<div @click="handleFullscreen" v-if="showFullScreenBtn"
+					class="full-screen-btn-con">
+					<tooltip :content="isFullscreen ? '退出全屏' : '全屏'" placement="bottom">
+					<icon :type="isFullscreen ? 'arrow-shrink' : 'arrow-expand'"
+						:size="22"></icon> </tooltip>
+				</div>
+				<!-- 是否锁屏 -->
+				<div @click="lockScreen" class="lock-screen-btn-con">
+					<tooltip content="锁屏" placement="bottom"> <icon
+						type="locked" :size="20"></icon> </tooltip>
+				</div>
+				<!-- 信息 -->
+				<div @click="showMessage" class="message-con">
+					<tooltip :content="msgNum > 0 ? '有' + msgNum + '条未读消息' : '无未读消息'"
+						placement="bottom"> <badge :count="msgNum" dot>
+					<icon type="ios-bell" :size="22"></icon> </badge> </tooltip>
+				</div>
+				<!-- 系统切换 -->
+				<div v-if="isShowSysMenus" class="system-change-con">
+					<tooltip content="系统切换" placement="left"> <dropdown
+						transfer trigger="hover"> <icon :size="20" type="shuffle" ></icon>
+					<dropdown-menu slot="list"> <dropdown-item
+						v-for="(item, index) in sysMenus" name="item.meu_code">
+					<i :class="item.menu_icon"></i> <label v-text="item.menu_name"
+						@click="changeSystem(item)" style="cursor: pointer;"></label></dropdown-item> </dropdown-menu> </dropdown> </tooltip>
+				</div>
+				<!-- 个人信息 -->
+				<div class="user-dropdown-menu-con">
+					<row type="flex" justify="end" align="middle"
+						class="user-dropdown-innercon"> <dropdown transfer
+						trigger="hover" @on-click="handleClickUserDropdown"> <a
+						href="javascript:void(0)"> <span class="main-user-name">{{
+							user.userName }}</span> <icon type="arrow-down-b"></icon>
+					</a> <dropdown-menu slot="list"> <dropdown-item
+						name="userInfo">个人信息</dropdown-item> <dropdown-item name="userPwd">修改密码</dropdown-item>
+					<dropdown-item name="portConf">首页配置</dropdown-item> <dropdown-item
+						name="loginout" divided>退出登录</dropdown-item> </dropdown-menu> </dropdown> <avatar
+						:src="avatorPath" style="background: #619fe7;margin-left: 10px;"></avatar>
+					</row>
+				</div>
+			</div>
+		</div>
+
+		<!-- 菜单 -->
+		<div class="sidebar-menu-con"
+			:style="{width: shrink?'60px':'180px', overflow: shrink ? 'visible' : 'auto'}">
+			<div :style="{background: bgColor}" class="ivu-shrinkable-menu">
+				<div class="logo-con">
+					<row type="flex" justify="center" align="middle">
+						<img  v-if="shrink" alt="" src="../../css/images/logo-con-shrink.png" style="height:44px;width:44px;">
+						<img  v-else alt="" src="../../css/images/logo-con.png" style="height:44px;width:auto;">						
+					</row>
+					<row type="flex" justify="center" align="middle"> <toolTip
+						v-if="shrink" :content="curSystem.menu_name" placement="right">
+					<icon :icon="curSystem.menu_icon" :color="shrinkIconColor"></icon>
+					</toolTip> <icon :icon="curSystem.menu_icon" v-else :color="shrinkIconColor"></icon>
+					<label v-text="curSystem.menu_name" v-if="!shrink"
+						style="color: white;"></label></row>
+				</div>
+				<!-- accordion 可以开启手风琴模式，每次只能展开一个子菜单-->
+				<i-menu ref="mainMenu" @on-select="menuSelect" theme="dark" v-show="!shrink"  accordion
+					style="width:180px;"  :active-name="activeMenu" :open-names="openChildMenu"  > 
+				<submenu v-if = "item.$chinldrens != 0"  :name="item.menu_code" v-for="(item, index) in menus" :key="item.menu_code"> 
+				<template slot="title"><i :class="item.menu_icon"></i>{{item.menu_name}}</template>
+					<!-- 二级菜单 -->
+					<menu-item v-if="(item.$chinldrens.length &gt; 0) && (menu.$chinldrens == null)" 
+						v-for="(menu, line) in item['$chinldrens']" :name="menu.menu_code" :key="menu.menu_code"> 
+						<i :class="[menu.menu_icon]"></i>{{menu.menu_name}}
+					</menu-item>
+					<!-- 三级菜单 -->
+					<submenu v-if="menu01.$chinldrens != null" :name="menu01.menu_code" v-for="(menu01, line01) in item['$chinldrens']" :key="menu01.menu_code"> 
+						<template slot="title"><i :class="menu01.menu_icon"></i>{{menu01.menu_name}}</template>
+						<menu-item v-if="menu01.$chinldrens != null" v-for="(item01, line) in menu01.$chinldrens" :name="item01.menu_code" :key="item01.menu_code"> 
+							<i :class="[item01.menu_icon]"></i>{{item01.menu_name}}
+						</menu-item>
+					</submenu> 
+				</submenu> 
+				</i-menu>
+
+				<div v-show="shrink">
+					<template v-for="(item, index) in menus">
+					<div style="text-align: center;" :key="index">
+						<dropdown transfer v-if="item.$chinldrens.length &gt; 1"
+							placement="right-start" :key="index" @on-click="menuSelect">
+							<i-button style="width: 70px; margin-left: -5px; padding: 10px 0;" type="text"> 
+							<toolTip :content="item.menu_name" placement="top"> 
+								<icon :size="20" :color="shrinkIconColor" :icon="item.menu_icon"></icon>
+							</toolTip> 
+							</i-button> 
+							<dropdown-menu style="width: 180px;" slot="list"> 
+								<template v-for="(child, i) in item.$chinldrens"> 
+									<!-- 二级菜单 -->
+									<template v-if = "child.$chinldrens == null">
+										<dropdown-item :name="child.menu_code" :key="i" > 
+											<i :class="child.menu_icon"></i> <span style="padding-left: 10px;">{{child.menu_name}}</span>
+										</dropdown-item> 
+									</template>
+									<!-- 三级菜单 -->
+									<template v-else>
+										<dropdown  transfer placement="right">
+											<dropdown-item> 
+												<i :class="child.menu_icon"></i> <span style="padding-left: 10px;">{{child.menu_name}}</span>
+											</dropdown-item> 
+											<dropdown-menu slot="list" style="width: 180px;">
+												<template v-for="(child01, i01) in child.$chinldrens"> 
+													<dropdown-item :name="child01.menu_code" :key="i01">
+														<i :class="child01.menu_icon"></i> <span style="padding-left: 10px;">{{child01.menu_name}}</span>
+													</dropdown-item>
+												</template>
+											</dropdown-menu>
+										</dropdown>
+									</template>
+								</template>
+							</dropdown-menu> 
+						</dropdown>
+						<dropdown transfer  v-if="item.$chinldrens.length == 1" placement="right-start" :key="index"
+							@on-click="menuSelect(item.$chinldrens[0].menu_code)">
+						<i-button @click="menuSelect(item.$chinldrens[0].menu_code)"
+							style="width: 70px; margin-left: -5px; padding: 10px 0;"
+							type="text"> <icon :size="20" :color="shrinkIconColor"
+							:icon="item.menu_icon"></icon> </i-button> <dropdown-menu
+							style="width: 180px;" slot="list"> <dropdown-item
+							:name="item.$chinldrens[0].menu_code" :key="'d' + index">
+
+						<icon :icon="item.menu_icon"></icon> <span
+							style="padding-left: 10px;">{{
+							item.$chinldrens[0].menu_name}}</span></dropdown-item> </dropdown-menu> </dropdown>
+					</div>
+					</template>
+				</div>
+			</div>
+		</div>
+
+		<!--  页面-->
+		<div class="single-page-con" :style="{left: shrink?'60px':'180px'}">
+			<tabs type="card" ref="tabsMain" closable @on-tab-remove="removeTab"
+				v-model="curMenu" @on-click = "changeTab"> <tab-pane label="首页" name="personPortal"
+				:closable="(false)" icon="home"> <iframe
+				name="pageFirstPortalWin" class="iframeClass"
+				src="portal/portal.html"></iframe> </tab-pane> <tab-pane :img="item.menu_icon"
+				closable v-for="(item, index) in menuTabs" :label="item.menu_name"
+				:name="item.menu_code" :key="item.menu_code"> <iframe :id = "item.menu_code"
+				class="iframeClass" :src="item.menu_url"
+				@load="tabPageLoad($event,item.menu_code)"></iframe> </tab-pane> </tabs>
+		</div>
+
+		<div v-if="showUnlock"
+			style="width: 100%; height: 100%; background: #667aa6">
+			<div class="unlock-con">
+				<transition name="show-unlock">
+				<div class="unlock-body-con" v-if="showUnlock"
+					@keydown.enter="handleUnlock">
+					<div @click="handleClickAvator" class="unlock-avator-con"
+						:style="{marginLeft: avatorLeft}">
+						<Avatar class="unlock-avator-img" :src="avatorPath"></Avatar>
+						<div class="unlock-avator-cover">
+							<span><icon type="unlocked" :size="30"></icon></span>
+							<p>解锁</p>
+						</div>
+					</div>
+					<div class="unlock-avator-under-back"
+						:style="{marginLeft: avatorLeft}"></div>
+					<div class="unlock-input-con">
+						<div class="unlock-input-overflow-con">
+							<div class="unlock-overflow-body" :style="{right: inputLeft}">
+								<input ref="inputEle" v-model="password" class="unlock-input"
+									type="password" placeholder="密码同登录密码" />
+								<button ref="unlockBtn" @mousedown="unlockMousedown"
+									@mouseup="unlockMouseup" @click="handleUnlock"
+									class="unlock-btn">
+									<icon color="white" type="key"></icon>
+								</button>
+							</div>
+						</div>
+					</div>
+					<div class="unlock-locking-tip-con">已锁定</div>
+				</div>
+				</transition>
+			</div>
+		</div>
+
+		<Modal v-model="pwdEdit" title="密码修改" :mask-closable="false"
+			@on-ok="pwdDataSave" @on-cancel="pwdDataCancel"> <i-form
+			:model="pwd" label-position="right" :label-width="80" ref="pwdForm"
+			:rules="rulesPwd"> <form-item label="原密码:" prop="oldPwd"
+			:required="true"> <i-input v-model="pwd.oldPwd"
+			type="password" v-bind:auto-complete="'off'"></i-input> </form-item> <form-item
+			label="新密码:" prop="newPwd" :required="true"> <i-input
+			v-model="pwd.newPwd" type="password" v-bind:auto-complete="'off'"></i-input>
+		</form-item> <form-item label="密码确认:" prop="newPwd1" :required="true">
+		<i-input v-model="pwd.newPwd1" type="password"
+			v-bind:auto-complete="'off'"></i-input> </form-item></i-form> </Modal>
+
+		<Modal v-model="userEdit" title="帐号信息修改" :mask-closable="false"
+			@on-ok="userDataSave"> <i-form :model="user"
+			label-position="right" :label-width="80" ref="userForm"
+			:rules="rulesUser"> <form-item label="帐号编码:"> <i-input
+			v-model="user.userCode" :disabled="true"></i-input> </form-item> <form-item
+			label="帐号名称:" prop="userName" :required="true"> <i-input
+			v-model="user.userName"></i-input> </form-item> <form-item label="用户邮箱:"
+			prop="user_email"> <i-input v-model="user.user_email"></i-input></form-item>
+		<form-item label="用户手机:" prop="user_mobile" :required="true">
+		<i-input v-model="user.user_mobile"></i-input></form-item></i-form> </Modal>
+	</div>
+</body>
+<script src="../../js/jquery/IE.plugin.js"></script>
+<!--[if lte IE 9]>	
+	<script src="../../js/ieBetter-min.js"></script>
+	<script src="../../js/jquery/respond.js"></script>
+	<script src="../../js/jquery/html5shiv.js"></script>	
+<![endif]-->
+
+<script src="../../js/md5.js"></script>
+<script src="../../js/js.cookie.js"></script>
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.min.js"></script>
+<script src="../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.min.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/SDPLayer.js"></script>
+<script type="text/javascript" src="main.js"></script>
+</html>

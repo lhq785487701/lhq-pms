@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.excelimp">
+	<!-- 返回字段 -->
+	<sql id="Imp_MColumn_List">
+		imp_code,imp_name,imp_remark, imp_statement,start_line,is_store,create_date,create_user,update_date,update_user
+	</sql>
+	
+	<!-- 根据导入编码查询 -->
+	<select id="queryByImpcode" resultType="com.lhq.pms.data.Row" parameterType="string">
+		select imp_code,imp_name,imp_statement,imp_remark,start_line,is_store
+		from sdp_excel_imp
+		where imp_code=#{imp_code,jdbcType=VARCHAR}
+	
+	</select>
+	
+	<!-- 查询头表数据 -->
+	<select id="queryExcelImp" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select
+		<include refid="Imp_MColumn_List" />
+		from sdp_excel_imp
+		<where>
+			<if test="imp_code != null">
+				imp_code like
+				CONCAT('%',#{imp_code,jdbcType=CHAR},'%')
+			</if>
+			<if test="imp_name != null">
+				and imp_name like
+				CONCAT('%',#{imp_name,jdbcType=CHAR},'%')
+			</if>
+			<if test="is_store != null">
+				and is_store in 
+				<foreach collection="is_store" item="sts" index="index"
+					open="(" close=")" separator=",">
+					#{sts}
+				</foreach>
+			</if>
+		</where>
+		order by create_date desc
+	</select>
+	
+	<!-- 从表明细数据 -->
+	<select id="queryExcelImp01" resultType="com.lhq.pms.data.Row"
+		parameterType="string">
+		select imp_line_id,
+		imp_code,line_no,excel_col,imp_col,is_null,sql_code,dic_code,repeat_sql_code,create_date,create_user,update_date,update_user
+		from sdp_excel_imp_01 where imp_code=#{imp_code,jdbcType=VARCHAR}
+		order by
+		line_no
+	</select> 
+	
+	<!-- 主表数据插入 -->
+ 	<insert id="insertExcelImp" parameterType="map">
+		insert into
+		sdp_excel_imp(imp_code,imp_name,imp_statement,imp_remark,start_line,is_store,create_date,create_user)
+		VALUES(#{imp_code,jdbcType=VARCHAR},#{imp_name,jdbcType=VARCHAR},#{imp_statement,jdbcType=VARCHAR},
+		#{imp_remark,jdbcType=VARCHAR},#{start_line,jdbcType=CHAR},#{is_store,jdbcType=CHAR}, now(),#{$user_code,jdbcType=VARCHAR})
+	</insert> 
+	
+	<!-- 配置明细插入 -->
+ 	<insert id="insertExcelImp01" parameterType="map">
+		insert into
+		sdp_excel_imp_01(imp_line_id,imp_code,line_no,excel_col,imp_col,is_null,sql_code,dic_code,repeat_sql_code,create_date,create_user)
+		VALUES(#{$uuid,jdbcType=VARCHAR},#{imp_code,jdbcType=VARCHAR},#{line_no,jdbcType=VARCHAR},#{excel_col,jdbcType=CHAR},
+		#{imp_col,jdbcType=VARCHAR},#{is_null,jdbcType=CHAR},#{sql_code,jdbcType=VARCHAR},#{dic_code,jdbcType=VARCHAR},#{repeat_sql_code,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=VARCHAR})
+	</insert> 
+	
+	<!--配置主表删除数据 -->
+ 	<delete id="deleteExcelImp" parameterType="map">
+		delete from sdp_excel_imp
+		where imp_code=#{imp_code,jdbcType=VARCHAR}
+	</delete> 
+	
+	<!-- 删除部分明细 -->
+ 	<delete id="deleteExcelImp01s" parameterType="map">
+		delete from
+		sdp_excel_imp_01 where
+		imp_line_id=#{imp_line_id,jdbcType=VARCHAR}
+	</delete> 
+	
+	<!-- 删除头表时，删明细 -->
+ 	<delete id="deleteExcelImp01" parameterType="map">
+		delete from
+		sdp_excel_imp_01 where
+		imp_code=#{imp_code,jdbcType=VARCHAR}
+	</delete>
+	
+	 <!-- 配置修改 -->
+ 	<update id="updateExcelImp" parameterType="map">
+		update sdp_excel_imp
+		<set>
+			<if test="imp_name != null">
+				imp_name=#{imp_name,jdbcType=VARCHAR},
+			</if>
+			<if test="imp_statement != null">
+				imp_statement=#{imp_statement,jdbcType=VARCHAR},
+			</if>
+			<if test="imp_remark != null">
+				imp_remark=#{imp_remark,jdbcType=VARCHAR},
+			</if>
+			<if test="is_store != null">
+				is_store=#{is_store,jdbcType=CHAR},
+			</if>
+			<if test="start_line != null">
+				start_line=#{start_line,jdbcType=CHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where imp_code=#{imp_code,jdbcType=VARCHAR}
+	</update>  
+	
+		<!-- 配置明细修改 -->
+  	<update id="updateExcelImp01" parameterType="map">
+		update sdp_excel_imp_01
+		<set>
+			<if test="line_no">
+				line_no=#{line_no,jdbcType=VARCHAR},
+			</if>
+			<if test="excel_col != null">
+				excel_col=#{excel_col,jdbcType=CHAR},
+			</if>
+			<if test="imp_col != null">
+				imp_col=#{imp_col,jdbcType=VARCHAR},
+			</if>
+			<if test="is_null != null">
+			 	is_null=#{is_null,jdbcType=CHAR}, 
+			</if>
+			<if test="sql_code != null">
+				sql_code=#{sql_code,jdbcType=VARCHAR},
+			</if>
+			<if test="dic_code != null">
+				dic_code=#{dic_code,jdbcType=VARCHAR},
+			</if>
+			<if test="repeat_sql_code !=null">
+				repeat_sql_code=#{repeat_sql_code,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where imp_line_id=#{imp_line_id,jdbcType=VARCHAR}
+	</update> 
+</mapper>

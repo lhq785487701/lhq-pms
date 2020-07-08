@@ -1,0 +1,102 @@
+﻿arset "utf-8 ";
+	/* 蓝色 */
+	/*全站默认字体颜色*/ a {
+	color: #333
+}
+
+html {
+	height: 100%;
+	margin: 0px;
+}
+
+body {
+	min-height: 100%;
+	position: relative;
+	font-size: 14px;
+	color: #333;
+	background-color: #fff;
+	margin: 0px;
+	height: 100%;
+}
+
+[v-cloak] {
+	display: none;
+}
+.hide{
+	display: none;
+}
+
+a:hover, a:focus, .maincolor, .maincolor a {
+	color: #06c
+}
+
+.sdp-main-container {
+	display: block;
+	content: "";
+	position: absolute;
+	z-index: 0;
+	width: 100%;
+	height: 100%;
+	max-width: inherit;
+	bottom: 0;
+	top: 0;
+	background-color: #FFF;
+}
+
+.iframeClass {
+	visibility: inherit;
+	width: 100%;
+	height: 100%;
+	z-index: 0;
+	frameborder: no;
+	border: 0;
+	marginwidth: 0;
+	marginheight: 0;
+	scrolling-x: no;
+	scrolling-y: auto;
+	allowtransparency: true;
+}
+
+.ivu-tabs, .ivu-tabs-card, .ivu-tabs .ivu-tabs-content, .ivu-tabs .ivu-tabs-content .ivu-tabs-tabpane
+	{
+	height: 100%;
+}
+
+.ivu-form-item {
+	margin-bottom: 4px;
+}
+
+.ivu-row {
+	margin-left: 0px !important;
+	margin-right: 0px !important;
+}
+
+.ivu-card-body {
+	padding: 3px;
+}
+
+.ivu-card-head {
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.ivu-tabs-bar {
+	margin-bottom: 2px !important;
+}
+
+.vertical-center-modal {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.vertical-center-modal>.ivu-modal {
+	top: 0px;
+}
+
+.ivu-table-cell {
+	padding-top: 1px;
+	padding-bottom: 1px;
+	padding-left: 5px;
+	padding-right: 5px;
+}

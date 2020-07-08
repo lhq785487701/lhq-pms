@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<title>笔记详情页面</title>
+<link rel="stylesheet"
+    href="../../../js/jquery/layer/skin/default/layer.css" />
+<link rel="stylesheet"
+    href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+    href="../../../css/fonts/awesome/font-awesome.min.css" />
+<link rel="stylesheet" href="../../../css/iview.css" />
+<link rel="stylesheet" href="noteDetail01.css" />
+<style type="text/css">
+#box_relative {
+  position: absolute;
+  left: -60px;
+  top: 70px;
+}
+#box_relative ul li{
+    margin-bottom:15px;
+    padding:8px 0;
+    width:40px;
+    height:40px;
+    border-radius:50%; 
+    background-color: white;
+    overflow:hidden;
+    text-align:center;
+}
+</style>
+</head>
+<body>
+    <div id="mainContainer" v-cloak>
+        <!-- 左边悬浮功能 -->
+                <div id="box_relative" >
+                    <!-- 其他用户进入该页面时 -->
+                    <Affix :offset-top="90">
+                        <ul v-if="params.user_id != data.create_user">
+                            <li>
+                                <a @click="cancelCollect()" v-if="ifcollect">
+                                    <i class="fa fa-heart fa-2x" aria-hidden="true" style="color:#FF4E22" title="取消收藏"></i>
+                                </a>
+                                <a @click="collect()" v-else>
+                                    <i class="fa fa-heart-o fa-2x" aria-hidden="true" title="收藏"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#rate">
+                                    <!-- <i class="fa fa-star fa-2x" aria-hidden="true" style="color:#f5a623" v-if="ifScore"></i> -->
+                                    <i class="fa fa-star-o fa-2x" aria-hidden="true" title="评分"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#commont">
+                                    <i class="fa fa-commenting-o fa-2x" aria-hidden="true" title="评论"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- 用户进入自己的笔记详情页面 -->
+                        <ul v-else>
+                            <li>
+                                <a @click="editRow(data)">
+                                    <i class="fa fa-pencil-square-o fa-2x" aria-hidden="true" title="编辑"></i>
+                                </a>
+                            </li>
+                            <div v-show="data.note_share ==='N'">
+                            <li>
+                                <a @click="deleteRow(data)">
+                                    <i class="fa fa-remove fa-2x" aria-hidden="true" title="删除"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a @click="shareRow(data)">
+                                    <i class="fa fa-share-square-o fa-2x" aria-hidden="true" title="分享"></i>
+                                </a>
+                            </li>
+                            </div>
+                        </ul>
+                    </Affix>
+                </div>
+        
+        <row>
+            <i-col span="18">
+                <!-- 笔记详情 -->
+                <card>
+                    <h1>笔记标题</h1>
+                    <row>
+                        <i-col span="8">
+                            综合评分： 
+                            <Rate show-text disabled allow-half :value="4">
+                                <span style="color: #f5a623">4分</span>
+                            </Rate>
+                            <!-- <Rate show-text disabled allow-half v-model="data.note_score">
+                                <span style="color: #f5a623">{{data.note_score}}分</span>
+                            </Rate> -->
+                        </i-col>
+                        <i-col span="2" offset="13">
+                            <i-button>
+                                <icon type="ios-heart"></icon> 
+                            已收藏
+                            </i-button>
+                        </i-col>
+                    </row>
+                    <!-- <Slider :value="[0,100]" range disabled show-tip="never"></Slider> -->
+                    <row>
+                        <div class="post_date">
+                            <i-col span="5" offset="1">
+                                <span>分享于: 2017-05-08</span>
+                            </i-col>
+                            <i-col span="12" offset="2">
+                                <span>标签：</span>
+                                <tag>标签一</tag>
+                                <!-- <tag v-for="item in tagList">{{item.value}}</tag> -->
+                            </i-col>
+                        </div>
+                    </row>
+                    <div id="note_content">
+                        Java是一门面向对象编程语言，不仅吸收了C++语言的各种优点，还摒弃了C++里难以理解的多继承、指针等概念，因此Java语言具有功能强大和简单易用两个特征。Java语言作为静态面向对象编程语言的代表，极好地实现了面向对象理论，允许程序员以优雅的思维方式进行复杂的编程[1]  。
+                    </div>
+                    <row style="margin-top:10px;">
+                        <i-col span="12">
+                            <span><strong>评分 :</strong></span>
+                            <Rate  allow-half></Rate>
+                            <!-- <div v-if="ifScore">
+                                <h5>你已经对该文章做了评分 :</h5>
+                                    <Rate  allow-half v-model="pScore" disabled>    
+                                        <span style="color: #f5a623">{{pScore}}分</span>
+                                    </Rate>
+                            </div>
+                            <div v-else>
+                             <h5>评分 :</h5>
+                                <Rate  allow-half @on-change="doScore"> 
+                                </Rate>
+                            </div> -->
+                        </i-col>
+                    </row>
+                </card>
+                <!-- 评论区 -->
+                <card>
+                    <p slot="title">
+                        <font size="4">评论区</font>
+                    </p>
+                    <p slot="extra">
+                        <a href="#">我也要评论 &#187;</a>
+                    </p>
+                    
+                    <!-- 评论内容列表 -->
+                    <row style="padding-top:5px;">
+                            <Avatar src="sample-gravatar.jpg" size="large"/>
+                    </row>
+                    <!-- <div class="comment_list"  v-for="com in commentDatas">
+                        <div class="comment alt">
+                            <div class="comment_gravatar left"><img alt="" src="sample-gravatar.jpg" height="32" width="32" /></div>
+                            <div class="comment_author left">
+                                {{com.user_name}}
+                                <div class="comment_date">评论时间：{{com.create_date}}</div>
+                            </div>
+                            <div class="clearer">&nbsp;</div>
+                            <div class="comment_body">                                  
+                                <p>{{com.comment_text}}</p>
+                            </div>
+                        </div>
+                    </div> -->
+                </card>
+            </i-col>
+            
+            <!-- 右边侧边栏相关信息 -->
+            <i-col span="6" style="padding-left:10px;">
+                <card>
+                    <h4>作者介绍</h4>
+                </card>
+            </i-col>
+        </row>
+    </div>
+
+</body>
+<!--[if lte IE 9]>
+    <script src="../../../js/jquery/respond.js"></script>
+    <script src="../../../js/jquery/html5shiv.js"></script>    
+<![endif]-->
+
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.js"></script>
+<script src="../../../js/jquery/jquery-migrate.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.js"></script>
+
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+
+<script type="text/javascript" src="noteDetail01.js"></script>
+</html>

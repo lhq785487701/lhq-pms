@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.sys">
+	<resultMap id="confResultMap" type="com.lhq.pms.data.Row">
+		<id column="conf_code" property="conf_code" jdbcType="VARCHAR" />
+		<result column="conf_name" property="conf_name" jdbcType="VARCHAR" />
+		<result column="conf_value" property="conf_value" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="confListResultMap" type="com.lhq.pms.data.Row">
+		<id column="conf_code" property="conf_code" jdbcType="VARCHAR" />
+		<result column="conf_name" property="conf_name" jdbcType="VARCHAR" />
+		<result column="conf_value" property="conf_value" jdbcType="VARCHAR" />
+		<result column="conf_remark" property="conf_remark" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="conf_column_list">
+		c.conf_code, c.conf_name,c.conf_value
+	</sql>
+	<sql id="conf_list_column_list">
+		c.conf_code, c.conf_name,c.conf_value,c.conf_remark,
+		c.create_date,c.create_user,c.update_date,c.update_user
+	</sql>
+
+	<select id="dbCurTime" resultType="java.util.Date">
+		SELECT now()
+	</select>
+
+	<!-- 获取系统配置信息 -->
+	<select id="selectSysConfs" resultMap="confResultMap">
+		select
+		<include refid="conf_column_list" />
+		from sdp_system_conf c
+	</select>
+
+	<!-- 查询系统配置信息 -->
+	<select id="querySysConfs" resultMap="confListResultMap"
+		parameterType="map">
+		select
+		<include refid="conf_list_column_list" />
+		from sdp_system_conf c
+		<where>
+			<if test="conf_code!=null">
+				c.conf_code like
+				CONCAT('%',#{conf_code,jdbcType=CHAR},'%')
+			</if>
+			<if test="conf_name!=null">
+				and c.conf_name like
+				CONCAT('%',#{conf_name,jdbcType=CHAR},'%')
+			</if>
+		</where>
+	</select>
+
+	<insert id="addSysConf" parameterType="map">
+		insert into
+		sdp_system_conf(conf_code,conf_name,conf_value,conf_remark,create_date,create_user)
+		VALUES(#{conf_code,jdbcType=CHAR},#{conf_name,jdbcType=CHAR},#{conf_value,jdbcType=CHAR},#{conf_remark,jdbcType=CHAR},now(),#{$user_code,jdbcType=CHAR})
+	</insert>
+
+	<!-- 更新系统配置 -->
+	<update id="updateSysConf" parameterType="map">
+		update sdp_system_conf
+		<set>
+			<if test="conf_name!=null">
+				conf_name=#{conf_name,jdbcType=CHAR},
+			</if>
+			<if test="conf_value!=null">
+				conf_value=#{conf_value,jdbcType=CHAR},
+			</if>
+			<if test="conf_remark!=null">
+				conf_remark=#{conf_remark,jdbcType=CHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where conf_code=#{conf_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 删除系统配置 -->
+	<delete id="delSysConf" parameterType="map">
+		delete from
+		sdp_system_conf where conf_code=#{conf_code,jdbcType=CHAR}
+	</delete>
+</mapper>

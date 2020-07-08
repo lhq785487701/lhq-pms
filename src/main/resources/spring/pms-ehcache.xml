@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<bean id="cacheManager"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:pms-ehcache-setting.xml"></property>
+	</bean>
+
+	<!-- 菜单变化缓存处理 -->
+	<bean id="sdpSqlCodeMenuChangeCacheBo" class="com.lhq.pms.cache.bo.impl.MenuChangCacheBoImpl">
+		<property name="cacheName" value="menuCache" />
+	</bean>
+
+	<!-- menu初始化 -->
+	<bean id="menuInitCacheBo" class="com.lhq.pms.cache.bo.impl.BaseInitCacheBoImpl">
+		<property name="cacheName" value="menuCache" />
+		<property name="sqlCode" value="SDP-MENU-010" />
+	</bean>
+
+	<!-- 数据字典初始化 -->
+	<bean id="dicInitCacheBo" class="com.lhq.pms.cache.bo.impl.DicInitCacheBoImpl">
+		<property name="cacheName" value="dicCache" />
+		<property name="sqlCode" value="SDP-DIC-013" />
+	</bean>
+
+	<!-- 数据字典变化缓存处理 -->
+	<bean id="sdpDicChangeCacheBo" class="com.lhq.pms.cache.bo.impl.DicChangCacheBoImpl">
+		<property name="cacheName" value="dicCache" />
+	</bean>
+
+	<!-- 数据字典缓存 -->
+	<bean id="dicCacheBo" class="com.lhq.pms.cache.bo.impl.DicCacheBoImpl"
+		parent="commonBo" />
+		
+	<!-- 门户授权数据初始化 -->
+	<bean id="portalRoleInitCacheBo" class="com.lhq.pms.portal.cache.PortalRoleInitCacheBoImpl">
+		<property name="cacheName" value="portalRoleCache" />
+		<property name="sqlCode" value="SDP-PORTAL-WIN-010" />
+	</bean>
+
+	<!-- 门户授权初始化缓存 -->
+	<bean id="portalRoleInitCacheBean" class="com.lhq.pms.sys.vo.SystemInitBean">
+		<property name="initCacheBo" ref="portalRoleInitCacheBo" />
+	</bean>
+</beans>

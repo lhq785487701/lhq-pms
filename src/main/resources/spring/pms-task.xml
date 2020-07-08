@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/cache 
+     http://www.springframework.org/schema/cache/spring-cache.xsd
+     http://www.springframework.org/schema/task 
+     http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<!--搜索引擎日志Bo -->
+	<bean id="taskLogBo" class="com.lhq.pms.logging.bo.impl.EsLogBoImpl"
+		parent="commonBo">
+		<property name="index" value="${pms.task.index}"></property>
+		<property name="indexType" value="${pms.task.index_type}"></property>
+	</bean>
+
+	<!-- 任务执行接口 -->
+	<bean id="taskBo" class="com.lhq.pms.task.bo.impl.TaskBoImpl"
+		parent="commonBo">
+	</bean>
+
+	<!-- 调度工厂 -->
+	<bean id="scheduler"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+	</bean>
+
+	<!-- sql调度执行 -->
+	<bean id="taskSQLBo" class="com.lhq.pms.task.bo.impl.TaskSqlExecuteBoImpl">
+	</bean>
+
+	<!-- URL调度执行 -->
+	<bean id="taskURLBo" class="com.lhq.pms.task.bo.impl.TaskUrlExecuteBoImpl">
+	</bean>
+
+</beans>

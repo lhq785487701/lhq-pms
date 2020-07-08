@@ -1,0 +1,18 @@
+[v-cloak] {
+  display: none;
+}
+
+body {
+    background-color: rgb(243, 243, 243);
+    width: 1024px;
+    margin: 0 auto;
+    padding-top: 20px;
+}
+/* 
+.post_date{
+	border-top: 1px solid #D5D5D5;
+	color: #777;
+	font-size: 0.9em;
+	padding: 8px 0 12px;
+	margin-top:5px;
+} */

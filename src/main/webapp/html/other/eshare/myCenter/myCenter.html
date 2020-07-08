@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+
+
+<title>个人中心</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet" href="../../css/index/a.css">
+</head>
+
+<body style="background-color:white">
+<div id="myCenter">
+	<!-- index_nav -->
+    <include file="h.html">
+	<div id="myCenters">
+		<div style="float:left">
+			<i-menu  active-name="1" width="130px">
+            	<menu-item name="1">
+                	<Icon type="document-text"></Icon>
+                	<span  @click="curl()" >个人资料
+            	</menu-item>
+            	<menu-item name="2">
+                	<Icon type="chatbubbles"></Icon>
+                	<span @click="curls()">密码修改
+            	</menu-item>
+      		</i-menu>
+		</div>
+		<div style="margin-left:8px;float:left;height:500px;width:calc(100% - 150px);margin-top: 10px" id="srcUrls">
+			<iframe src="information.html" id="srcs"id="iframepage" style="height:500px;width:calc(100% - 150px)" frameborder="0" ></iframe>
+    	</div>
+	
+	</div><!-- myCenters -->
+</div><!-- myCenter -->
+</body>
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<script src="../../js/vue/vue.js"></script>
+<script src="../../js/vue/ui/iview.js"></script>
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="myCenter.js"></script>
+<script type="text/javascript" src="../b.js"></script>
+</html>

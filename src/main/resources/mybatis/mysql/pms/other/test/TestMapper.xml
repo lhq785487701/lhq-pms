@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.test">
+	
+	<!-- 消费菜单返回结果对象定义 -->
+	<resultMap id="testMap" type="map">
+		<id column="test_id" property="test_id" jdbcType="INTEGER" />
+		<result column="test_name" property="test_name" jdbcType="VARCHAR" />
+		<result column="test_content" property="test_content" jdbcType="VARCHAR" />
+		<result column="node_code" property="node_code" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="queryTestTable" resultMap="testMap" parameterType="map">
+		select pnt.test_id, pnt.test_name, pnt.test_content, pnt.node_code 
+		from pms_node_test pnt, pms_common_tree pct
+		<where>
+			pct.node_code = pnt.node_code
+			and pct.node_code = #{node_code,jdbcType=VARCHAR}
+			<if test="test_name !=null and test_name != ''">
+				and pnt.test_name like
+				CONCAT('%',#{test_name,jdbcType=VARCHAR},'%')
+			</if>
+			<if test="test_name !=null and test_name != ''">
+				and pnt.test_content like
+				CONCAT('%',#{test_content,jdbcType=VARCHAR},'%')
+			</if>
+		</where>
+		order by test_id
+	</select>
+
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	
+	<bean class="org.springframework.session.web.http.DefaultCookieSerializer">
+		<property name="cookieName" value="${pms.session.cookiename}"></property>
+		<property name="cookiePath" value="${pms.session.cookiepath}"></property>
+		<property name="cookieMaxAge" value="${pms.session.cookieMaxAge}"></property>
+		<!--<property name="domainNamePattern" value="^.+?\.(\w+\.[a-z]+)$"></property> -->
+	</bean>
+
+	<!-- 不能配置 会影响cookieName配置 <bean id="cookieHttpSessionStrategy" class="org.springframework.session.web.http.CookieHttpSessionStrategy"></bean> 
+		org.springframework.session.web.http.SessionRepositoryFilter -->
+
+	<bean
+	class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration">
+		<property name="maxInactiveIntervalInSeconds" value="${pms.session.maxInactiveIntervalInSeconds}"></property>
+		<property name="redisNamespace" value="${pms.session.redis.namespace}"></property>
+	</bean>
+
+	<!-- 必须配置 否则web.xml里面session过滤器出错 -->
+	<context:component-scan
+		base-package="org.springframework.web.filter.DelegatingFilterProxy">
+	</context:component-scan>
+</beans>

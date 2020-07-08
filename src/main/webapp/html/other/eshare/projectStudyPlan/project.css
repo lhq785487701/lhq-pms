@@ -1,0 +1,103 @@
+@CHARSET "UTF-8";
+
+.allStyle{
+	background-color:rgb(243,243,243);
+	width: 75%;
+	margin: 0 auto;
+	
+}
+a {
+	cursor:default;
+    text-decoration: none;
+    color: #777777
+}
+
+a:hover,
+a:focus {
+    outline: none;
+   /*  color: #F03131 */
+    color: #777777
+}
+#imgChange{
+margin-left:5%
+}
+#cards{
+
+}
+#cards span{
+	margin-left:20px;
+	font-size: 14px;
+	color: #777777
+}
+.assists{
+margin-left:15px
+}
+.assist{
+margin-left:3px
+}
+p{
+letter-spacing:2px;
+margin: 10px 0;
+font-size: 14px;
+
+position:relative;
+line-height:1.4em;
+/* 3 times the line-height to show 3 lines */
+height:4.1em;
+overflow:hidden;
+}
+
+.dot{
+letter-spacing:2px;
+margin: 10px 0;
+font-size: 14px;
+}
+
+p::after {
+    content:"...";
+    font-weight:bold;
+    position:absolute;
+    bottom:0;
+    right:0;
+    padding:0 20px 1px 45px;
+    background:url(http://css88.b0.upaiyun.com/css88/2014/09/ellipsis_bg.png) repeat-y;
+}
+
+
+
+.brs{ 
+height:8px
+}
+.tags{
+margin-left:8px;
+margin-top:8px;
+}
+.button_group{
+	float:right;
+	bottom:20px;
+}
+
+[v-cloak] {
+  display: none;
+}
+
+
+.maintab {
+	z-index: 1;
+	visibility: inherit;
+	width: 100%;
+	height:1024px;
+	frameborder: no;
+	border: 0;
+	marginwidth: 0;
+	marginheight: 0;
+	scrolling-x: no;
+	scrolling-y: no;
+	allowtransparency: true;
+}
+
+
+
+
+
+

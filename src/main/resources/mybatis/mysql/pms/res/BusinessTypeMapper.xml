@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.business.type">
+	<resultMap id="busTypeResultMap" type="com.lhq.pms.data.Row">
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="bus_type" property="bus_type" jdbcType="VARCHAR" />
+		<result column="bus_type_name" property="bus_type_name"
+			jdbcType="VARCHAR" />
+		<result column="bus_type_sts" property="bus_type_sts" jdbcType="VARCHAR" />
+		<result column="line_no" property="line_no" jdbcType="INTEGER" />
+	</resultMap>
+	<resultMap id="busTypeListResultMap" type="com.lhq.pms.data.Row">
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="bus_type" property="bus_type" jdbcType="VARCHAR" />
+		<result column="bus_type_name" property="bus_type_name"
+			jdbcType="VARCHAR" />
+		<result column="bus_type_sts" property="bus_type_sts" jdbcType="VARCHAR" />
+		<result column="line_no" property="line_no" jdbcType="INTEGER" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="bus_type_column_list">
+		bt.system_code,
+		bt.bus_type,bt.bus_type_name,bt.bus_type_sts,bt.line_no
+	</sql>
+	<sql id="bus_type_list_column_List">
+		bt.system_code,
+		bt.bus_type,bt.bus_type_name,bt.bus_type_sts,bt.line_no,
+		bt.create_date,bt.create_user,bt.update_date,bt.update_user
+	</sql>
+
+	<!-- 根据系统编码业务类型信息 -->
+	<select id="selectBusTypeBySystemCode" resultMap="busTypeResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="bus_type_column_list" />
+		from sdp_bus_type bt where bt.system_code
+		=#{system_code,jdbcType=VARCHAR}
+		order by bt.line_no
+	</select>
+
+	<!--业务信息查询 -->
+	<select id="queryBusType" resultMap="busTypeListResultMap"
+		parameterType="map">
+		select
+		<include refid="bus_type_list_column_List" />
+		from sdp_bus_type bt
+		<where>
+			<if test="system_code!=null">
+				bt.system_code=#{system_code,jdbcType=VARCHAR}
+			</if>
+			<if test="bus_type!=null">
+				and (bt.bus_type =#{bus_type,jdbcType=VARCHAR} or bt.bus_type_name like CONCAT('%',#{bus_type,jdbcType=VARCHAR}, '%'))
+			</if>
+			<if test="bus_type_sts != null">
+				and bt.bus_type_sts in 
+				<foreach collection="bus_type_sts" item="sts" index="index"
+					open="(" close=")" separator=",">
+					#{sts}
+				</foreach>
+			</if>
+		</where>
+		order by bt.line_no
+	</select>
+
+	<insert id="addBusType" parameterType="map">
+		insert into
+		sdp_bus_type(system_code,bus_type,bus_type_name,line_no,bus_type_sts,create_date,create_user)
+		VALUES(#{system_code,jdbcType=VARCHAR},#{bus_type,jdbcType=VARCHAR},#{bus_type_name,jdbcType=VARCHAR},#{line_no ,jdbcType=VARCHAR},
+		#{bus_type_sts,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 修改单个业务类型 -->
+	<update id="updateBusType" parameterType="map">
+		update sdp_bus_type
+		<set>
+			<if test="bus_type_name!=null">
+				bus_type_name=#{bus_type_name,jdbcType=VARCHAR},
+			</if>
+			<if test="line_no!=null">
+				line_no=#{line_no,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where system_code=#{system_code,jdbcType=VARCHAR} and
+		bus_type=#{bus_type,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 禁用业务类型 -->
+	<update id="disabledBusType" parameterType="map">
+		update sdp_bus_type
+		<set>
+			bus_type_sts='D',
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where bus_type_sts='Y' and system_code=#{system_code,jdbcType=VARCHAR}
+		and bus_type=#{bus_type,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 启用业务类型 -->
+	<update id="enableBusType" parameterType="map">
+		update sdp_bus_type
+		<set>
+			bus_type_sts='Y',
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where bus_type_sts='D' and system_code=#{system_code,jdbcType=VARCHAR}
+		and bus_type=#{bus_type,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 删除单个业务类型 -->
+	<delete id="delBusType" parameterType="map">
+		delete from sdp_bus_type
+		where
+		system_code=#{system_code,jdbcType=VARCHAR} and
+		bus_type=#{bus_type,jdbcType=VARCHAR}
+	</delete>
+</mapper>

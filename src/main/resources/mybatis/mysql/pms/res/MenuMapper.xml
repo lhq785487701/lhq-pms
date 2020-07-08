@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.menu">
+	<!-- 返回结果对象定义 -->
+	<resultMap id="menuResultMap" type="map">
+		<id column="menu_code" property="menu_code" jdbcType="VARCHAR" />
+		<result column="menu_pcode" property="menu_pcode" jdbcType="VARCHAR" />
+		<result column="menu_level" property="menu_level" jdbcType="INTEGER" />
+		<result column="menu_order" property="menu_order" jdbcType="INTEGER" />
+		<result column="menu_name" property="menu_name" jdbcType="VARCHAR" />
+		<result column="menu_icon" property="menu_icon" jdbcType="VARCHAR" />
+		<result column="menu_system" property="menu_system" jdbcType="VARCHAR" />
+		<result column="menu_url" property="menu_url" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 返回结果对象定义 -->
+	<resultMap id="menuAllResultMap" type="map">
+		<id column="menu_code" property="menu_code" jdbcType="VARCHAR" />
+		<result column="menu_pcode" property="menu_pcode" jdbcType="VARCHAR" />
+		<result column="menu_level" property="menu_level" jdbcType="INTEGER" />
+		<result column="menu_order" property="menu_order" jdbcType="INTEGER" />
+		<result column="menu_name" property="menu_name" jdbcType="VARCHAR" />
+		<result column="menu_icon" property="menu_icon" jdbcType="VARCHAR" />
+		<result column="menu_sts" property="menu_sts" jdbcType="VARCHAR" />
+		<result column="menu_system" property="menu_system" jdbcType="VARCHAR" />
+		<result column="menu_url" property="menu_url" jdbcType="VARCHAR" />
+		<result column="menu_text" property="menu_text" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+		<result column="isdel" property="isdel" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<!-- 返回字段 -->
+	<sql id="menu_Column_List">
+		um.menu_code,um.menu_pcode,um.menu_level,
+		um.menu_order,um.menu_name,um.menu_icon,
+		um.menu_system,um.menu_url
+	</sql>
+
+	<!-- 返回字段 -->
+	<sql id="menu_All_Column_List">
+		um.menu_code,um.menu_pcode,um.menu_level,
+		um.menu_order,um.menu_name,um.menu_icon,um.menu_sts,
+		um.menu_system,um.menu_url,um.create_date,um.menu_text,um.create_user,um.update_date,um.update_user
+	</sql>
+
+	<!-- 树形菜单生成 -->
+	<sql id="menuTree">
+		SELECT menu_code, menu_pcode, menu_level, paths
+		FROM(SELECT
+		menu_code,menu_pcode,menu_level,
+		@le:=IF(menu_pcode IS NULL, 0,
+		IF(LOCATE(CONCAT('|', menu_pcode, ':'), @pathlevel) > 0,
+		SUBSTRING_INDEX(SUBSTRING_INDEX(@pathlevel, CONCAT('|', menu_pcode,
+		':'), - 1), '|', 1) + 1, @le + 1)) levels,
+		@pathlevel:=CONCAT(@pathlevel, '|', menu_code, ':', @le, '|')
+		pathlevel,
+		@pathnodes:=IF(menu_pcode IS NULL, ',0', CONCAT_WS(',',
+		IF(LOCATE(CONCAT('|', menu_pcode, ':'),
+		@pathall) > 0,
+		SUBSTRING_INDEX(SUBSTRING_INDEX(@pathall, CONCAT('|', menu_pcode,
+		':'), - 1), '|', 1), @pathnodes),
+		menu_pcode)) paths,
+		@pathall:=CONCAT(@pathall, '|', menu_code, ':', @pathnodes, '|')
+		pathall
+		FROM sdp_menu, (SELECT @le:=0, @pathlevel:='', @pathall:='',
+		@pathnodes:='') vv
+		WHERE menu_sts = 'Y') src
+	</sql>
+
+	<!-- 树形菜单生成 -->
+	<sql id="menuAllTree">
+		SELECT
+		menu_code,menu_pcode,menu_level,
+		@le:=IF(menu_pcode IS
+		NULL, 0,
+		IF(LOCATE(CONCAT('|', menu_pcode, ':'), @pathlevel) > 0,
+		SUBSTRING_INDEX(SUBSTRING_INDEX(@pathlevel, CONCAT('|', menu_pcode,
+		':'), - 1), '|', 1) + 1, @le + 1)) levels,
+		@pathlevel:=CONCAT(@pathlevel, '|', menu_code, ':', @le, '|')
+		pathlevel,
+		@pathnodes:=IF(menu_pcode IS NULL, ',0', CONCAT_WS(',',
+		IF(LOCATE(CONCAT('|', menu_pcode, ':'),
+		@pathall) > 0,
+		SUBSTRING_INDEX(SUBSTRING_INDEX(@pathall, CONCAT('|', menu_pcode,
+		':'), - 1), '|', 1), @pathnodes),
+		menu_pcode)) paths,
+		@pathall:=CONCAT(@pathall, '|', menu_code, ':', @pathnodes, '|')
+		pathall
+		FROM sdp_menu, (SELECT @le:=0, @pathlevel:='', @pathall:='',
+		@pathnodes:='') vv
+	</sql>
+
+
+	<!-- 查询第一级系统级菜单 -->
+	<select id="querySuperMenu" resultMap="menuResultMap">
+		select
+		<include refid="menu_Column_List" />
+		from sdp_menu um where um.menu_sts='Y' and um.menu_level=1 and
+		um.menu_pcode is null and
+		exists(select 1
+		from
+		sdp_menu_role mr inner
+		join sdp_user_role ur on
+		mr.role_code=ur.role_code
+		where
+		mr.menu_code=m.menu_code and
+		ur.user_code=#{$user_code,jdbcType=VARCHAR} and
+		mr.menu_code=um.menu_code) order by um.menu_order
+	</select>
+
+	<!-- 获取当前帐号权限菜单 -->
+	<select id="queryUserMenu" resultMap="menuResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="menu_Column_List" />
+		FROM sdp_menu um inner join (
+		<include refid="menuTree" />
+		WHERE
+		exists(select 1
+		from
+		sdp_menu_role mr inner join sdp_user_role ur
+		on
+		mr.role_code=ur.role_code inner join sdp_menu m on
+		mr.menu_code=m.menu_code
+		where
+		ur.user_code=#{$user_code,jdbcType=VARCHAR} and
+		src.menu_code =
+		m.menu_code)
+		)
+		rm
+		on
+		um.menu_code=rm.menu_code
+		order by
+		um.menu_level,um.menu_order
+	</select>
+
+	<!-- 获取所有菜单 -->
+	<select id="queryMenus" resultMap="menuAllResultMap">
+		select
+		<include refid="menu_All_Column_List" />
+		,
+		(case when (select count(*) from sdp_menu_role mr where
+		mr.menu_code=um.menu_code)>0 then 'N' else 'Y' end) isdel
+		FROM sdp_menu
+		um inner join (
+		<include refid="menuAllTree" />
+		)
+		rm
+		on
+		um.menu_code=rm.menu_code
+		order by
+		um.menu_level,um.menu_order
+	</select>
+
+	<!-- 菜单更新 -->
+	<update id="updateMenu" parameterType="map">
+		update sdp_menu
+		<set>
+			<if test="menu_name!=null">menu_name=#{menu_name,jdbcType=VARCHAR},</if>
+			<if test="menu_order!=null">menu_order=#{menu_order,jdbcType=NUMERIC},</if>
+			<if test="menu_url!=null">menu_url=#{menu_url,jdbcType=VARCHAR},</if>
+			<if test="menu_icon!=null">menu_icon=#{menu_icon,jdbcType=VARCHAR},</if>
+			<if test="menu_system!=null">menu_system=#{menu_system,jdbcType=VARCHAR},</if>
+			<if test="menu_text!=null">menu_text=#{menu_text,jdbcType=VARCHAR},</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where menu_code=#{menu_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 菜单禁用 -->
+	<update id="disabledMenu" parameterType="map">
+		update sdp_menu
+		set
+		menu_sts='D',update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where menu_code=#{menu_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 菜单启用 -->
+	<update id="enableMenu" parameterType="map">
+		update sdp_menu
+		set
+		menu_sts='Y',update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where menu_code=#{menu_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 菜单删除 -->
+	<delete id="deleteMenu" parameterType="map">
+		delete from sdp_menu
+		where
+		menu_code=#{menu_code,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 菜单新增 -->
+	<insert id="addMenu" parameterType="map">
+		insert into
+		sdp_menu(menu_code,menu_name,menu_sts,menu_pcode,menu_level,
+		menu_order,menu_icon,menu_system,menu_url,menu_text,create_date,create_user)
+		VALUES(#{menu_code,jdbcType=CHAR},#{menu_name,jdbcType=CHAR},'Y',#{menu_pcode,jdbcType=CHAR},#{menu_level,jdbcType=CHAR},
+		#{menu_order,jdbcType=NUMERIC},#{menu_icon,jdbcType=CHAR},#{menu_system,jdbcType=CHAR},#{menu_url,jdbcType=CHAR},
+		#{menu_text,jdbcType=CHAR},
+		now(),#{$user_code,jdbcType=CHAR})
+	</insert>
+
+	<!-- 获取可授权菜单 -->
+	<select id="queryMenusRole" resultMap="menuResultMap">
+		select
+		<include refid="menu_Column_List" />
+		FROM sdp_menu
+		um inner join (
+		<include refid="menuTree" />
+		)
+		rm
+		on
+		um.menu_code=rm.menu_code
+		order by
+		um.menu_level,um.menu_order
+	</select>
+	
+	<!-- 获取菜单名称信息 -->
+	<select id="selectMenuNames" resultType="com.lhq.pms.data.Row">
+		select
+		menu_code
+		code,menu_name name from sdp_menu
+	</select>
+</mapper>

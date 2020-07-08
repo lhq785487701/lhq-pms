@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="pms">
+<meta name="keywords" content="PMS">
+<title>用户管理页面</title>
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet"
+	href="../../../js/jquery/layer/theme/default/layer.css">
+<link rel="stylesheet" href="../../../css/sdp-ui.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/awesome/font-awesome.min.css" />
+</head>
+<body>
+	<div class="sdp-main-container" id="mainContainer" v-cloak>
+		<i-form inline :model="params" :label-width="80"> <form-item
+			label="用户:"> <i-input v-model="params.user_name"></i-input></form-item>
+		<form-item label="用户状态:"> <i-select
+			v-model="params.user_sts" style="width:170px;" multiple
+			placeholder="请选择" clearable> <i-option
+			v-for="item in dicDatas['sdp_user_sts']" :label="item.dic_label"
+			:value="item.dic_value" :key="item.dic_value">
+		</option></i-select></form-item> <form-item> <i-button @click="searchDatas" icon="search">
+		查询 </i-button> <i-button @click="addData" icon="android-add">新增 </i-button> <i-button
+			@click="impExcelData" img="zmdi zmdi-upload zmdi-hc-fw">导入
+		</i-button> <i-button @click="downExcelData" img="zmdi zmdi-download zmdi-hc-fw">导出
+		</i-button> </form-item> </i-form>
+		<i-table :data='datas' :columns="columns" ref="dataGrid" height="400"
+			border> </i-table>
+		<page @on-page-size-change="handleSizeChange"
+			:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+			:current="page.getPageNumber()" show-total show-elevator show-sizer
+			:total="page.totalCount"> </page>
+
+		<Modal v-model="dataEdit" title="用户修改" :mask-closable="false"
+			@on-ok="editDataSave" @on-cancel="editDataCancel"> <i-form
+			:model="curRow" ref="dataEditForm" label-position="right"
+			:label-width="80" :rules="rulesEdit"> <form-item
+			label="用户编码:"> <i-input v-model="curRow.user_code"
+			:disabled="true"></i-input> </form-item> <form-item label="用户名称:"
+			prop="user_name"> <i-input v-model="curRow.user_name"></i-input></form-item>
+		<form-item label="用户状态:"> <i-input
+			v-model="stsFormat('sdp_user_sts',curRow,'user_sts')"
+			:disabled="true"></i-input></form-item> <form-item label="用户邮箱:"
+			prop="user_email"> <i-input v-model="curRow.user_email"></i-input></form-item>
+		<form-item label="用户手机:" prop="user_mobile" :required="true">
+		<i-input v-model="curRow.user_mobile"></i-input></form-item> </i-form> </Modal>
+		<Modal v-model="dataAdd" title="用户新增"
+			class-name="vertical-center-modal" :mask-closable="false"
+			@on-ok="addDataSave" @on-cancel="addDataCancel"> <i-form
+			:model="curRow" label-position="right" :label-width="80"
+			ref="dataAddForm" :rules="rulesAdd"> <form-item
+			label="用户编码:" prop="user_code"> <i-input
+			v-model="curRow.user_code"></i-input> </form-item> <form-item label="用户名称:"
+			prop="user_name"> <i-input v-model="curRow.user_name"></i-input></form-item>
+		<form-item label="用户状态:"> <i-input
+			v-model="stsFormat('sdp_user_sts',curRow,'user_sts')"
+			:disabled="true"></i-input></form-item> <form-item label="用户邮箱:"
+			prop="user_email"> <i-input v-model="curRow.user_email"></i-input></form-item>
+		<form-item label="用户手机:" prop="user_mobile" :required="true">
+		<i-input v-model="curRow.user_mobile"></i-input></form-item> <form-item
+			label="用户密码:" prop="user_pwd" :required="true"> <i-input
+			v-model="curRow.user_pwd" type="password"
+			v-bind:auto-complete="'off'"></i-input> </form-item> <form-item label="密码确认:"
+			prop="user_pwd1" :required="true"> <i-input
+			v-model="curRow.user_pwd1" type="password" auto-complete="off"></i-input>
+		</form-item> </i-form> </Modal>
+	</div>
+</body>
+<script src="../../../js/jquery/IE.plugin.js"></script>
+<!--[if lte IE 9]>	
+	<script src="../../../js/ieBetter-min.js"></script>
+	<script src="../../../js/jquery/respond.js"></script>
+	<script src="../../../js/jquery/html5shiv.js"></script>	
+<![endif]-->
+
+<script src="../../../js/md5.js"></script>
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.min.js"></script>
+<script src="../../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<script src="../../../js/sdp/fileDown.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.min.js"></script>
+
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/SDPLayer.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="userList.js"></script>
+</html>

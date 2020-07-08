@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="sdp">
+<meta name="keywords" content="SDP">
+<title>个人现状页面</title>
+<!-- 引入css -->
+<!--  <link rel="stylesheet" href="http://unpkg.com/iview/dist/styles/iview.css"> -->
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet" href="../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../css/career/personal_status.css">
+<link rel="stylesheet" href="../../css/career/personal_promote.css">
+</head>
+<body>
+	<div id="personalStatus" align="center">
+
+		<!-- 个人目标  -->
+		<div class="personal-target">
+			<Card :bordered="false">
+				<p slot="title">
+					<Icon type="social-vimeo-outline" size="20"></Icon>
+					<font size="4">个人目标</font>
+				</p>
+				<i-button slot="extra" type="dashed" icon="ios-compose-outline" @click="updatePersonalTarget">编辑</i-button>
+				<div v-for="(item,index) in targetMassege" :key="index">
+					<Row>
+						<i-col span="4" offset="1"><div class="div">目标现状</div></i-col>
+						<i-col span="19">{{item.personal_goals}}</i-col>
+					</Row><br>
+					<Row :gutter="16">
+						<i-col span="4" offset="1"><div class="div">计划时间</div></i-col>
+						<i-col span="3">{{item.startDate}}</i-col>
+						<i-col span="3" style="text-align: center">--</i-col>
+						<i-col span="13">{{item.fetchDate}}</i-col>
+					</Row>
+				</div><br>
+			</Card>
+		</div>
+
+		<!-- 专业技能  -->
+		<div class="personal-skills">
+			<Card :bordered="false">
+				<p slot="title"><Icon type="share" size="20"></Icon><font size="4">专业技能</font></p>
+				<a href="javascript:void(0);" slot="extra" @click="skillMap"><Icon type="ios-pie-outline"></Icon>技能图谱</a>
+				<div>
+					<Row>
+						<i-col span="6" offset="4">
+							<div id="skillList">
+								<div id="skill-tag"  v-for="(item,index) in userSkills" :key="index">
+									<div id="skill-name">{{ item.skill_name }}</div>
+									<div id="skill-mastery">{{ item.skill_level }}</div>
+									<div id="skill-usetime">{{ item.use_time }}</div>
+								</div>
+							</div>
+						</i-col>
+						<i-col span="2" offset="12">
+							<Row>
+								<i-col span="6">注：</i-col>
+								<i-col span="6">
+									<div id="color-note1">&nbsp;</div>
+									<font class="font-size">技能名称</font>
+								</i-col>
+								<i-col span="6">
+									<div id="color-note2">&nbsp;</div>
+									<font class="font-size">技能等级</font>
+								</i-col>
+								<i-col span="6">
+									<div id="color-note3">&nbsp;</div>
+									<font class="font-size">使用时间</font>
+								</i-col>
+							</Row>
+						</i-col>
+					</Row>
+				</div>
+			</Card>
+		</div>
+
+		<!-- 职业倾向  -->
+		<div class="personal-careerOrientation">
+			<Card :bordered="false">
+				<p slot="title"><Icon type="android-happy" size="20"></Icon><font size="4">职业倾向</font></p>
+				<i-button slot="extra" type="dashed" icon="ios-compose-outline" @click="updateCareerOrientation">编辑</i-button>
+				<div v-for="(item,index) in targetMassege" :key="index">
+					<Row>
+						<i-col span="4" offset="1"><div class="div">详细描述</div></i-col>
+						<i-col span="19">{{item.careerOrientation}}</i-col>
+					</Row><br>
+				</div>
+			</Card>
+		</div>
+
+		<!-- 晋升路线  -->
+		<div class="personal-promote">
+			<Card :bordered="false">
+				<p slot="title"><Icon type="paper-airplane" size="20"></Icon><font size="4">晋升路线</font></p>
+				<a href="javascript:void(0);" slot="extra" @click="promote"><Icon type="flag"></Icon>晋升申请</a>
+				<div>
+					<Row>
+						<i-col span="3" offset="1"><div class="div">当前路线</div></i-col>
+						<i-col span="17">
+						<!-- 岗位晋升路线轴线 -->
+							<section class="cd-horizontal-timeline" ref=".cd-horizontal-timeline">
+								<div class="timeline" ref="timeline">
+									<div class="events-wrapper" ref="events-wrapper">
+										<div class="events" id="hover" ref="events">
+											<ol v-for="(item,index) in postRoute" :key="index">
+												<li><a href="javascript:void(0);" :id="item.post_code" @click="skillMapShow(item.post_code)">{{ item.post_name }}</a></li>
+											</ol>
+											<span class="filling-line" aria-hidden="true"></span>
+										</div>
+									</div>
+									<ul class="cd-timeline-navigation">
+										<li><a href="javascript:void(0);" class="prev inactive">Prev</a></li>
+										<li><a href="javascript:void(0);" class="next">Next</a></li>
+									</ul>
+								</div>
+								<!--个人能力分析图-->
+								<div style="display: none;" id="skill-map">
+									<div id="skillMap" style="width: 600px; height: 300px"></div>
+								</div>
+							</section>
+						</i-col>
+						<i-col span="3">
+							<i-menu mode="horizontal" ref="postMenu" @on-select="postSelected">
+								 <Submenu name="1">
+						            <template slot="title">选择岗位</template>
+						                <menu-item :name="item.post_code" v-for="(item, index) in currentPosts" :key="item.post_code">{{item.post_name}}</menu-item>
+						        </Submenu>
+							</i-menu>
+						</i-col>
+					</Row><br>
+					<Row>
+						<i-col span="4" offset="1"><div class="div">历史岗位</div></i-col>
+						<i-col span="14">
+							<div id="overPost" class="overPost_list" v-for="(item,index) in overPosts" :key="index">
+								<row>
+									<i-col span="10">{{item.post_name}}</i-col>
+									<i-col span="4">{{item.beginDate}}</i-col>
+									<i-col span="3" style="text-align: center">---</i-col>
+									<i-col span="7">{{item.endDate}}</i-col>
+								</row>
+							</div>
+						</i-col>
+						<i-col span="5"></i-col>
+					</Row><br>
+				</div>
+			</Card>
+		</div>
+
+		<!-- 大神列表  -->
+		<div class="personal-manito" style="font-size:16px">
+			<Collapse v-model="manitoValue">
+				<Panel name="1">大神履历
+					<div slot="content" style="font-size:12px">
+						<Row>
+							<i-col span="20" offset="4">
+								<div id="manitoList" v-for="(item,index) in randomManitos" :key="index">
+									<div id="manito">
+										<a href="javascript:void(0);" :id="item.user_id" @click="manitoMassege(item.user_id)"><img :src="item.images"/></a>
+										<a href="javascript:void(0);" :id="item.user_id" @click="manitoMassege(item.user_id)"><p>姓名：{{ item.name }}</p></a>
+										<p>部门：{{ item.department }}</p>
+										<p>擅长：{{ item.good_skill }}</p>
+									</div>
+								</div>
+							</i-col>
+						</Row>
+						<Row>
+							<i-col span="2" offset="22">
+								<a href="javascript:void(0);" @click="changeLimit"><Icon type="ios-loop-strong" size="20"></Icon>换一换</a>
+							</i-col>
+						</Row>
+					</div>
+				</Panel>
+			</Collapse>
+		</div>
+		
+		<!-- 编辑个人目标  -->
+		<Modal v-model="targetEdit" title="目标计划" @on-ok="targetSave" @on-cancel="targetCancel">
+			<i-form ref="targetForm" :model="targetPlan" :rules="rulesTarget" :label-width="90">
+				<form-item label="目标描述：" prop="personal_goals" :required="true">
+					<i-Input v-model="targetPlan.personal_goals" placeholder="请输入"></i-Input>
+				</form-item>
+				<form-item label="选择日期：" prop="date" :required="true">
+					<Row>
+						<i-col span="10">
+							<form-item prop="startDate" :required="true">
+								<Date-Picker type="date" placeholder="选择开始日期" v-model="targetPlan.startDate" @on-change="fomatStartDate"></Date-Picker>
+							</form-item>
+						</i-col>
+						<i-col span="4" style="text-align: center">-</i-col>
+						<i-col span="10">
+							<form-item prop="fetchDate" :required="true">
+								<Date-Picker type="date" placeholder="选择达成日期" v-model="targetPlan.fetchDate" @on-change="fomatFetchDate"></Date-Picker>
+							</form-item>
+						</i-col>
+					</Row>
+				</form-item>
+			</i-form>
+		</Modal>
+
+		<!-- 编辑职业倾向  -->
+		<Modal v-model="careerEdit" title="职业倾向" @on-ok="careerSave" @on-cancel="careerCancel">
+			<i-form ref="careerForm" :model="careerMassege" :rules="rulesCareer" :label-width="90">
+				<form-item label="描述：" prop="careerOrientation" :required="true">
+					<i-Input v-model="careerMassege.careerOrientation" placeholder="请输入"></i-Input>
+				</form-item>
+			</i-form>
+		</Modal>
+
+	</div>
+</body>
+
+<!-- 引入 jquery -->
+<script type="text/javascript" src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script src="personalStatus.js"></script>
+<!-- 引入 echarts -->
+<script src="../../js/echarts/dist/echarts-all.js"></script>
+</html>

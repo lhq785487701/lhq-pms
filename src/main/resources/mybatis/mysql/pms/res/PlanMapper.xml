@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.plan">
+	<resultMap id="planResultMap" type="com.lhq.pms.data.Row">
+		<id column="plan_id" property="plan_id" jdbcType="INTEGER" />
+		<result column="plan_title" property="plan_title" jdbcType="VARCHAR" />
+		<result column="plan_content" property="plan_content" jdbcType="VARCHAR" />
+		<result column="plan_starttime" property="plan_starttime" jdbcType="DATE" />
+		<result column="plan_endtime" property="plan_endtime" jdbcType="DATE" />
+		<result column="plan_user" property="plan_user" jdbcType="INTEGER" />
+		<result column="plan_type" property="plan_type" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="TIMESTAMP" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="TIMESTAMP" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="plan_column_list">
+		plan_id,plan_title,plan_content,plan_starttime,plan_endtime,plan_user,plan_type,create_date,create_user,update_date,update_user
+	</sql>
+
+	<!-- 查询所有计划 -->
+	<select id="queryPlans" resultMap="planResultMap"
+		parameterType="map">
+		select
+		<include refid="plan_column_list" />
+		from
+		sdp_plan
+	</select>
+	<!--计划信息查询 -->
+	<select id="queryPlan" resultType="com.lhq.pms.data.Row" parameterType="map">
+		select
+		<include refid="plan_column_list" />
+		from sdp_plan plan
+		<where>
+			<if test="plan_title != null">
+				and (plan.plan_title like CONCAT('%',#{plan_title,jdbcType=VARCHAR}, '%') 
+				or plan.plan_content like CONCAT('%',#{plan_title,jdbcType=VARCHAR}, '%'))
+			</if>
+			<if test="plan_user != null">
+				and plan.plan_user like CONCAT('%',#{plan_user,jdbcType=VARCHAR}, '%')
+			</if>
+		</where>
+		order by plan.plan_id
+	</select>
+	<!-- 插入计划 -->
+	<insert id="addPlan" parameterType="map">
+		insert into
+		sdp_plan
+		(plan_title,plan_content,plan_starttime,plan_endtime,plan_user,plan_type,create_date,create_user)
+		VALUES
+		(#{plan_title,jdbcType=VARCHAR},#{plan_content,jdbcType=VARCHAR},#{plan_starttime,jdbcType=DATE},
+		#{plan_endtime ,jdbcType=DATE},#{plan_user,jdbcType=VARCHAR},#{plan_type,jdbcType=VARCHAR},now(),#{create_user,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 更新计划信息 -->
+	<update id="updatePlan" parameterType="map">
+		update sdp_plan
+		<set>
+			<if test="plan_title != null">
+				plan_title=#{plan_title,jdbcType=VARCHAR},
+			</if>
+			<if test="plan_content != null">
+				plan_content=#{plan_content,jdbcType=VARCHAR},
+			</if>
+			<if test="plan_user != null">
+				plan_user=#{plan_user,jdbcType=VARCHAR},
+			</if>
+			<if test="plan_starttime != null">
+				plan_starttime=#{plan_starttime,jdbcType=DATE},
+			</if>
+			<if test="plan_endtime != null">
+				plan_endtime=#{plan_endtime,jdbcType=DATE},
+			</if>
+			update_date=now()
+		</set>
+		where plan_id=#{plan_id,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 删除计划 -->
+	<delete id="deletePlan" parameterType="map">
+		delete from sdp_plan
+		where
+		plan_id=#{plan_id,jdbcType=VARCHAR}
+	</delete>
+</mapper>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="pms">
+<meta name="keywords" content="PMS">
+<title>计划列表页面</title>
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet"
+	href="../../../js/jquery/layer/theme/default/layer.css">
+<link rel="stylesheet" href="../../../css/sdp-ui.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/awesome/font-awesome.min.css" />
+
+</head>
+<body>
+	<div class="sdp-main-container" id="mainContainer" v-cloak>
+		<i-form inline :model="params" :label-width="80"> 
+			<form-item label="计划名:"> 
+				<i-input v-model="params.plan_title" style="width:150px" placeholder="输入关键字"></i-input>
+			</form-item> 
+			<form-item label="负责人:" > 
+				<i-input v-model="params.plan_user_name" style="width:150px"></i-input>
+			</form-item> 
+			<form-item> 
+				<i-button @click="searchDatas" icon="search">查询 </i-button> 
+				<i-button @click="addData" icon="android-add" style="margin-left:8px" v-if="f_action.add_plan_day">新增 </i-button> 
+			</form-item> 
+			
+		</i-form>
+		<i-table :data='datas' :columns="columns" ref="dataGrid" height="400"
+			border highlight-row stripe> </i-table>
+
+		<page @on-page-size-change="handleSizeChange"
+			:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+			:current="page.getPageNumber()" show-total show-elevator show-sizer
+			:total="page.totalCount"> </page>
+		<Modal v-model="dataAdd" title="计划新增" class-name="vertical-center-modal" :mask-closable="false"  @on-ok="addDataSave" @on-cancel="addDataCancel"> 
+			<i-form :model="curRow" label-position="right" :label-width="150" ref="dataAddForm" :rules="rulesAdd"> 
+				<form-item label="计划标题" :required="true" > 
+					<i-input v-model="curRow.plan_title" style="width:240px"></i-input>
+				</form-item> 
+				<form-item label="计划内容" prop="plan_content" > 
+					<i-input v-model="curRow.plan_content" type="textarea" :autosize="{minRows:1 , maxRows:2}" style="width:240px"></i-input>
+				</form-item> 
+				<form-item label="计划详情" prop="plan_details" > 
+					<i-input v-model="curRow.plan_details" type="textarea" :autosize="{minRows:1 , maxRows:2}" style="width:240px"></i-input>
+				</form-item> 
+				<form-item label="计划负责人" > 
+					<i-input v-model="curRow.plan_user" style="width:240px"></i-input>
+				</form-item> 
+				<form-item label="创建人" > 
+					<i-input v-model="curRow.plan_owner"  style="width:240px"></i-input>
+				</form-item> 
+				<form-item label="计划开始时间" > 
+					<!-- <i-input id="start" v-model="curRow.plan_starttime" type="text" style="width:240px"></i-input> -->
+					<Date-picker v-model="curRow.plan_starttime" type="datetime" format="yyyy-MM-dd HH:mm:ss"    style="width: 240px"></Date-picker>
+				</form-item> 
+				<form-item label="计划结束时间" > 
+					<Date-picker v-model="curRow.plan_endtime" type="datetime" format="yyyy-MM-dd HH:mm:ss"    style="width: 240px"></Date-picker>
+				</form-item> 
+				<form-item label="类型" > 
+					<i-input v-model="curRow.plan_type"  style="width:240px"></i-input>
+				</form-item> 
+				<form-item label="可视程度" > 
+					<i-select v-model="curRow.plan_visible" style="width:240px">  
+						<i-option v-for="item in dicDatas['plan_visible_sts']" :label="item.dic_label"
+							:value="item.dic_value" :key="item.dic_value"> </i-option>
+				    </i-select>
+				</form-item> 
+				<form-item label="计划优先级" > 
+					<i-select v-model="curRow.plan_order_level" style="width:240px">  
+						<i-option v-for="item in dicDatas['plan_order_sts']" :label="item.dic_label"
+							:value="item.dic_value" :key="item.dic_value"> </i-option>
+				    </i-select>
+				</form-item> 
+				<form-item label="备注" > 
+					<i-input v-model="curRow.rmark"  type="textarea" style="width:240px"></i-input>
+				</form-item> 
+			</i-form> 
+		</Modal>
+		<Modal v-model="dataEdit" title="计划内容修改" :mask-closable="false" @on-cancel="editDataCancel" :styles="{top: '0px'}"> 
+			<i-form :model="curRow" ref="dataEditForm" label-position="right" :label-width="150" :rules="rules" > 
+				<form-item label="计划标题" :required="true" prop="plan_title"> 
+					<i-input v-model="curRow.plan_title" style="width:240px"></i-input>
+				</form-item> 
+				<form-item label="计划内容" :required="true" prop="plan_content" > 
+					<i-input v-model="curRow.plan_content" type="textarea" :autosize="{minRows:1 , maxRows:2}" style="width:240px"></i-input>
+				</form-item> 
+				<form-item label="计划执行人" > 
+					<i-input v-model="curRow.plan_user" style="width:240px"></i-input>
+				</form-item> 
+				<form-item label="计划发起人" > 
+					<i-input v-model="curRow.plan_owner" style="width:240px"></i-input>
+				</form-item>
+				<form-item label="计划详情" > 
+					<i-input v-model="curRow.plan_details" style="width:240px"></i-input>
+				</form-item>  
+				<form-item label="计划开始时间" > 
+					<Date-picker  v-if="curRow.plan_state==1||curRow.plan_state==4" v-model="curRow.plan_starttime" type="datetime" format="yyyy-MM-dd HH:mm:ss"   style="width: 240px" disabled></Date-picker>
+					<Date-picker  v-if="curRow.plan_state==0||curRow.plan_state==3||curRow.plan_state==2" v-model="curRow.plan_starttime" type="datetime" format="yyyy-MM-dd HH:mm:ss"   style="width: 240px" ></Date-picker>
+				</form-item> 
+				<form-item label="计划结束时间" > 
+					<Date-picker  v-if="curRow.plan_state==1||curRow.plan_state==4" v-model="curRow.plan_endtime" type="datetime" format="yyyy-MM-dd HH:mm:ss"   style="width: 240px" disabled></Date-picker>
+					<Date-picker  v-if="curRow.plan_state==0||curRow.plan_state==3||curRow.plan_state==2" v-model="curRow.plan_endtime" type="datetime" format="yyyy-MM-dd HH:mm:ss"   style="width: 240px" ></Date-picker>
+				</form-item> 
+				<form-item label="计划可视程度" > 
+					<i-select v-model="curRow.plan_visible" style="width:240px">  
+				      	<i-option v-for="item in dicDatas['plan_visible_sts']" :label="item.dic_label"
+							:value="item.dic_value" :key="item.dic_value"> </i-option>
+				    </i-select>
+				</form-item> 
+				<form-item label="计划优先级" > 
+					<i-select v-model="curRow.plan_order_level" style="width:240px">  
+				       <i-option v-for="item in dicDatas['plan_order_sts']" :label="item.dic_label"
+							:value="item.dic_value" :key="item.dic_value"> </i-option>  
+				    </i-select>
+				</form-item>
+				<form-item label="备注" > 
+					<i-input v-model="curRow.rmark"  style="width:240px"></i-input>
+				</form-item>
+				
+			</i-form> 
+			<div slot="footer">
+            <i-Button type="primary" size="large"   @click="editDataSave">确定</i-Button>
+       		 </div>
+				
+		</Modal>
+		<Modal v-model="dataDelay" title="计划延期" :mask-closable="false" @on-cancel="editDelayCancel"> 
+			<i-form :model="curRow" ref="dataDelayForm" label-position="right" :label-width="150" :rules="rules"> 
+				<form-item label="计划标题" :required="true" prop="plan_title" style="display:none;"> 
+						<i-input v-model="curRow.plan_title" style="width:240px ;display:none;"></i-input>
+				</form-item> 
+				<form-item label="计划内容" :required="true" prop="plan_content" style="display:none;"> 
+					<i-input v-model="curRow.plan_content" type="textarea" :autosize="{minRows:1 , maxRows:2}" style="width:240px ;display:none;"></i-input>
+				</form-item> 
+				<form-item label="code" style="display:none;"> 
+					<i-input v-model="curRow.plan_code" style="width:240px;display:none;"></i-input>
+				</form-item>  
+				<form-item label="计划结束时间" > 
+					<Date-picker v-model="curRow.plan_endtime" type="datetime" format="yyyy-MM-dd HH:mm:ss"  style="width: 240px"></Date-picker>
+				</form-item> 
+			</i-form> 
+			<div slot="footer">
+            <i-Button type="primary" size="large"   @click="editDelaySave">确定</i-Button>
+       		 </div>
+				
+		</Modal>
+		
+	</div>
+	
+	
+</body>
+<script src="../../../js/jquery/IE.plugin.js"></script>
+<!--[if lte IE 9]>	
+	<script src="../../../js/ieBetter-min.js"></script>
+	<script src="../../../js/jquery/respond.js"></script>
+	<script src="../../../js/jquery/html5shiv.js"></script>	
+<![endif]-->
+
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.min.js"></script>
+<script src="../../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<script src="../../../js/moment.min.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.min.js"></script>
+
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+<script src="../../../js/sdp/SDPFunction.js"></script>
+<script type="text/javascript" src="planDayList.js"></script>
+
+</html>

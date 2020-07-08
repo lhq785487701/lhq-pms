@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.system">
+	<resultMap id="systemNodeResultMap" type="com.lhq.pms.data.Row">
+		<id column="node_code" property="node_code" jdbcType="VARCHAR" />
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="server_ip" property="server_ip" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="node_sts" property="node_sts" jdbcType="VARCHAR" />
+		<result column="node_code_next" property="node_code_next"
+			jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="system_node_column_list">
+		node_code,system_code,node_sts,
+		server_ip,create_date,update_date,node_code_next
+	</sql>
+
+	<!-- 查询系统部署信息 -->
+	<select id="selectSystemNodes" resultMap="systemNodeResultMap"
+		parameterType="map">
+		select
+		<include refid="system_node_column_list" />
+		from sdp_system_node
+		<where>
+			<if test="system_code!=null">
+				system_code=#{system_code,jdbcType=CHAR}
+			</if>
+			<if test="node_sts!=null">
+				and node_sts=#{node_sts,jdbcType=CHAR}
+			</if>
+		</where>
+		order by create_date desc
+	</select>
+
+	<insert id="addSystemNode" parameterType="com.lhq.pms.sys.vo.SystemNode">
+		insert into
+		sdp_system_node(node_code,system_code,server_ip,node_sts,create_date)
+		VALUES(#{nodeCode,jdbcType=CHAR},#{systemCode,jdbcType=CHAR},#{serverIp,jdbcType=CHAR},'S',now())
+	</insert>
+
+	<!-- 更新系统部署节点 -->
+	<update id="updateSystemNode" parameterType="com.lhq.pms.sys.vo.SystemNode">
+		update
+		sdp_system_node set node_sts='C',update_date=now()
+		where
+		node_code=#{nodeCode,jdbcType=CHAR}
+	</update>
+	
+	<!-- 更新系统部署节点前状态 -->
+	<update id="freshSystemNodeStsExp" parameterType="com.lhq.pms.sys.vo.SystemNode">
+		update
+		sdp_system_node set
+		node_sts='E',node_code_next=#{nodeCode,jdbcType=CHAR}
+		where
+		node_sts='S' and server_ip=#{serverIp,jdbcType=CHAR} and
+		system_code=#{systemCode,jdbcType=CHAR} and
+		node_code <![CDATA[<>]]>
+		#{nodeCode,jdbcType=CHAR}
+	</update>
+</mapper>

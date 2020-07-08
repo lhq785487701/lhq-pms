@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>创建笔记</title>
+
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet"
+    href="../../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../../css/sdp-admin.css" />
+<link rel="stylesheet" href="../../../css/sdp-skin.css" />
+<link rel="stylesheet"
+    href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+    href="../../../css/fonts/awesome/font-awesome.min.css" />
+
+<style type="text/css">
+[v-cloak] {
+  display: none;
+}
+body{
+background-color:rgb(243,243,243);
+width: 1024px;
+margin: 0 auto;
+padding-top: 10px;
+}
+</style>
+
+</head>
+<body>
+
+    <div id="mainContainer" v-cloak>
+        <i-form ref="formNote" :model="curRow" label-position="right" :label-width="100" :rules="ruleForm">
+            <form-item  prop="note_title" label="笔记标题" required>
+                 <i-input v-model="curRow.note_title" placeholder="请输入笔记标题" />
+            </form-item>
+            <form-item label="是否分享">
+                <i-switch v-model="isShare" >
+                    <span slot="open">是</span>
+                    <span slot="close">否</span>
+                </i-switch>
+            </form-item>
+            <form-item label="关联学习计划" prop="plan_id">
+		            <i-select v-model="curRow.plan_id" clearable style="width: 200px;">
+		                <i-option v-for="item in datas" :value="item.plan_id" :key="item.plan_id">{{item.plan_title}}</i-option>
+		            </i-select>
+            </form-item>
+            <form-item label="笔记内容" prop="note_text">
+                <div id="editor"></div>
+            </form-item>
+            
+            <form-item label="附件上传" prop="plan_attach_id" >
+                <Upload action="#">
+	                <i-button type="ghost" icon="ios-cloud-upload-outline">上传文件</i-button>
+	            </Upload>
+            </form-item>
+            
+            
+            <form-item>
+                <row>
+	                <i-col span="4" offset="20">
+	                    <i-button type="primary" @click="resetDatas">重置</i-button>
+	                    <i-button type="primary" @click="addDataSave">确定</i-button>
+	                </i-col>
+	            </row>
+            </form-item>
+        </i-form>
+        
+        <!-- <i-form ref="formNote" :model="formNote" :rules="ruleForm">
+            <form-item  prop="note_title">
+                <row>
+                    <i-col span="2">
+                        <label>笔记标题</label>
+                    </i-col>
+                    <i-col span="20">
+                        <i-input v-model="formNote.note_title" placeholder="请输入笔记标题" />
+                    </i-col>
+                </row>
+            </form-item>
+            <form-item>
+                <row>
+                    <i-col span="2">
+                        <label>是否分享</label>
+                    </i-col>
+                    <i-col span="20">
+                        <i-switch v-model="switch1" ></i-switch>
+                    </i-col>
+                </row>
+            </form-item>
+            <form-item prop="plan_id">
+               <row>
+                   <i-col span="2">学习计划</i-col>
+                   <i-col span="20">
+                        <i-select v-model="model" clearable style="width: 200px;">
+                            <i-option v-for="item in datas" :value="item.plan_id" :key="item.plan_id">{{item.plan_title}}</i-option>
+                        </i-select>
+                   </i-col>
+               </row>
+            </form-item>
+            <form-item prop="note_text">
+                <row>
+                    <i-col span="2">
+                        <label>笔记内容</label>
+                    </i-col>
+                </row>
+                <row>
+                    <i-col span="24">
+                        <div id="editor"></div>
+                    </i-col>
+                </row>
+            </form-item>
+            <form-item>
+                <row>
+	                <i-col span="3" offset="21">
+	                    <i-button type="primary" @click="resetDatas">重置</i-button>
+	                    <i-button type="primary" @click="demo">确定</i-button>
+	                </i-col>
+	            </row>
+            </form-item>
+        </i-form> -->
+        
+        
+    </div>
+
+</body>
+
+<!--[if lte IE 9]>
+    <script src="../../../js/jquery/respond.js"></script>
+    <script src="../../../js/jquery/html5shiv.js"></script>    
+<![endif]-->
+
+<script src="../../../js/md5.js"></script>
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.js"></script>
+<script src="../../../js/jquery/jquery-migrate.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.js"></script>
+
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+
+<script type="text/javascript" src="../../../js/wangEditor/wangEditor.min.js"></script>
+
+<script type="text/javascript" src="createNote02.js"></script>
+</html>

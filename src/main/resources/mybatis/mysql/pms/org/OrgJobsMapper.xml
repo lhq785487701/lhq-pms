@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.org.jobs">
+	<resultMap id="resultJobsMap" type="com.lhq.pms.data.Row">
+		<result column="jobs_code" property="jobs_code" jdbcType="VARCHAR" />
+		<result column="jobs_name" property="jobs_name" jdbcType="VARCHAR" />
+		<result column="jobs_level" property="jobs_level" jdbcType="VARCHAR" />
+		<result column="jobs_remark" property="jobs_remark" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="jobs_column_list">
+		jobs.jobs_code , jobs.jobs_name , jobs.jobs_level , jobs.jobs_remark , 
+		jobs.create_date,jobs.create_user,jobs.update_date,jobs.update_user
+	</sql>
+
+	<!-- 获取职务信息，根据职务编码 -->
+	<select id="selectJobsByJobsCode" resultType="com.lhq.pms.data.Row" parameterType="java.lang.String">
+		select
+		<include refid="jobs_column_list" />
+		from sdp_org_jobs jobs where jobs.jobs_code
+		=#{jobs_code,jdbcType=VARCHAR}
+		order by jobs.jobs_code
+	</select>
+
+	<!--业务信息查询 -->
+	<select id="queryJobs" resultType="com.lhq.pms.data.Row" parameterType="map">
+		select
+		<include refid="jobs_column_list" />
+		from sdp_org_jobs jobs
+		<where>
+			<if test="jobs_code != null">
+				and (jobs.jobs_code like CONCAT('%',#{jobs_code,jdbcType=VARCHAR}, '%') 
+				or jobs.jobs_name like CONCAT('%',#{jobs_code,jdbcType=VARCHAR}, '%'))
+			</if>
+			<if test="jobs_level != null">
+				and jobs.jobs_level like CONCAT('%',#{jobs_level,jdbcType=VARCHAR}, '%')
+			</if>
+		</where>
+		order by jobs.create_date
+	</select>
+
+	<!-- 插入职务 -->
+	<insert id="addJobs" parameterType="map">
+		insert into
+		sdp_org_jobs
+		(jobs_code,jobs_name,jobs_level,jobs_remark,create_date,create_user)
+		VALUES
+		(#{jobs_code,jdbcType=VARCHAR},#{jobs_name,jdbcType=VARCHAR},#{jobs_level,jdbcType=VARCHAR},
+		#{jobs_remark ,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 更新职务信息 -->
+	<update id="updateJobs" parameterType="map">
+		update sdp_org_jobs
+		<set>
+			<if test="jobs_name != null">
+				jobs_name=#{jobs_name,jdbcType=VARCHAR},
+			</if>
+			<if test="jobs_level != null">
+				jobs_level=#{jobs_level,jdbcType=VARCHAR},
+			</if>
+			<if test="jobs_remark != null">
+				jobs_remark=#{jobs_remark,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where jobs_code=#{jobs_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 删除职务信息 -->
+	<delete id="deleteJobs" parameterType="map">
+		delete from sdp_org_jobs
+		where
+		jobs_code=#{jobs_code,jdbcType=VARCHAR}
+	</delete>
+</mapper>

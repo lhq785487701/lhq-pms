@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.bug">
+	
+	<resultMap id="bugListResultMap" type="com.lhq.pms.data.Row">
+		<id column="bug_code" property="bug_code" jdbcType="VARCHAR" />
+		<result column="bug_date" property="bug_date" jdbcType="DATE" />
+		<result column="bug_grade" property="bug_grade" jdbcType="VARCHAR" />
+		<result column="bug_status" property="bug_status" jdbcType="VARCHAR" />
+		<result column="bug_module" property="bug_module" jdbcType="VARCHAR" />
+		<result column="manage_user" property="manage_user" jdbcType="VARCHAR" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="find_user" property="find_user" jdbcType="VARCHAR" />
+		<result column="find_date" property="find_date" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="VARCHAR" />
+		<result column="expectsolve_date" property="expectsolve_date" jdbcType="VARCHAR" />
+		<result column="actualsolve_date" property="actualsolve_date" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="VARCHAR" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+		<result column="bug_solution" property="bug_solution" jdbcType="VARCHAR" />
+		
+		
+		<!-- <result column="user_sts" property="user_sts" jdbcType="VARCHAR" />
+			<result column="login_date" property="login_date" jdbcType="DATE" /> -->
+	</resultMap>
+	
+	<!-- 新增bug -->
+	<insert id="addBug" parameterType="map">
+		insert into
+		sdp_bug(bug_code,bug_description,find_user,find_date,bug_grade,bug_status,bug_module,manage_user,expectsolve_date,actualsolve_date,bug_solution,create_date,create_user)
+		VALUES(#{bug_code,jdbcType=CHAR},#{bug_description,jdbcType=CHAR},#{finder_user,jdbcType=CHAR},
+		#{find_date,jdbcType=DATE},#{bug_grade,jdbcType=NUMERIC},
+		#{bug_status,jdbcType=CHAR},#{bug_module,jdbcType=CHAR},#{manage_user,jdbcType=CHAR},
+		#{expectsolve_date,jdbcType=DATE},#{actualsolve_date,jdbcType=DATE},#{bug_solution,jdbcType=CHAR},
+		now(),#{$user_code,jdbcType=CHAR}
+		)
+	</insert>
+	
+	<!--bug信息查询 -->
+	<select id="queryBugs" resultMap="bugListResultMap"	parameterType="map">
+		select *
+		from sdp_bug b	
+		where 1=1
+		<if test="bug_code!=null">
+		 AND (b.bug_code like
+		CONCAT('%',#{bug_code,jdbcType=CHAR},'%') )
+		</if>
+		<if test="bug_status!=null">
+		 AND b.bug_status=#{bug_status,jdbcType=CHAR}
+		</if>
+		order by b.create_date desc
+	</select>
+	
+	
+	<!-- 更新信息 -->
+	<update id="updateBug" parameterType="map">
+		update sdp_bug
+		 <set>
+		<!-- 	<if test="bug_description!=null"> -->
+				bug_description=#{bug_description,jdbcType=CHAR},
+			<!-- </if>
+			<if test="find_user!=null"> -->
+				find_user=#{find_user,jdbcType=CHAR},
+			<!-- </if>
+			<if test="find_date!=null"> -->
+				find_date=#{find_date,jdbcType=DATE},
+			<!-- </if>
+			 <if test="bug_grade!=null"> -->
+				bug_grade=#{bug_grade,jdbcType=NUMERIC},
+			<!-- </if>
+			<if test="bug_status!=null"> -->
+				bug_status=#{bug_status,jdbcType=CHAR},
+			<!-- </if>
+			<if test="bug_module!=null"> -->
+				bug_module=#{bug_module,jdbcType=CHAR},
+			<!-- </if>
+			<if test="manage_user!=null"> -->
+				manage_user=#{manage_user,jdbcType=CHAR},
+			<!-- </if>
+			<if test="expectsolve_date!=null"> -->
+				expectsolve_date=#{expectsolve_date,jdbcType=DATE},
+			<!-- </if>
+			<if test="actualsolve_date!=null"> -->
+				actualsolve_date=#{actualsolve_date,jdbcType=DATE},
+			<!-- </if>
+			<if test="bug_solution!=null"> -->
+				bug_solution=#{bug_solution,jdbcType=CHAR},
+			<!-- </if>  -->
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}			
+		</set>	
+		where bug_code=#{bug_code,jdbcType=CHAR}
+	</update>
+	
+	
+	<!-- 删除 -->
+	<delete id="deleteBug">
+		delete from sdp_bug where
+		bug_code=#{bug_code,jdbcType=CHAR}
+	</delete>
+</mapper>

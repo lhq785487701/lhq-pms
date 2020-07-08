@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.plan">
+	<resultMap id="planDayResultMap" type="com.lhq.pms.data.Row">
+		<id column="plan_code" property="plan_code" jdbcType="INTEGER" />
+		<result column="plan_title" property="plan_title" jdbcType="VARCHAR" />
+		<result column="plan_content" property="plan_content" jdbcType="VARCHAR" />
+		<result column="plan_details" property="plan_details" jdbcType="VARCHAR" />
+		<result column="plan_owner" property="plan_owner" jdbcType="VARCHAR" />
+		<result column="plan_owner_name" property="plan_owner_name" jdbcType="VARCHAR" />
+		<result column="plan_user" property="plan_user" jdbcType="VARCHAR" />
+		<result column="plan_user_name" property="plan_user_name" jdbcType="VARCHAR" />
+		<result column="plan_state" property="plan_state" jdbcType="INTEGER" />
+		<result column="plan_visible" property="plan_visible" jdbcType="INTEGER" />
+		<result column="create_date" property="create_date" jdbcType="TIMESTAMP" />
+		<result column="plan_starttime" property="plan_starttime" jdbcType="TIMESTAMP" />
+		<result column="plan_endtime" property="plan_endtime" jdbcType="TIMESTAMP" />
+		<result column="plan_order_level" property="plan_order_level" jdbcType="INTEGER" />
+		<result column="plan_type" property="plan_type" jdbcType="VARCHAR" />
+		<result column="rmark" property="rmark" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="plan_day_column_list">
+		plan_code,plan_title,plan_content,plan_details,plan_owner,plan_user,plan_state,plan_visible,create_date,plan_starttime,plan_order_level,plan_type,rmark,update_date,plan_endtime
+	</sql>
+	
+	<sql id="plan_day_column_list01">
+		planday.plan_code,planday.plan_title,planday.plan_content,planday.plan_details,
+		planday.plan_owner,usr.user_name plan_owner_name,planday.plan_user,
+		usr1.user_name plan_user_name,planday.plan_state,planday.plan_visible,
+		planday.create_date,planday.plan_starttime,planday.plan_order_level,planday.plan_type,
+		planday.rmark,planday.update_date,planday.plan_endtime
+	</sql>
+
+	<!-- 查询所有每日计划 -->
+	<select id="queryDayPlans" resultMap="planDayResultMap"
+		parameterType="map">
+		SELECT
+			<include refid="plan_day_column_list01" />
+		FROM
+			sdp_plan_day planday  LEFT JOIN sdp_user usr on usr.user_code = planday.plan_owner  
+														LEFT JOIN sdp_user usr1 on usr1.user_code = planday.plan_user
+		WHERE
+			(
+				(
+					(
+						planday.plan_user = #{$user_code,jdbcType=CHAR}
+						OR planday.plan_owner = #{$user_code,jdbcType=CHAR}
+					)
+					AND (planday.plan_visible = '2')
+				)
+				OR (
+					planday.plan_visible = '1'
+					AND planday.plan_owner = #{$user_code,jdbcType=CHAR}
+				)  
+			) 
+		<if test="plan_owner_name != null">
+			and usr.user_name like
+			CONCAT('%',#{plan_owner_name,jdbcType=VARCHAR},'%')
+		</if>
+		<if test="plan_user_name != null">
+			and usr1.user_name like
+			CONCAT('%',#{plan_user_name,jdbcType=VARCHAR},'%')
+		</if>
+		ORDER BY
+			CASE
+		WHEN plan_user = #{$user_code,jdbcType=CHAR} THEN
+			0
+		ELSE
+			1
+		END,
+		 plan_order_level DESC
+	</select>
+	
+	<!--计划信息查询 -->
+	<select id="queryDayPlan" resultType="com.lhq.pms.data.Row" parameterType="map">
+		select
+		<include refid="plan_day_column_list" />
+		from sdp_plan_day planday
+		<where>
+			(((planday.plan_user=#{$user_code,jdbcType=VARCHAR} or planday.plan_owner=#{$user_code,jdbcType=VARCHAR}) 
+		and (planday.plan_visible='2')) or (planday.plan_visible='1' and planday.plan_owner=#{$user_code,jdbcType=VARCHAR} ))
+			<if test="plan_title != null">
+				and (planday.plan_title like CONCAT('%',#{plan_title,jdbcType=VARCHAR}, '%') 
+				or planday.plan_content like CONCAT('%',#{plan_title,jdbcType=VARCHAR}, '%'))
+			</if>
+			<if test="plan_user != null">
+				and planday.plan_user like CONCAT('%',#{plan_user,jdbcType=VARCHAR}, '%')
+			</if>
+		</where>
+			order by case when plan_user=#{$user_code,jdbcType=VARCHAR} then 0 else 1 end,plan_order_level desc
+	</select>
+	<!-- 插入计划 -->
+	<insert id="addDayPlan" parameterType="map">
+		insert into
+		sdp_plan_day
+		(plan_title,plan_content,plan_details,plan_owner,plan_user,plan_visible,plan_starttime,plan_order_level,plan_type,rmark,plan_endtime)
+		VALUES
+		(#{plan_title,jdbcType=VARCHAR},#{plan_content,jdbcType=VARCHAR},#{plan_details,jdbcType=VARCHAR},#{plan_owner,jdbcType=VARCHAR},
+		#{plan_user ,jdbcType=VARCHAR},#{plan_visible,jdbcType=INTEGER},#{plan_starttime,jdbcType=TIMESTAMP},#{plan_order_level,jdbcType=INTEGER}
+		,#{plan_type,jdbcType=VARCHAR},#{rmark,jdbcType=VARCHAR},#{plan_endtime,jdbcType=TIMESTAMP})
+	</insert>
+	
+	<!-- 更新计划信息 -->
+	<update id="updateDayPlan" parameterType="map">
+		update sdp_plan_day
+		<set>
+			<if test="plan_title != null">
+				plan_title=#{plan_title,jdbcType=VARCHAR},
+			</if>
+			<if test="plan_content != null">
+				plan_content=#{plan_content,jdbcType=VARCHAR},
+			</if>
+			<if test="plan_user != null">
+				plan_user=#{plan_user,jdbcType=VARCHAR},
+			</if>
+			<if test="plan_owner != null">
+				plan_owner=#{plan_owner,jdbcType=VARCHAR},
+			</if>
+			<if test="plan_details != null">
+				plan_details=#{plan_details,jdbcType=VARCHAR},
+			</if>
+			<if test="plan_starttime != null">
+				plan_starttime=#{plan_starttime,jdbcType=DATE},
+			</if>
+			<if test="plan_endtime != null">
+				plan_endtime=#{plan_endtime,jdbcType=DATE},
+			</if>
+			<if test="plan_visible != null">
+				plan_visible=#{plan_visible,jdbcType=INTEGER},
+			</if>
+			<if test="plan_order_level != null">
+				plan_order_level=#{plan_order_level,jdbcType=INTEGER},
+			</if>
+			<if test="rmark != null">
+				rmark=#{rmark,jdbcType=VARCHAR},
+			</if>
+			update_date=now()
+		</set>
+		where plan_code=#{plan_code,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 删除计划 -->
+	<update id="deleteDayPlan" parameterType="map">
+		update sdp_plan_day
+		set plan_visible=3
+		where plan_code=#{plan_code,jdbcType=VARCHAR}
+	</update>
+	<!-- 完成计划 -->
+	<update id="finishDayPlan" parameterType="map">
+		update sdp_plan_day
+		set 
+		<if test="plan_state =='0'.toString()">
+		plan_state='1'
+		</if>
+		<if test="plan_state =='2'.toString()">
+		plan_state='1'
+		</if>
+		<if test="plan_state =='3'.toString()">
+		plan_state='4'
+		</if>
+		where plan_code=#{plan_code,jdbcType=VARCHAR}
+	</update>
+	<!-- 完成计划 -->
+	<update id="delayDayPlan" parameterType="map">
+		update sdp_plan_day
+		set 
+		plan_state='3',plan_endtime=#{plan_endtime,jdbcType=TIMESTAMP},update_date=now()
+		where plan_code=#{plan_code,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 更新计划状态 -->
+	<update id="judgeState" parameterType="map">
+		update sdp_plan_day
+		set 
+		plan_state='2'
+		where (plan_state=0 or plan_state=3)and(unix_timestamp(now())>unix_timestamp(plan_endtime))
+	</update>
+</mapper>

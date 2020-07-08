@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.findRoute">
+	
+	<!-- 消费菜单返回结果对象定义 -->
+	<resultMap id="layoutData" type="map">
+		<id column="route_id" property="routeId" jdbcType="INTEGER" />
+		<result column="level" property="level" jdbcType="INTEGER" />
+		<result column="length" property="length" jdbcType="INTEGER" />
+		<result column="width" property="width" jdbcType="INTEGER" />
+		<result column="stuffing" property="stuffing" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="queryLayoutData" resultMap="layoutData" parameterType="map">
+		select route_id, level, length, width, stuffing from pms_find_route
+		<where>
+			<if test="level !=null and level != ''">
+				level = #{level,jdbcType=INTEGER}
+			</if>
+		</where>
+		order by level, width, length
+	</select>
+
+</mapper>

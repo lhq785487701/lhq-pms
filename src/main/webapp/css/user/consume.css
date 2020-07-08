@@ -1,0 +1,13 @@
+html,body{height:100%}
+.sdp-main-container{height:100%}
+.menuTree{width: 20%;float:left;height:96%;overflow:auto;}
+.consumeTable{width: 79%;float:right;height:100%;}
+
+.consumeSCss{
+      margin:0px;
+      padding:0px;
+      font-family:"微软雅黑","黑体","宋体";
+      font-size:14px;
+      height:36px;
+}
+

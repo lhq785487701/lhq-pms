@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.dic">
+	<!-- 返回结果对象定义 -->
+	<resultMap id="dicMResultMap" type="map">
+		<id column="dic_code" property="dic_code" jdbcType="VARCHAR" />
+		<result column="dic_name" property="dic_name" jdbcType="VARCHAR" />
+		<result column="dic_sts" property="dic_sts" jdbcType="VARCHAR" />
+		<result column="cate_code" property="cate_code" jdbcType="VARCHAR" />
+		<result column="dic_remark" property="dic_remark" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+	<!-- 返回结果对象定义 -->
+	<resultMap id="dic01ResultMap" type="map">
+		<id column="dic_code" property="dic_code" jdbcType="VARCHAR" />
+		<id column="dic_value" property="dic_value" jdbcType="VARCHAR" />
+		<result column="dic_order" property="dic_order" jdbcType="INTEGER" />
+		<result column="dic_label" property="dic_label" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+	<!-- 返回结果对象定义 -->
+	<resultMap id="dicResultMap" type="map">
+		<id column="dic_code" property="dic_code" jdbcType="VARCHAR" />
+		<result column="dic_value" property="dic_value" jdbcType="VARCHAR" />
+		<collection property="items" javaType="ArrayList" ofType="map">
+			<result column="dic_value" property="dic_value" jdbcType="VARCHAR" />
+			<result column="dic_label" property="dic_label" jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+
+	<!-- 返回字段 -->
+	<sql id="dic_MColumn_List">
+		dic_code,dic_name,dic_sts,cate_code,dic_remark,create_date,create_user,update_date,update_user
+	</sql>
+
+	<!-- 返回字段 -->
+	<sql id="dic_Column_List">
+		d.dic_code,d01.dic_value,d01.dic_label
+	</sql>
+	
+	
+
+	<!-- 查询数据字典明细数据 -->
+	<select id="queryDicByCodes" resultMap="dicResultMap">
+		select
+		<include refid="dic_Column_List" />
+		from sdp_dic d right join
+		sdp_dic_01 d01 on d.dic_code=d01.dic_code
+		where
+		d.dic_code in
+		<foreach collection="dic_code" item="code" index="index" open="("
+			close=")" separator=",">
+			#{code}
+		</foreach>
+		and
+		d.dic_code is not
+		null
+		order by d.dic_code,d01.dic_order
+	</select>
+
+	<!-- 查询数据字典头表数据 -->
+	<select id="queryDicMainData" resultMap="dicMResultMap"
+		parameterType="map">
+		select
+		<include refid="dic_MColumn_List" />
+		from sdp_dic
+		<where>
+			<if test="dic_code!=null">
+				dic_code like
+				CONCAT('%',#{dic_code,jdbcType=CHAR},'%')
+			</if>
+			<if test="dic_name!=null">
+				and dic_name like
+				CONCAT('%',#{dic_name,jdbcType=CHAR},'%')
+			</if>
+			<if test="dic_sts!=null and dic_sts.size()!=0">
+				AND dic_sts in
+				<foreach collection="dic_sts" item="sts" index="index" open="("
+					close=")" separator=",">
+					#{sts}
+				</foreach>
+			</if>
+		</where>
+		order by create_date desc
+	</select>
+
+	<!-- 数据字典插入 -->
+	<insert id="addMDicData" parameterType="map">
+		insert into
+		sdp_dic(dic_code,dic_name,dic_sts,dic_remark,cate_code,create_date,create_user)
+		VALUES(#{dic_code,jdbcType=CHAR},#{dic_name,jdbcType=CHAR},'Y',
+		#{dic_remark,jdbcType=CHAR},null,now(),#{$user_code,jdbcType=CHAR})
+	</insert>
+
+	<!-- 数据字典更新 -->
+	<update id="updateMDicData" parameterType="map">
+		update sdp_dic
+		<set>
+			<if test="dic_name!=null">
+				dic_name=#{dic_name,jdbcType=CHAR},
+			</if>
+			<if test="dic_remark!=null">
+				dic_remark=#{dic_remark,jdbcType=CHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where dic_code=#{dic_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 数据字典禁用 -->
+	<update id="disabledMDicData" parameterType="map">
+		update sdp_dic set
+		dic_sts='D',
+		update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where dic_code=#{dic_code,jdbcType=CHAR}
+	</update>
+
+	<!-- 数据字典启用 -->
+	<update id="enableMDicData" parameterType="map">
+		update sdp_dic set
+		dic_sts='Y',
+		update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where dic_code=#{dic_code,jdbcType=CHAR}
+	</update>
+
+	<!--数据字典头表删除 -->
+	<delete id="deleteMDicData" parameterType="map">
+		delete from sdp_dic
+		where dic_code=#{dic_code,jdbcType=CHAR}
+	</delete>
+
+	<!-- 数据字典查询明细数据 -->
+	<select id="queryDic01Data" resultMap="dic01ResultMap"
+		parameterType="string">
+		select
+		dic_code,dic_order,dic_value,dic_label,create_date,create_user,update_date,update_user
+		from sdp_dic_01 where dic_code=#{dic_code,jdbcType=VARCHAR}
+		order by
+		dic_order
+	</select>
+
+	<!-- 数据字典明细插入 -->
+	<insert id="addDic01Data" parameterType="map">
+		insert into
+		sdp_dic_01(dic_code,dic_order,dic_value,dic_label,create_date,create_user)
+		VALUES(#{dic_code,jdbcType=CHAR},#{dic_order,jdbcType=CHAR},#{dic_value,jdbcType=CHAR},
+		#{dic_label,jdbcType=CHAR},now(),#{$user_code,jdbcType=CHAR})
+	</insert>
+
+	<!-- 数据字典更新 -->
+	<update id="updateDic01Data" parameterType="map">
+		update sdp_dic_01
+		<set>
+			<if test="dic_order!=null">
+				dic_order=#{dic_order,jdbcType=CHAR},
+			</if>
+			<if test="dic_label!=null">
+				dic_label=#{dic_label,jdbcType=CHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		</set>
+		where
+			dic_code=#{dic_code,jdbcType=CHAR}
+		and dic_value=#{dic_value,jdbcType=CHAR}
+	</update>
+
+	<!-- 数据字典明细删除 -->
+	<delete id="deleteDic01Data" parameterType="map">
+		delete from
+		sdp_dic_01 where
+		dic_code=#{dic_code,jdbcType=CHAR},dic_value=#{dic_value,jdbcType=CHAR}
+	</delete>
+
+	<!-- 删除头表时，删明细 -->
+	<delete id="deleteMDic01Data" parameterType="map">
+		delete from
+		sdp_dic_01 where
+		dic_code=#{dic_code,jdbcType=CHAR}
+	</delete>
+	
+	<!-- 查询数据字典明细数据 初始化缓存 -->
+	<select id="queryDics" resultMap="dicResultMap">
+		select
+		<include refid="dic_Column_List" />
+		from sdp_dic d right join
+		sdp_dic_01 d01 on d.dic_code=d01.dic_code
+		where
+		d.dic_code is not
+		null
+		order by d.dic_code,d01.dic_order
+	</select>
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:redis="http://www.springframework.org/schema/redis"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/cache 
+     http://www.springframework.org/schema/cache/spring-cache.xsd
+     http://www.springframework.org/schema/util 
+     http://www.springframework.org/schema/util/spring-util.xsd
+     http://www.springframework.org/schema/redis
+     http://www.springframework.org/schema/redis/spring-redis.xsd">
+
+	<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxTotal" value="${pms.redis.maxTotal}" />
+		<property name="maxIdle" value="${pms.redis.maxIdle}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${pms.redis.timeBetweenEvictionRunsMillis}" />
+		<property name="minEvictableIdleTimeMillis" value="${pms.redis.minEvictableIdleTimeMillis}" />
+		<property name="softMinEvictableIdleTimeMillis" value="${pms.redis.softMinEvictableIdleTimeMillis}" />
+		<property name="maxWaitMillis" value="${pms.redis.maxWaitMillis}" />
+		<property name="testOnBorrow" value="${pms.redis.testOnBorrow}" />
+		<property name="testWhileIdle" value="${pms.redis.testWhileIdle}" />
+		<property name="testOnReturn" value="${pms.redis.testOnReturn}" />
+		<property name="blockWhenExhausted" value="${pms.redis.blockWhenExhausted}" />
+	</bean>
+
+	<bean id="clusterConfig" class="com.lhq.pms.plugin.redis.ReidsClusterConfig">
+		<constructor-arg>
+			<value>${pms.redis.host}</value>
+		</constructor-arg>
+	</bean>
+
+	<bean id="connectionFactory"
+		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<constructor-arg index="0" ref="clusterConfig" />
+		<constructor-arg index="1" ref="poolConfig" />
+		<property name="password" value="${pms.redis.password}"></property>
+	</bean>
+
+	<!-- redis操作模板 -->
+	<bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+		<property name="connectionFactory">
+			<ref bean="connectionFactory" />
+		</property>
+	</bean>
+
+	<bean id="jdkSerializer"
+		class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+
+
+	<bean id="messageListenerContainer"
+		class="com.lhq.pms.plugin.redis.PMSRedisMessageListenerContainer"
+		destroy-method="destroy">
+		<property name="connectionFactory" ref="connectionFactory" />
+	</bean>
+</beans>

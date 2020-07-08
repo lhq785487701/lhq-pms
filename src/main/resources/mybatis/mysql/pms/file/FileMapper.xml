@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.file">
+	<resultMap id="fileResultMap" type="com.lhq.pms.data.Row">
+		<id column="file_id" property="file_id" jdbcType="VARCHAR" />
+		<result column="file_suffix" property="file_suffix" jdbcType="VARCHAR" />
+		<result column="file_name" property="file_name" jdbcType="VARCHAR" />
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="bus_type" property="bus_type" jdbcType="VARCHAR" />
+		<result column="business_no" property="business_no" jdbcType="VARCHAR" />
+		<result column="line_no" property="line_no" jdbcType="INTEGER" />
+	</resultMap>
+	<resultMap id="fileListResultMap" type="com.lhq.pms.data.Row">
+		<id column="file_id" property="file_id" jdbcType="VARCHAR" />
+		<result column="file_suffix" property="file_suffix" jdbcType="VARCHAR" />
+		<result column="file_name" property="file_name" jdbcType="VARCHAR" />
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="bus_type" property="bus_type" jdbcType="VARCHAR" />
+		<result column="business_no" property="business_no" jdbcType="VARCHAR" />
+		<result column="line_no" property="line_no" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="file_column_list">
+		f.file_id,
+		f.file_suffix,f.file_name,f.system_code,f.bus_type,n.bus_type_name,
+		f.business_no,f.line_no
+	</sql>
+	<sql id="file_list_Column_List">
+		f.file_id,
+		f.file_suffix,f.file_name,f.system_code,f.bus_type,n.bus_type_name,
+		f.business_no,f.line_no,f.create_date,f.create_user,f.update_date,f.update_user
+	</sql>
+
+	<!-- 根据文件ID获取文件信息 -->
+	<select id="selectFileById" resultMap="fileResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="file_column_list" />
+		from sdp_file f left join sdp_bus_type n on
+		f.system_code=n.system_code and f.bus_type=n.bus_type where f.file_id
+		=#{file_id,jdbcType=CHAR}
+	</select>
+
+	<!--文件信息查询 -->
+	<select id="queryFiles" resultMap="fileListResultMap"
+		parameterType="map">
+		select
+		<include refid="file_list_Column_List" />
+		from sdp_file f left join sdp_bus_type n on
+		f.system_code=n.system_code and f.bus_type=n.bus_type
+		<where>
+			<if test="system_code!=null">
+				f.system_code=#{system_code,jdbcType=CHAR}
+			</if>
+			<if test="bus_type!=null">
+				and f.bus_type =#{bus_type,jdbcType=CHAR}
+			</if>
+			<if test="business_no!=null">
+				and f.business_no=#{business_no,jdbcType=CHAR}
+			</if>
+			<if test="file_name!=null">
+				and f.file_name like
+				CONCAT('%',#{file_name,jdbcType=CHAR},'%')
+			</if>
+			<if test="$isAdmin==false">
+				and f.create_user=#{$user_code,jdbcType=CHAR}
+			</if>
+		</where>
+		order by system_code,bus_type,business_no,line_no
+	</select>
+
+	<!-- 添加文件 -->
+	<insert id="addFile" parameterType="map">
+		insert into
+		sdp_file(file_id,file_suffix,file_name,system_code,bus_type,business_no,line_no,create_date,create_user)
+		VALUES(#{file_id,jdbcType=CHAR},#{file_suffix,jdbcType=CHAR},#{file_name,jdbcType=CHAR},#{system_code,jdbcType=CHAR},
+		#{bus_type,jdbcType=CHAR},#{business_no,jdbcType=CHAR},#{line_no,jdbcType=INTEGER},now(),#{$user_code,jdbcType=CHAR})
+	</insert>
+
+	<!-- 删除单个文件 -->
+	<delete id="delFile" parameterType="map">
+		delete from sdp_file where
+		file_id=#{file_id,jdbcType=CHAR}
+	</delete>
+
+	<!-- 批量删除文件 -->
+	<delete id="delFiles" parameterType="map">
+		delete from sdp_file where
+		file_id in
+		<foreach collection="file_id" item="id" index="index" open="("
+			close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<!-- 更新文件 -->
+	<update id="updateFile" parameterType="map">
+		update sdp_file
+		set file_id = #{file_id,jdbcType=CHAR},
+			file_suffix = #{file_suffix,jdbcType=CHAR},
+			file_name = #{file_name,jdbcType=CHAR},
+			system_code = #{system_code,jdbcType=CHAR},
+			bus_type = #{bus_type,jdbcType=CHAR},
+			business_no = #{business_no,jdbcType=CHAR},
+			update_date = now(),
+			update_user = #{$user_code,jdbcType=CHAR}
+		where file_id = #{file_old_id,jdbcType=CHAR}
+	</update>
+
+</mapper>

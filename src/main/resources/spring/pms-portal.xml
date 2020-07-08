@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- 门户授权初始化缓存 -->
+	<bean id="portalCacheBo" class="com.lhq.pms.portal.cache.PortalCacheBoImpl"
+		parent="commonBo">
+	</bean>
+
+	<!-- 门户变化更改门户缓存 -->
+	<bean id="sdpSqlCodePortalRoleChangeAuthBo" class="com.lhq.pms.portal.cache.PortalRoleChangeCacheBoImpl">
+		<property name="cacheName" value="portalRoleCache" />
+	</bean>
+
+	<!-- 角色变化更改门户缓存 -->
+	<bean id="sdpSqlCodeRoleChangeAuthBo" class="com.lhq.pms.portal.cache.RoleChangePortalCacheBoImpl">
+		<property name="cacheName" value="portalRoleCache" />
+	</bean>
+
+	<!-- 用户角色变化更改门户缓存 -->
+	<bean id="sdpSqlCodeUserRoleChangeAuthBo"
+		class="com.lhq.pms.portal.cache.UserRoleChangePortalCacheBoImpl">
+		<property name="cacheName" value="portalRoleCache" />
+	</bean>
+</beans>

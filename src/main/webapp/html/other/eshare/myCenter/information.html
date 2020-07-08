@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+
+<title>修改密码</title>
+<link rel="stylesheet" href="../../css/iview.css">
+</head>
+<body>
+	<div  id="information">
+		
+		<div>
+			<div style="float:left;width:45%;">
+				<i-form label-position="right" :label-width="100" :model="user" ref="userForm" :rules="rulesUser"> 
+					<form-item label="姓名:" prop="userName" :required="true" > 
+						<i-input v-model="user.userName"  style="width:200px;" ></i-input> 
+					</form-item>
+					<form-item label="昵称:" :required="true" > 
+					<p class="lookLikeAListitem">混世魔王</p>
+					</form-item> 
+					<form-item label="Q Q:" prop="userQQ" >
+						<i-input v-model="user.userQQ" style="width:200px"></i-input> 
+					</form-item>
+					<form-item label="微信:"  prop="userWeChat" >
+						<i-input v-model="user.userWeChat" style="width:200px"></i-input> 
+					</form-item>
+					<form-item label="电话:"  prop="user_mobile">
+						<i-input v-model="user.user_mobile" style="width:200px"></i-input> 
+					</form-item>
+				</i-form>
+				<div style="margin-left:45%" >
+				    <i-button @click="userSave" type="primary" style="width:70px; height:35px;"  >提交</i-button>
+					<i-button @click="userDataCancel" type="ghost" style=" width:70px; height:35px;margin-left:25px">重置</i-button>
+				</div>
+			
+			</div> 
+			
+			<div  class="img_list" >
+					 <img :src="src" style="width:100px;height:100px"/>					
+			</div>
+		</div>
+				<!--  <upload
+					ref="upload"
+					:show-upload-list="false"
+					:default-file-list="defaultList"
+					:on-success="handleSuccess"
+					:format="['jpg','jpeg','png']"
+					:max-size="2048"
+					:on-format-error="handleFormatError"
+					:on-exceeded-size="handleMaxSize"
+					:before-upload="handleBeforeUpload"
+					multiple
+					type="drag"
+					action="//jsonplaceholder.typicode.com/posts/"
+					style="display: inline-block;width:80px;">
+					
+					<div >
+					
+					<Icon type="camera" size="12" > </Icon>
+					<p @click="csrc">查看图片</p>
+					</div>
+				</upload>
+				 -->
+		
+	
+
+			
+			
+	
+			
+		
+	</div>
+
+</body>
+
+
+
+
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<script src="../../js/vue/vue.js"></script>
+<script src="../../js/vue/ui/iview.js"></script>
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="information.js"></script>
+
+
+</html>

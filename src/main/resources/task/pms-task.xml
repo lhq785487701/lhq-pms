@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/task 
+     http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<!-- 系统节点检查任务   doParam 是初始化传入参数-->
+	<bean id="systemNodeCheckTask" class="com.lhq.pms.task.vo.PMSTaskBean">
+		<property name="taskCode" value="systemNodeCheckTask" />
+		<property name="taskName" value="系统节点检查任务" />
+		<property name="doType" value="B" />
+		<property name="doContent" value="systemNodeCheckBo" />
+		<property name="doParam" value="5" />
+		<property name="cronExp" value="0 0/2 * * * ?" />
+		<property name="systemCode" value="system" />
+		<property name="taskGroup" value="system" />
+		<property name="taskRemark" value="每2分钟发送节点检查消息" />
+	</bean>
+</beans>

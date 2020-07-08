@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="pms">
+<meta name="keywords" content="PMS">
+<title>导出配置编辑</title>
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet"
+	href="../../../js/jquery/layer/theme/default/layer.css">
+<link rel="stylesheet" href="../../../css/sdp-ui.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../../css/fonts/awesome/font-awesome.min.css" />
+</head>
+<body>
+	<div class="sdp-main-container" id="mainContainer" v-cloak>
+		<i-form :model="curRows" ref="dataEditForm" label-position="right" :label-width="100" :rules="rulesEdit" inline > 
+			<form-item label="导出编码:" > 
+				<i-input v-model="curRows.exp_code" :disabled="true"></i-input> 
+			</form-item> 
+			<form-item label="导出名称:" prop="exp_name"> 
+				<i-input v-model="curRows.exp_name"></i-input>
+			</form-item> 
+			<form-item label="开始行:" :required="true"> 
+				<input-number v-model="curRows.start_row" style="width:170px;"></input-number>
+			</form-item>
+			<form-item label="导出标题:" :required="true"> 
+				<i-input v-model="curRows.exp_title"></i-input>
+			</form-item>
+			<form-item label="导出备注:" > 
+				<i-input v-model="curRows.exp_remark"></i-input>
+			</form-item>
+			<form-item>
+				<i-button @click="addData01" icon="android-add"> 新增导出明细</i-button>
+			</form-item>
+		</i-form> 
+		<i-table :data='datas01' :columns="columns01" ref="dataGrid01Edit"
+					height="280" border highlight-row stripe> 
+		</i-table>
+		<div style="text-align:right;margin-right: 20px;margin-top: 15px;">
+			<i-button @click="editDataSave" type="primary" style="margin-right:10px"> 确定</i-button>
+			<i-button @click="editDataCancel" > 取消</i-button>
+		</div>
+	</div>
+</body>
+<script src="../../../js/jquery/IE.plugin.js"></script>
+<!--[if lte IE 9]>	
+	<script src="../../../js/ieBetter-min.js"></script>
+	<script src="../../../js/jquery/respond.js"></script>
+	<script src="../../../js/jquery/html5shiv.js"></script>	
+<![endif]-->
+<script src="../../../js/jquery/jquery.min.js"></script>
+<script src="../../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<script src="../../../js/vue/vue.min.js"></script>
+<script src="../../../js/vue/ui/iview.min.js"></script>
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="excelExpEdit.js"></script>
+</html>

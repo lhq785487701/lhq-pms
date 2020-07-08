@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/aop
+     http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/cache 
+     http://www.springframework.org/schema/cache/spring-cache.xsd">
+	
+	<context:component-scan base-package="com.lhq.pms" />
+	
+	<!-- 将配置文件读取到容器中，交给Spring管理 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations" ref="propertyResources" />
+	</bean>
+
+	<!-- 配置国际化资源 -->
+	<bean id="messageSource" class="com.lhq.pms.plugin.bundle.PMSBundleMessageSource">
+		<property name="cacheSeconds" value="100000" />
+		<property name="resourceLoader">
+			<bean class="com.lhq.pms.plugin.bundle.PMSResourceLoader" />
+		</property>
+	</bean>
+	
+	
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="url" value="${pms.jdbc.pool.url}" />
+		<property name="username" value="${pms.jdbc.pool.username}" />
+		<property name="password" value="${pms.jdbc.pool.password}" />
+
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${pms.jdbc.pool.initialSize}" />
+		<!-- 最小空闲连接数 -->
+		<property name="minIdle" value="${pms.jdbc.pool.minIdle}" />
+		<!-- 最大空闲连接数 -->
+		<property name="maxActive" value="${pms.jdbc.pool.maxActive}" />
+
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${pms.jdbc.pool.maxWait}" />
+
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis"
+			value="${pms.jdbc.pool.timeBetweenEvictionRunsMillis}" />
+
+		<!-- 超过时间限制是否回收 -->
+		<property name="removeAbandoned" value="${pms.jdbc.pool.removeAbandoned}" />
+		<!-- 超过时间限制多长 -->
+		<property name="removeAbandonedTimeout" value="${pms.jdbc.pool.removeAbandonedTimeout}" />
+
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${pms.jdbc.pool.minEvictableIdleTimeMillis}" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="validationQuery" value="${pms.jdbc.pool.validationQuery}" />
+		<!-- 申请连接的时候检测 -->
+		<property name="testWhileIdle" value="${pms.jdbc.pool.testWhileIdle}" />
+		<!-- 申请连接时执行validationQuery检测连接是否有效，配置为true会降低性能 -->
+		<property name="testOnBorrow" value="${pms.jdbc.pool.testOnBorrow}" />
+		<!-- 归还连接时执行validationQuery检测连接是否有效，配置为true会降低性能 -->
+		<property name="testOnReturn" value="${pms.jdbc.pool.testOnReturn}" />
+
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<property name="poolPreparedStatements" value="${pms.jdbc.pool.poolPreparedStatements}" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="${pms.jdbc.pool.maxPoolPreparedStatementPerConnectionSize}" />
+
+		<!--属性类型是字符串，通过别名的方式配置扩展插件，常用的插件有： 监控统计用的filter:stat 日志用的filter:log4j 防御SQL注入的filter:wall -->
+		<property name="filters" value="${pms.jdbc.pool.filters}" />
+		<!-- 运行程序，当连接超过removeAbandonedTimeout分钟后会强制进行回收，并输出异常日志 -->
+		<property name="logAbandoned" value="${pms.jdbc.pool.logAbandoned}" />
+	</bean>
+
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configuration">
+			<bean class="org.apache.ibatis.session.Configuration">
+				<property name="callSettersOnNulls" value="true" />
+			</bean>
+		</property>
+		<property name="mapperLocations" value="classpath*:mybatis/mysql/pms/**/*.xml"></property>
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageInterceptor">
+					<property name="properties">
+						<value>
+							rowBoundsWithCount=true
+							reasonable=true
+							autoRuntimeDialect=true
+							closeConn=true
+						</value>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- <bean id="sqlSession_batch" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory" />
+		<constructor-arg name="executorType" value="BATCH" />
+	</bean> -->
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource">
+		</property>
+	</bean>
+	
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="update*" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="save*" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="remove*" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="delete*" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="insert*" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="do*" propagation="REQUIRED" rollback-for="Exception" />
+			<tx:method name="add*" propagation="REQUIRED" rollback-for="Exception" />
+			<tx:method name="init*" propagation="REQUIRED"
+				rollback-for="Exception" />
+
+			<!-- 有则加入事物，无也不创建事物 -->
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="load*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="search*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="select*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="query*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="list*" propagation="SUPPORTS" read-only="true" />
+
+			<tx:method name="*_noTran" propagation="NOT_SUPPORTED" />
+
+			<!-- <tx:method name="*" read-only="true" /> -->
+		</tx:attributes>
+	</tx:advice>
+
+	<tx:advice id="txAdvice_new" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="*Tran" propagation="REQUIRES_NEW"
+				rollback-for="Exception" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 多实例模式 -->
+	<bean id="loginUser" class="com.lhq.pms.data.LoginUser" scope="prototype" />
+
+	<import resource="classpath*:spring/**/*.xml" />
+	<import resource="classpath*:/task/**/*.xml" />
+</beans>

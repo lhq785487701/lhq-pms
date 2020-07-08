@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="pms">
+<meta name="keywords" content="PMS">
+<title>门户资源授权</title>
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet" href="../../../js/jquery/layer/theme/default/layer.css">
+<link rel="stylesheet" href="../../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet" href="../../../css/fonts/awesome/font-awesome.min.css" />
+<style type="text/css">
+	.vertical-center-modal{
+        display: flex;
+        align-items: center;
+        justify-content: center;      
+    }
+   .vertical-center-modal .ivu-modal{
+        top: 0;
+   }
+</style>
+</head>
+<body>
+	<div class="sdp-main-container" id="mainContainer" v-cloak>
+		<row > 
+			<i-col :span="10"> 
+				<row> 
+					<i-col :span="18">
+						<i-input v-model="role_code" placeholder="输入角色名或编码"></i-input>
+					</i-col> 
+					<i-col :span="6"> 
+						<i-button @click="searchDatas" icon="search">查询 </i-button>
+					</i-col> 
+				</row> 
+				<i-table :data='datasRole' :columns="columnsRole" ref="dataGridRole" height="400" @on-select-change="tableSelectRole" border highlight-row> </i-table> 
+				<page @on-page-size-change="handleSizeChangeRole" :page-size="pageRole.getPageRowCount()" @on-change="handleCurrentChangeRole" :current="pageRole.getPageNumber()" 
+				show-total show-elevator show-sizer :total="pageRole.totalCount"></page>
+			</i-col> 
+			<i-col :span="14"> 
+				<row type="flex" justify="end"> 
+					<i-button icon="android-add" @click="addPorRole">添加窗体</i-button> 
+					<i-button img="fa fa-remove" @click="deletePorRole">删除窗体</i-button>
+				</row> 
+				<i-table :data='datasPorRole':columns="columnsPorRole" ref="dataGridPorRole" height="400" border></i-table> 
+				<page @on-page-size-change="handleSizeChangePorRole":page-size="pagePorRole.getPageRowCount()" @on-change="handleCurrentChangePorRole" :current="pagePorRole.getPageNumber()"
+				show-total show-elevator show-sizer :total="pagePorRole.totalCount"></page> 
+			</i-col> 
+		</row>
+		
+		<!-- 新增选择门户资源 -->
+		<Modal v-model="dataAdd" title="选择门户窗体" :mask-closable="false"  width="50"  @on-ok="listDataSave"  class-name="vertical-center-modal"> 
+			<row> 
+				<i-col :span="20">
+					<i-input v-model="win_name" placeholder="输入名称"></i-input> 
+				</i-col> 
+				<i-col :span="4"> 
+					<i-button @click="queryPortalsDatas" icon="search">查询 </i-button>
+				</i-col> 
+			</row> 
+			<i-table :data='datasPortals' :columns="columnsPortals"ref="dataGridPortals" height="300" border></i-table> 
+			<page @on-page-size-change="handleSizeChangePortals":page-size="pagePortals.getPageRowCount()" @on-change="handleCurrentChangePortals" 
+			:current="pagePortals.getPageNumber()"show-total show-elevator show-sizer :total="pagePortals.totalCount"></page> 
+		</Modal>
+		
+		<Modal v-model="dataEdit" title="修改序号" :mask-closable="false"  width="50"  @on-ok="lineSave"  class-name="vertical-center-modal"> 
+			<i-form :model="curWinRoleRow" ref="dataEditForm" label-position="right" :label-width="150" > 
+				<form-item label="窗体名称:" > 
+					<i-input v-model="curWinRoleRow.win_name"  :disabled="true" style="width:240px"   ></i-input> 
+				</form-item>
+				<form-item label="窗体标题:"> 
+					<i-input v-model="curWinRoleRow.win_title" :disabled="true" style="width:240px" ></i-input>
+				</form-item> 
+				<form-item label="窗体地址:"> 
+					<i-input v-model="curWinRoleRow.win_url" :disabled="true" style="width:240px" ></i-input> 
+				</form-item>
+				<form-item label="序号:"> 
+					<input-number v-model="curWinRoleRow.line_no" style="width:240px"></input-number> 
+				</form-item>
+			</i-form> 
+		</Modal> 
+	</div>
+</body>
+<script src="../../../js/jquery/IE.plugin.js"></script>
+<!--[if lte IE 9]>	
+	<script src="../../../js/ieBetter-min.js"></script>
+	<script src="../../../js/jquery/respond.js"></script>
+	<script src="../../../js/jquery/html5shiv.js"></script>	
+<![endif]-->
+
+<script src="../../../js/jquery/jquery.min.js"></script>
+<script src="../../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<script src="../../../js/vue/vue.min.js"></script>
+<script src="../../../js/vue/ui/iview.min.js"></script>
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="portalRole.js"></script>
+</html>

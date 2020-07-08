@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta name="description" content="pms">
+<meta name="keywords" content="PMS">
+<title>个人消费管理</title>
+<link rel="stylesheet" href="../../../css/iview.css">
+<link rel="stylesheet" href="../../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../../css/sdp-admin.css" />
+<link rel="stylesheet" href="../../../css/sdp-skin.css" />
+<link rel="stylesheet" href="../../../css/user/consume.css" />
+<link rel="stylesheet" href="../../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet" href="../../../css/fonts/awesome/font-awesome.min.css" />
+</head>
+<body>
+	<div class="sdp-main-container" id="mainContainer">
+    	<div class = "menuTree">
+    		<i-Button type="ghost" @click="addConsumeMenu" style = "margin-left:20px">新增消费菜单</i-Button><br>
+    		<Tree :data="menuTree" :render = "actionRender" ></Tree>
+    	</div>
+      	<div class = "consumeTable">
+      		<i-form inline :model="consumeParams" :label-width="90"><br>
+			<form-item label="消费时间:"><Row>
+	           	<i-Col span="11">
+	           		<form-item prop="date"><Date-Picker type="date" style="width: 110px" v-model="consumeParams.consumeSDate"></Date-Picker></form-item>
+	            </i-Col>
+	            <i-Col span="2" style="text-align: center">  到</i-Col>
+	            <i-Col span="11">
+	                <form-item prop="time"><Date-Picker type="date" style="width: 110px" v-model="consumeParams.consumeEDate"></Date-Picker></form-item>
+	            </i-Col>
+	       	</Row></form-item> 
+			<form-item label="消费描述:"> <i-input style="width: 120px" v-model="consumeParams.consumeDesc"></i-input></form-item>
+			<form-item label="消费类型:">
+				<i-select v-model="consumeParams.consumeType"  style="width: 120px;">
+						<i-option value=""></i-option>
+        				<i-option value="支出">支出</i-option>
+        				<i-option value="收入">收入</i-option>
+   				</i-select>
+    		</form-item>  
+			<form-item>
+				<i-button type="primary" shape="circle" @click="queryConsumeDatas" icon="search">查询</i-button> 
+				<i-button type="primary" shape="circle" @click="addConsumeDatas" icon="android-add">新增 </i-button> 
+			</form-item> 
+			</i-form>
+      		<i-table :data='consumeDatas' :columns="consumeCols" height="300"
+				border highlight-row width="1050"> </i-table>
+			<page :page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+				:current="page.getPageNumber()" show-total  show-elevator
+				:total="page.totalCount"> </page><br>
+			<div style = "display:inline-flex;">
+				<div class = "consumeSCss" style="color:red;">
+					消费统计：<br><a href = "consumeStatistics.html" style="color:blue;">更多统计</a></div>
+				<i-table :data='consumeStatistics' :columns="statisticsCols" height="170"
+					border highlight-row width="980" size="small"> </i-table></div>
+      	</div>
+	   	
+	   	
+	   	<Modal v-model="consumeAddModal" title="新增消费明细" :mask-closable="false"  :closable="false" width= "50%"> 
+			<i-form  :model="consumeAddData"  :label-width="0" ref="dataDetailAddForm" :rules="rulesConsumeAdd" inline width= "50%">
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费金额:</label>
+				<form-item :required="true" prop="consume_money"> 
+					<i-input v-model="consumeAddData.consume_money" number></i-input> 
+				</form-item>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费时间:</label>
+				<form-item :required="true" prop="consume_date"> 
+					<Date-Picker type="date" v-model="consumeAddData.consume_date" style="width: 168px;"></Date-Picker>
+				</form-item><br><br>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费类型:</label>
+				<form-item :required="true" prop="consume_type"> 
+					<i-select v-model="consumeAddData.consume_type"  style="width: 164px;">
+         				<i-option value="支出">支出</i-option>
+         				<i-option value="收入">收入</i-option>
+    				</i-select>
+				</form-item>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费菜单:</label>
+				<form-item :required="true" prop="consume_menu"> 
+					<i-select v-model="consumeAddData.consume_menu"  style="width: 168px;">
+         				<i-Option v-for="item in menuLastLevel" :value="item.consume_id" :key="item.consume_menu_name">{{ item.consume_menu_name }}</i-Option>
+    				</i-select>
+				</form-item><br><br>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费方式:</label>
+				<form-item :required="true" prop="consume_way"> 
+					<i-input v-model="consumeAddData.consume_way"></i-input> 
+				</form-item>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费时段:</label>
+				<form-item :required="true" prop="consume_time"> 
+					<i-select v-model="consumeAddData.consume_time"  style="width: 168px;">
+         				<i-Option v-for="item in dicDatas.pms_consume_time" :value="item.dic_value" :key="item.dic_label">{{ item.dic_label }}</i-Option>
+    				</i-select>
+				</form-item></br><br>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费说明:</label>
+				<form-item :required="true" prop="consume_desc"> 
+					<i-input v-model="consumeAddData.consume_desc" type="textarea" :autosize="{minRows: 1,maxRows: 5}"></i-input> 
+				</form-item>
+				<br>
+			</i-form> 
+			<div slot="footer">
+	          	<i-button type="primary" size="large"  @click="addConsumeDetailCancel" shape="circle">取消</i-button>
+	          	<i-button type="primary" size="large"  @click="addConsumeDetailSave" shape="circle">新增</i-button>
+	      	</div>
+		</Modal>
+		
+		
+		<Modal v-model="consumeEditModal" title="更新消费明细" :mask-closable="false"  :closable="false" width= "50%"> 
+			<i-form  :model="consumeData"  :label-width="0" ref="dataDetailEditForm" :rules="rulesConsumeEdit" inline width= "50%">
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费金额:</label>
+				<form-item :required="true" prop="consume_money"> 
+					<i-input v-model="consumeData.consume_money" number></i-input> 
+				</form-item>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费时间:</label>
+				<form-item :required="true" prop="consume_date"> 
+					<Date-Picker type="date" v-model="consumeData.consume_date" style="width: 168px;"></Date-Picker>
+				</form-item><br><br>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费类型:</label>
+				<form-item :required="true" prop="consume_type"> 
+					<i-select v-model="consumeData.consume_type"  style="width: 164px;">
+         				<i-option value="支出">支出</i-option>
+         				<i-option value="收入">收入</i-option>
+    				</i-select>
+				</form-item>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费菜单:</label>
+				<form-item :required="true" prop="consume_menu"> 
+					<i-select v-model="consumeData.consume_menu"  style="width: 168px;">
+         				<i-Option v-for="item in menuLastLevel" :value="item.consume_id" :key="item.consume_menu_name">{{ item.consume_menu_name }}</i-Option>
+    				</i-select>
+				</form-item><br><br>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费方式:</label>
+				<form-item :required="true" prop="consume_way"> 
+					<i-input v-model="consumeData.consume_way"></i-input> 
+				</form-item>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费时段:</label>
+				<form-item :required="true" prop="consume_time"> 
+					<i-select v-model="consumeData.consume_time"  style="width: 168px;">
+         				<i-Option v-for="item in dicDatas.pms_consume_time" :value="item.dic_value" :key="item.dic_label">{{ item.dic_label }}</i-Option>
+    				</i-select>
+				</form-item></br><br>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">消费说明:</label>
+				<form-item :required="true" prop="consume_desc"> 
+					<i-input v-model="consumeData.consume_desc" type="textarea" :autosize="{minRows: 1,maxRows: 5}"></i-input> 
+				</form-item>
+				<br>
+			</i-form> 
+			<div slot="footer">
+	          	<i-button type="primary" size="large"  @click="editConsumeDetailCancel" shape="circle">取消</i-button>
+	          	<i-button type="primary" size="large"  @click="editConsumeDetailSave" shape="circle">修改</i-button>
+	      	</div>
+		</Modal>
+		
+		
+		
+		
+		<Modal v-model="consumeDetailModal" title="查看消费明细" :mask-closable="false"  width= "30%" :styles="{top: '20px'}"> 
+			<i-form inline :model="consumeData" label-position="right" :label-width="0" style = "text-align:left"> 
+				<form-item><div style="min-width: 280px">消费菜单:{{consumeData.consume_menu_name }};</div></form-item><br>
+				<form-item><div style="min-width: 280px">消费金额:{{consumeData.consume_money }};</div></form-item><br>
+				<form-item><div style="min-width: 280px">消费类型:{{consumeData.consume_type }};</div></form-item><br>
+				<form-item><div style="min-width: 280px">消费时间:{{changeDateFormat(consumeData.consume_date) }};</div></form-item><br>
+				<form-item><div style="min-width: 280px">消费方式：{{consumeData.consume_way }};</div></form-item><br>
+				<form-item><div style="min-width: 280px">消费时段：{{stsFormatDetail(consumeData.consume_time) }};</div></form-item><br>
+				<form-item><div style="min-width: 280px">消费说明:{{consumeData.consume_desc}};</div></form-item><br>														
+			</i-form>
+			<div slot="footer">
+	          	<i-button type="primary" size="large"  @click="seeConsumeDetailCancel" shape="circle">关闭</i-button>
+	      	</div>
+		</Modal>
+	   	
+	   	
+	   	<Modal v-model="consumeMenuModal" title="新增消费菜单" :mask-closable="false" width= "50%"> 
+			<i-form  :model="consumeMenuData"  :label-width="0" ref="dataMenuAddForm" :rules="rulesMenuAdd" inline width= "50%">
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">菜单名称:</label>
+				<form-item :required="true" prop="menuName"> 
+					<i-input v-model="consumeMenuData.menuName" ></i-input> 
+				</form-item>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">菜单描述:</label>
+				<form-item :required="true" prop="menuDesc"> 
+					<i-input v-model="consumeMenuData.menuDesc" ></i-input> 
+				</form-item><br>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">菜单顺序:</label>
+				<form-item :required="true" prop="menuOrder"> 
+					<i-input v-model="consumeMenuData.menuOrder" number></i-input> 
+				</form-item>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">父级菜单:</label>
+				<form-item :required="true" prop="menuPid"> 
+					<i-select id="label_consumeMenu_menuPid" v-model="consumeMenuData.menuPid"  style="width: 162px;">
+         				<i-Option v-for="item in menuList" :value="item.consume_id" :key="item.consume_menu_name">{{ item.consume_menu_name }}</i-Option>
+    				</i-select>
+				</form-item><br>
+			</i-form>
+			<div slot="footer">
+	          	<i-button type="primary" size="large"  @click="addConsumeMenuCancel" shape="circle">取消</i-button>
+	          	<i-button type="primary" size="large"  @click="addConsumeMenuSave" shape="circle">确定</i-button>
+	      	</div>
+		</Modal>
+		
+		
+		<Modal v-model="consumeMenuModalEdit" title="修改消费菜单" :mask-closable="false" width= "30%">
+			<i-form  :model="consumeMenuData"  :label-width="0" ref="dataMenuEditForm" :rules="rulesMenuAdd" inline width= "30%">
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">菜单名称:</label>
+				<form-item :required="true" prop="menuName"> 
+					<i-input v-model="currentMenuData.title" ></i-input> 
+				</form-item><br>
+				<label style="font-size:14px;display:inline-block ;width:92px; text-align:right;line-height:32px">菜单顺序:</label>
+				<form-item :required="true" prop="menuOrder"> 
+					<i-input v-model="currentMenuData.menu_order" number></i-input> 
+				</form-item>
+			</i-form>
+			<div slot="footer">
+	          	<i-button type="primary" size="large"  @click="editConsumeMenuCancel" shape="circle">取消</i-button>
+	          	<i-button type="primary" size="large"  @click="editConsumeMenuSave" shape="circle">确定</i-button>
+	      	</div>
+		</Modal>
+	</div>
+</body>
+<script src="../../../js/jquery/IE.plugin.js"></script>
+<!--[if lte IE 9]>	
+	<script src="../../../js/ieBetter-min.js"></script>
+	<script src="../../../js/jquery/respond.js"></script>
+	<script src="../../../js/jquery/html5shiv.js"></script>	
+<![endif]-->
+
+<!-- 引入 jquery -->
+<script src="../../../js/jquery/jquery.js"></script>
+<script src="../../../js/jquery/jquery-migrate.js"></script>
+<script src="../../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../../js/vue/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="../../../js/vue/ui/iview.min1.js"></script>
+
+<script src="../../../js/sdp/SDPUrl.js"></script>
+<script src="../../../js/sdp/SDPContext.js"></script>
+<script src="../../../js/sdp/Page.js"></script>
+<script src="../../../js/sdp/Row.js"></script>
+<script src="../../../js/sdp/RowSet.js"></script>
+<script src="../../../js/sdp/DataStore.js"></script>
+<script src="../../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="consume.js"></script>
+</html>

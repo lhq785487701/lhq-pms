@@ -1,0 +1,102 @@
+@charset "utf-8";
+/* -----------SDP前端框架-------------
+* sdp.login.css v0.1	后台登录页样式
+* Created & Modified by liugongjun
+* Date modified 2017.4.20
+*
+*
+*/
+html, body {
+	height: 100%;
+	*position: static;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-size: 14px;
+	background-color: #fff;
+	color: #333
+}
+
+.header, .footer {
+	position: absolute;
+	left: 0;
+	right: 0;
+	width: 100%;
+	z-index: 99
+}
+
+.header {
+	top: 0;
+	height: 55px;
+	background: #808080 url(images/ulogo.png) no-repeat 0 center;
+	background-position:center center
+}
+
+.loginWraper {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	z-index: 1;
+	background: #3283AC url(images/user-login-bg.jpg) no-repeat center;
+	background-size: 100% 100%
+}
+
+.loginBox {
+	position: absolute;
+	width: 617px;
+	height: 330px;
+	left: 60%;
+	top: 50%;
+	margin-left: -309px;
+	margin-top: -184px;
+	padding-top: 50px;
+	padding-right: 20px;
+	padding-left: 20px;
+}
+
+@media ( max-width :617px) {
+	.loginbox {
+		width: 100%;
+		position: static;
+		margin-top: 0;
+		margin-left: 0;
+	}
+}
+
+.loginBox .row {
+	margin-top: 20px;
+}
+
+.loginBox {
+	font-size: 24px;
+	width: 360px
+}
+
+@media ( max-width :617px) {
+	.loginBox {
+		width: 80%
+	}
+}
+
+.row-bg {
+	padding: 20px 15px;
+}
+
+.row-bg-bt {
+	padding-right: 15px;
+	padding-top: 30px;
+}
+
+.err-tip {
+	color: red;
+	font-size: 18px;
+}
+
+[v-cloak] {
+	display: none;
+}

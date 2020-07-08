@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="renderer" content="webkit|ie-comp|ie-stand">
+		<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+		<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+		<meta http-equiv="Cache-Control" content="no-siteapp" />
+		<title>文档库</title>
+
+		<link rel="stylesheet" href="../../css/iview.css">
+		
+		<link rel="stylesheet"
+			href="../../js/jquery/layer/skin/default/layer.css">
+		<link rel="stylesheet" href="../../css/sdp-ui.css" />
+		<link rel="stylesheet" href="../../css/sdp-admin.css" />
+		<link rel="stylesheet" href="../../css/sdp-skin.css" />
+		<link rel="stylesheet"
+			href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+		<link rel="stylesheet"
+			href="../../css/fonts/awesome/font-awesome.min.css" />
+		<style type="text/css">
+			#card {
+				border:1px solid #9BA7B5;
+				margin-top:20px;
+				margin-right:50px;
+				height:530px;
+			}
+		</style>
+		
+</head>
+
+	<body style="width: 100%;margin: 0 auto;">
+		<div id="mainContainer" align="center" style="height:60px;padding:10px;">
+			<i-form inline :model="params" :label-width="80">
+				<h1><Icon type="document-text"></Icon>文档库</h1>
+				<br>
+				<form-item label="所属项目"> 
+					<i-input v-model="params.doc_owner"></i-input>
+				</form-item>
+				<form-item label="文档名称"> 
+					<i-input v-model="params.doc_name" style="width:100px" ></i-input>
+				</form-item> 
+				<form-item label="创建时间"> 
+			       	<Date-picker @on-change="dateChange"  format="yyyy-MM-dd" type="daterange" confirm placement="bottom-end" placeholder="选择日期" style="width: 200px" ></Date-picker>
+				</form-item> 
+				<form-item label="文档类型"> 
+					<!-- v-model去掉,显示出来的没有办法选中,去掉:label获取到的值是类型代码,没有去查数据字典,去掉:value只能一起选择,一起取消.去掉:key没啥变化 -->
+					<i-select v-model="params.doc_types" style="width:160px;" multiple placeholder="请选择" clearable> 
+						<i-option v-for="item in dicDatas['sdp_doc_type']" :label="item.dic_label" :value="item.dic_value" :key="item.dic_value"></i-option> 
+					</i-select> 
+				</form-item>
+				<form-item label-width="20">
+					<i-button type="info" @click="queryDatas" icon="search" >查询</i-button> 
+				</form-item> 
+				<form-item label-width="20">
+					<i-button type="ghost" @click="dataUpload=true" icon="upload">上传</i-button> 
+				</form-item>
+			</i-form>
+			<card id="card" :bordered="false" style="margin-left:4%" >
+				<!-- border 每一小格的边框,stripe条纹 -->
+				<i-table :data='datas' :columns="columns" height="450" ref="dataGrid" stripe> </i-table>
+				<div style="margin-top:15px" align="center">
+					<page @on-page-size-change="handleSizeChange"
+						:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+						:current="page.getPageNumber()" show-total show-elevator show-sizer
+						:total="page.totalCount"></page>
+				</div>
+			</card>
+			<Modal v-model="dataEdit" title="文档编辑" :mask-closable="false" @on-ok="editDataSave" @on-cancel="editDataCancel">
+				<i-form :model="curRow" label-position="right" :label-width="80" ref="dataEditForm" :rules="rulesEdit">
+					<form-item label="文档编码">
+						<i-input v-model="curRow.doc_id" :disabled=true></i-input>
+					</form-item>
+					<form-item label="所属项目">
+						<i-input v-model="curRow.proj_name" :disabled=true></i-input>
+					</form-item>
+					<form-item label="文档名称" prop="doc_name">
+						<i-input v-model="curRow.doc_name" ></i-input>
+					</form-item>
+					<form-item label="文档描述">
+						<i-input v-model="curRow.doc_intro"></i-input>
+					</form-item>
+					<form-item label="文档类型">
+						<i-select v-model="curRow.doc_type">
+							<i-option v-for="item in dicDatas['sdp_doc_type']" :label="item.dic_label" :value="item.dic_value" :key="item.dic_value"></i-option>
+						</i-select>
+					</form-item>
+				</i-form> 
+			</Modal>
+			<Modal v-model="dataUpload" title="上传文档" @on-ok="" @on-cancel="" >
+				<i-form :model="curRow" label-position="left" :label-width="80">
+					<form-item label="所属项目">
+						<i-input @on-click="queryProj" icon="search" v-model="curRow.proj_name" placeholder="点击右侧查询按钮,选择所属项目" disabled></i-input>
+					</form-item>
+					<form-item label="文档名称">
+						<i-input v-model="curRow.doc_name">
+					</form-item>
+					<form-item label="文档描述">
+						<i-input v-model="curRow.doc_intro">
+					</form-item>
+					<form-item label="文档类型">
+						<i-select v-model="curRow.doc_type" align="center">
+							<i-option v-for="item in dicDatas['sdp_doc_type']" :label="item.dic_label" :value="item.dic_value" :key="item.dic_value"></i-option>
+						</i-select>
+					</form-item>
+					<form-item label="上传文件">
+						<Upload multiple type="drag" action="//jsonplaceholder.typicode.com/posts/">					        
+				            <Icon type="ios-cloud-upload" size="52" style="color: #3399ff" ></Icon>
+				            <p>Click or drag files here to upload</p>
+					    </Upload>
+					</form-item>
+				</i-form>
+			</Modal>
+			<Modal v-model="projChoose" title="项目查询">
+				<i-form :model="params" :label-width="80" label-position="left">
+					<form-item label="项目名称"> 
+						<i-input v-model="params.proj_name"></i-input>
+					</form-item> 
+					<form-item label="项目经理"> 
+						<i-input v-model="params.proj_mgr"></i-input>
+					</form-item>
+					<form-item label-width="20" align="right">
+						<i-button type="info" @click="queryDatas1" icon="search" >查询</i-button> 
+					</form-item>		
+				</i-form>
+				<i-table :data='datas1' :columns="columns1" ref="currentRowTable" height="200" highlight-row @on-current-change="getCurData"> </i-table>
+				<div style="margin-top:15px" align="center">
+					<page @on-page-size-change="handleSizeChange"
+						:page-size="page.getPageRowCount()" @on-change="handleCurrentChange"
+						:current="page.getPageNumber()" show-total show-elevator show-sizer
+						:total="page.totalCount"></page>
+				</div>
+			</Modal>
+		</div>
+	</body>
+
+	<!-- 引入 jquery -->
+	<script src="../../js/jquery/jquery.js"></script>
+	<script src="../../js/jquery/jquery-migrate.js"></script>
+	<script src="../../js/jquery/layer/layer.js"></script>
+	<script src="../../js/vue/vue.js"></script>
+	<script src="../../js/vue/ui/iview.js"></script>
+	
+	<script src="../../js/sdp/SDPUrl.js"></script>
+	<script src="../../js/sdp/SDPContext.js"></script>
+	<script src="../../js/sdp/Page.js"></script>
+	<script src="../../js/sdp/Row.js"></script>
+	<script src="../../js/sdp/RowSet.js"></script>
+	<script src="../../js/sdp/DataStore.js"></script>
+	<script src="../../js/sdp/SDPDic.js"></script>
+	
+	<script type="text/javascript" src="document.js"></script>
+	
+
+</html>

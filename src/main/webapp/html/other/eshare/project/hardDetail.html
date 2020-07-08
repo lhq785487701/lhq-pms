@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<title>笔记详情页面</title>
+<link rel="stylesheet"
+    href="../../js/jquery/layer/skin/default/layer.css" />
+<link rel="stylesheet"
+    href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+    href="../../css/fonts/awesome/font-awesome.min.css" />
+<link rel="stylesheet" href="../../css/iview.css" />
+<style type="text/css">
+[v-cloak] {
+  display: none;
+}
+body {
+    background-color: rgb(243, 243, 243);
+    width: 1024px;
+    margin: 0 auto;
+    padding-top: 20px;
+}
+.comment_list{
+    margin-bottom:5px;
+    padding:10px 0;
+    border-bottom:1px solid #ccc
+}
+a{
+    color:#666666;
+    margin-right: 5px;
+} 
+a:hover {color:red;} /*悬浮（鼠标经过）时颜色*/
+.top{
+    padding: 10px;
+    background: rgba(0, 153, 229, .7);
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+}
+#rate{
+    border-top: 1px solid #D5D5D5;
+    padding: 8px 0 12px;
+    margin-top:25px;
+}
+.ivu-card-head {
+    background: aliceblue;
+    width: 1024px;
+}
+.ivu-card-body {
+     width: 1024px;
+     background-color: white;
+}
+</style>
+</head>
+<body>
+    <div id="mainContainer" v-cloak >
+        <div v-for="data in datas" :key="data.problem_id">
+            <row>
+                <i-col span="18" >
+                    <!-- 笔记详情 -->
+                    <card shadow>
+                        <div slot="title">
+                            <row>
+                                <strong><font size="5">{{data.problem_name}}</font></strong>
+                            </row>
+                            <row style="padding-top:10px;" :gutter="16">
+                                <span>&emsp;分享于: {{ data.create_date}}&emsp;</span>
+                                <span>&emsp;标签：</span>
+                                 <tag >{{data.tags_name}}</tag>
+                                <span>&emsp;所属项目：</span>
+                                <a @click="queryRow(data.proj_code)">
+                                 <tag >{{data.proj_name}}</tag>
+                                 </a>
+                             </row>
+                        </div>
+                       
+                        
+                        <!-- 解析文本中的html标签 -->
+                        <div id="text_content" v-html="data.problem_detail"></div>
+                        
+                      <!--   <div id="edit_content"></div> -->
+                        
+                        
+                        <!-- 上下篇  -->
+                        <div v-for="item in datasUpAndDown" :key="item.problem_id">
+                           <div v-if="datasUpAndDown.length==1">
+                               <row v-if="item.pre=='pre'">
+                                  <span>上一篇：当前已是最前一篇</span>
+                               </row>
+                               <row v-else>
+                                   <a @click="redirect(item.pre)">上一篇: {{item.problem_name}}</a>
+                               </row>
+                               <row v-if="item.next=='next'">
+                                  <span>下一篇：当前已是最后一篇</span>
+                               </row>
+                               <row v-else>
+                                   <a @click="redirect(item.next)">下一篇: {{item.problem_name}}</a>
+                               </row>
+                           </div>
+                           <div v-else>
+                                <row v-if="item.pre != 'pre'">
+                                    <a @click="redirect(item.pre)">上一篇: {{item.problem_name}}</a>
+                                </row>
+                                <row v-if="item.next != 'next'">
+                                    <a @click="redirect(item.next)">下一篇: {{item.problem_name}}</a>
+                                </row>
+                           </div>
+                        </div>
+                         
+                    </card>
+                </i-col>
+            </row>
+            
+            <back-top :height="400" :bottom="200" :right="90">
+                <div class="top">返回顶端</div>
+            </back-top>
+        </div>
+    </div>
+
+</body>
+<!--[if lte IE 9]>
+    <script src="../../js/jquery/respond.js"></script>
+    <script src="../../js/jquery/html5shiv.js"></script>    
+<![endif]-->
+
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/jquery-migrate.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+
+<script type="text/javascript" src="hardDetail.js"></script>
+</html>

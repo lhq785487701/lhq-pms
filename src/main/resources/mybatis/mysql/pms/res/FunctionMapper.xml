@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.function">
+	
+
+	<!-- 返回字段 -->
+	<sql id="function_column_list">
+		fn.function_code,fn.menu_code,fn.function_name,fn.system_code,
+		fn.function_sts,fn.create_user,fn.create_date,fn.update_user,fn.update_date,menu.menu_name
+	</sql>
+
+
+<!-- 	<select id="queryAuthFunctionRole"  resultMap="functionRoleFunctionultMap">
+		select
+		fn.function_code,fnr.role_code from sdp_function fn right join
+		sdp_function_role fnr on fn.function_code=fnr.function_code where fn.function_code is not
+		null
+		<if test="system_code!=null">
+			and fn.system_code=#{system_code,jdbcType=VARCHAR}
+		</if>
+		union all
+		select m.menu_code,m.menu_url,mr.role_code from
+		sdp_menu_role
+		mr left join sdp_menu m
+		on mr.menu_code=m.menu_code where
+		m.menu_url is
+		not null
+		<if test="system_code!=null">
+			and m.menu_system=#{system_code,jdbcType=VARCHAR}
+		</if>
+	</select>
+ -->
+	<!--功能查询 -->
+	<select id="queryFunction"  resultType = "map"
+		parameterType="map">
+		select
+		<include refid="function_column_list" />
+		from sdp_function fn, sdp_menu menu
+		<where>
+			menu.menu_code = fn.menu_code
+			<if test="function_code != null">
+				and (fn.function_code like
+				CONCAT('%',#{function_code,jdbcType=VARCHAR}, '%') or fn.function_name like
+				CONCAT('%',#{function_code,jdbcType=VARCHAR},'%'))
+			</if>
+			<if test="system_code!=null">
+				and fn.system_code=#{system_code,jdbcType=VARCHAR}
+			</if>
+			<if test="function_sts != null">
+				and fn.function_sts = #{function_sts, jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by fn.create_date desc
+	</select>
+	
+	
+	<select id="queryFunctionsts"  resultType = "map" parameterType="map">
+		SELECT
+		    fn.function_code,
+		    fn.function_sts
+        	FROM
+			    sdp_function fn inner join
+			    sdp_function_role fnr
+        		on fn.function_code = fnr.function_code
+      		WHERE
+		        fnr.role_code in 
+		        (
+				    SELECT
+					role_code
+				    FROM
+					sdp_user_role
+				    WHERE
+						user_code=#{$user_code,jdbcType=VARCHAR}
+		        )
+	</select>
+
+
+
+	<!-- 添加功能 -->
+	<insert id="addFunction" parameterType="map">
+		insert into
+		sdp_function(function_code,menu_code,function_name,function_sts,system_code,create_date,create_user)
+		VALUES(#{function_code,jdbcType=VARCHAR},#{menu_code,jdbcType=VARCHAR},#{function_name,jdbcType=VARCHAR},#{function_sts,jdbcType=VARCHAR},
+		#{system_code,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 修改功能 -->
+	<update id="updateFunction" parameterType="map">
+		update sdp_function
+		<set>
+			<if test="function_name != null">
+				function_name=#{function_name,jdbcType=VARCHAR},
+			</if>
+			<if test="function_sts != null">
+				function_sts=#{function_sts,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where function_code=#{function_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 禁用功能 -->
+	<update id="disabledFunction" parameterType="map">
+		update sdp_function
+		<set>
+			function_sts='D',
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where function_sts='Y' and function_code=#{function_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 启用功能 -->
+	<update id="enableFunction" parameterType="map">
+		update sdp_function
+		<set>
+			function_sts='Y',
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where function_sts='D' and function_code=#{function_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 删除功能 -->
+	<delete id="delFunction" parameterType="map">
+		delete from sdp_function
+		where
+		function_code=#{function_code,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 可获取功能 -->
+	<select id="queryRoleFunction" resultType = "map"
+		parameterType="map">
+		select
+		fn.function_code,fn.menu_code,fn.function_name , menu.menu_name
+		from sdp_function fn
+		left join
+		sdp_function_role fnr on fn.function_code=fnr.function_code
+		left join
+		sdp_menu menu on fn.menu_code = menu.menu_code
+		where
+		fnr.role_code=#{role_code,jdbcType=VARCHAR}
+		<if test="system_code!=null">
+			and fn.system_code=#{system_code,jdbcType=VARCHAR}
+		</if>
+	</select>
+
+	<!-- 删除角色功能 -->
+	<delete id="delFunctionRole" parameterType="map">
+		delete from sdp_function_role where role_code=#{role_code,jdbcType=CHAR}
+		and
+		function_code in
+		<foreach collection="function_code" item="function" index="index" open="("
+			close=")" separator=",">
+			#{function}
+		</foreach>
+	</delete>
+	
+	<!-- 查询当前用户未授权的角色 -->
+	<select id="queryRoleNotExistFunction" parameterType="map"
+		resultType = "map">
+		select
+		fn.function_code, fn.menu_code, fn.function_name , menu.menu_name
+		from sdp_function fn, sdp_menu menu
+		where not
+		exists(select 1 from
+		sdp_function_role fnr where
+		fnr.function_code=fn.function_code
+		and fnr.role_code=#{role_code,jdbcType=CHAR})
+		<if test="system_code!=null">
+			and fn.system_code=#{system_code,jdbcType=VARCHAR}
+		</if>
+		<if test="role_name!=null">
+			and (fn.function_code like
+			CONCAT('%',#{function_name,jdbcType=CHAR},'%')
+			or fn.function_name like
+			CONCAT('%',#{function_name,jdbcType=CHAR},'%'))
+		</if>
+		and fn.menu_code = menu.menu_code
+	</select>
+	
+	<!-- 新增角色功能 -->
+	<insert id="addRoleFunction" parameterType="map">
+		insert into
+		sdp_function_role(function_code,role_code,create_date,create_user)
+		VALUES
+		<foreach collection="function_code" item="code" index="index"
+			separator=",">
+			(#{code,jdbcType=VARCHAR},#{role_code,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=CHAR})
+		</foreach>
+	</insert>
+
+	<!-- 查询功能菜单的名字和code -->
+	<select id = "queryMenuAndCode" parameterType = "map" resultType = "map">
+		select menu.menu_code, menu.menu_name, menu.menu_url 
+		from sdp_menu menu
+		where menu.menu_url is not null
+	</select>
+	
+	<!-- 查询用户所在页面的所有对应权限 -->
+	<select id="queryFunctionForUrlRole" parameterType = "map" resultType = "map">
+		SELECT fnm.fn1_code function_code, IF (isnull(fns.fn_sts), 0, 1) AS function_sts
+		FROM
+			(SELECT
+					fn1.function_code fn1_code,
+					fn1.menu_code
+				FROM
+					sdp_function fn1,
+					sdp_menu mu
+				WHERE
+					mu.menu_code = fn1.menu_code
+				AND mu.menu_url = #{menu_url,jdbcType=VARCHAR}
+			) fnm
+		LEFT JOIN (
+			SELECT DISTINCT
+				fn.function_code fn_code,
+				fn.function_sts fn_sts
+			FROM
+				sdp_function fn,
+				sdp_function_role fnr
+			WHERE
+				fn.function_code = fnr.function_code
+			AND fnr.role_code IN (
+				SELECT
+					role_code
+				FROM
+					sdp_user_role
+				WHERE
+					user_code = #{$user_code,jdbcType=VARCHAR}
+			)
+		) fns ON fns.fn_code = fnm.fn1_code
+	</select>
+	
+	<!-- 查询联合主键是否有相同字段 -->
+	<select id="queryEquelFunction" parameterType = "map" resultType = "map">
+		select count(1) count
+		from  sdp_function fn 
+		where fn.function_code =  #{function_code,jdbcType=VARCHAR}
+		<!-- and fn.menu_code = #{menu_code,jdbcType=VARCHAR} -->
+	</select>
+	
+</mapper>

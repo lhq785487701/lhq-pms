@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>index</title>
+
+<!-- 引入样式 -->
+<link rel="stylesheet" href="../../css/iview.css">
+</head>
+<body>
+	<div  id="pedEdit">
+		
+		<i-form  label-position="right" :label-width="100" :model="pwd" ref="pwdForm" :rules="rulesPwd"> 
+				<form-item label="原密码:" prop="oldPwd" :required="true"> 
+					<i-input v-model="pwd.oldPwd" type="password" v-bind:auto-complete="'off'" style="width:200px"></i-input> 
+				</form-item> 
+				<form-item label="新密码:" prop="newPwd" :required="true"> 
+					<i-input v-model="pwd.newPwd" type="password" v-bind:auto-complete="'off'" style="width:200px"></i-input>
+				</form-item> 
+				<form-item label="密码确认:" prop="newPwd1" :required="true">
+					<i-input v-model="pwd.newPwd1" type="password" v-bind:auto-complete="'off'" style="width:200px"></i-input> 
+				</form-item>
+				<form-item>
+					<i-button  @click="pwdDataSave" type="primary">提交</i-button>
+					<i-button style="margin-left: 8px" @click="pwdDataCancel" >重置</i-button>
+				</form-item>
+			</i-form> 
+
+		
+		<!-- <i-form :model="pwd" label-position="right" :label-width="100" ref="pwdForm" > 
+			<form-item label="原密码:" prop="oldPwd" :required="true" > 
+				<i-input type="password" style="width:200px" v-model="pwd.oldPwd"></i-input> 
+			</form-item>
+			<form-item label="新密码:" prop="newPwd" :required="true"> 
+				<i-input type="password" style="width:200px" v-model="pwd.newPwd"></i-input>
+			</form-item> 
+			<form-item label="密码确认:" prop="newPwdl" :required="true">
+				<i-input type="password" style="width:200px" v-model="pwd.newPwdl"></i-input> 
+			</form-item>
+			<form-item>
+				<i-button  @click="pwdDataSave">提交</i-button>
+				<i-button style="margin-left: 8px" @click="pwdDataCancel" >重置</i-button>
+			</form-item>
+		</i-form> -->
+		
+	</div>
+
+</body>
+<script src="../../js/md5.js"></script>
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<script src="../../js/vue/vue.js"></script>
+<script src="../../js/vue/ui/iview.js"></script>
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+
+<script type="text/javascript" src="pwdEdit.js"></script>
+
+</html>

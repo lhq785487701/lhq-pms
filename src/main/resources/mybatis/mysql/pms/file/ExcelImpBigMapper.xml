@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.file">
+	<resultMap id="excelImpBigResultMap" type="com.lhq.pms.data.Row">
+		<id column="big_id" property="big_id" jdbcType="VARCHAR" />
+		<result column="imp_title" property="imp_title" jdbcType="VARCHAR" />
+		<result column="row_num" property="row_num" jdbcType="INTEGER" />
+		<result column="imp_sts" property="imp_sts" jdbcType="VARCHAR" />
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="menu_code" property="menu_code" jdbcType="VARCHAR" />
+		<result column="file_id" property="file_id" jdbcType="VARCHAR" />
+		<result column="sql_code" property="sql_code" jdbcType="VARCHAR" />
+		<result column="thread_code" property="thread_code" jdbcType="VARCHAR" />
+		<result column="error_code" property="error_code" jdbcType="VARCHAR" />
+		<result column="server_ip" property="server_ip" jdbcType="VARCHAR" />
+		<result column="client_ip" property="client_ip" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="excelImpBigListResultMap" type="com.lhq.pms.data.Row">
+		<id column="big_id" property="big_id" jdbcType="VARCHAR" />
+		<result column="imp_title" property="imp_title" jdbcType="VARCHAR" />
+		<result column="row_num" property="row_num" jdbcType="INTEGER" />
+		<result column="imp_sts" property="imp_sts" jdbcType="VARCHAR" />
+		<result column="system_code" property="system_code" jdbcType="VARCHAR" />
+		<result column="menu_code" property="menu_code" jdbcType="VARCHAR" />
+		<result column="file_id" property="file_id" jdbcType="VARCHAR" />
+		<result column="sql_code" property="sql_code" jdbcType="VARCHAR" />
+		<result column="thread_code" property="thread_code" jdbcType="VARCHAR" />
+		<result column="server_ip" property="server_ip" jdbcType="VARCHAR" />
+		<result column="client_ip" property="client_ip" jdbcType="VARCHAR" />
+		<result column="error_code" property="error_code" jdbcType="VARCHAR" />
+		<result column="create_date" property="create_date" jdbcType="DATE" />
+		<result column="create_user" property="create_user" jdbcType="VARCHAR" />
+		<result column="update_date" property="update_date" jdbcType="DATE" />
+		<result column="update_user" property="update_user" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="excel_imp_big_column_list">
+		f.big_id,f.imp_title,
+		f.row_num,f.imp_sts,f.system_code,f.file_id,f.error_code
+	</sql>
+	<sql id="excel_imp_big_list_column_list">
+		f.big_id,f.imp_title,
+		f.row_num,f.imp_sts,f.system_code,f.file_id,f.menu_code,f.error_code,
+		f.sql_code,f.thread_code,f.server_ip,f.client_ip,f.create_date,f.create_user,f.update_date,f.update_user
+	</sql>
+
+	<!--文件信息查询 -->
+	<select id="queryExcelImpBigFiles" resultMap="excelImpBigListResultMap"
+		parameterType="map">
+		select
+		<include refid="excel_imp_big_list_column_list" />
+		from sdp_excel_imp_big f
+		<where>
+			<if test="system_code!=null">
+				f.system_code=#{system_code,jdbcType=CHAR}
+			</if>
+			<if test="imp_sts!=null">
+				and f.imp_sts =#{imp_sts,jdbcType=CHAR}
+			</if>
+			<if test="imp_title != null">
+				and ( f.imp_title like
+				CONCAT('%',#{imp_title,jdbcType=VARCHAR}, '%') or f.big_id like
+				CONCAT('%',#{imp_title,jdbcType=VARCHAR}, '%') )
+			</if>
+			<if test="$isAdmin==false">
+				and f.create_user=#{$user_code,jdbcType=CHAR}
+			</if>
+		</where>
+		order by f.create_date desc
+	</select>
+
+	<!-- 添加文件 -->
+	<insert id="addExcelImpBig" parameterType="map">
+		insert into
+		sdp_excel_imp_big(big_id,imp_title,row_num,imp_sts,system_code,file_id,sql_code,thread_code,server_ip,client_ip,menu_code,create_date,create_user)
+		VALUES(#{big_id,jdbcType=CHAR},#{imp_title,jdbcType=CHAR},#{row_num,jdbcType=CHAR},#{imp_sts,jdbcType=CHAR},
+		#{system_code,jdbcType=CHAR},#{file_id,jdbcType=CHAR},#{sql_code,jdbcType=INTEGER},#{thread_code,jdbcType=INTEGER},
+		#{server_ip,jdbcType=INTEGER},#{client_ip,jdbcType=INTEGER},#{menu_code,jdbcType=CHAR},now(),#{$user_code,jdbcType=CHAR})
+	</insert>
+
+	<!-- 更新导出大文件 -->
+	<update id="updateExcelImpBig" parameterType="map">
+		update
+		sdp_excel_imp_big set
+		imp_sts=#{imp_sts,jdbcType=CHAR},row_num=#{row_num,jdbcType=CHAR},file_id=#{file_id,jdbcType=CHAR},error_code=#{error_code,jdbcType=CHAR},
+		update_date=now(),update_user=#{$user_code,jdbcType=CHAR}
+		where
+		big_id=#{big_id,jdbcType=CHAR}
+	</update>
+
+</mapper>

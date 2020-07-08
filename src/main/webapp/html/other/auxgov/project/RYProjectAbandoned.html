@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>荣誉类项目废弃</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet"
+	href="../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../css/sdp-ui.css" />
+<link rel="stylesheet"
+	href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../css/fonts/awesome/font-awesome.min.css" />
+</head>
+
+
+<body>
+
+<div  class="sdp-main-container" id="mainContainer" v-cloak>
+<div class="layout">
+	<Layout>
+        <Header style="height:48px;text-align: center;line-height:48px;font-size:20px" ><strong>荣誉类项目废弃</strong></Header>
+        <br>
+    	 <Content>
+	<i-form inline :model="params" :label-width="120" > 
+		 <form-item :label-width="770">
+		 	<i-button type="primary" size="large">保存</i-button>
+           	<i-button type="primary" size="large">提交</i-button>
+           	<i-button type="primary" size="large">取消废弃</i-button>
+	     </form-item>
+	     <form-item label="荣誉名称:" :required="true"> 
+	           <i-input v-model="params.task_code" style="width:200px;" :disabled="true"></i-input> 
+	     </form-item>
+	     <form-item label="项目编号:" :label-width="120"> 
+	           <Input-Number :max="999" :min="001" style="width:200px;" v-model="params.task_code" :disabled="true"></Input-Number>
+	     </form-item>
+	     <form-item label="版本号:" :label-width="120"> 
+	           <i-input v-model="params.task_code" style="width:200px;" :disabled="true"></i-input> 
+	     </form-item> 
+	     <form-item label="立项年份:" :label-width="120"> 
+	           <Date-picker  placeholder="立项年份"  type="year" v-model="params.year" style="width:200px;" :disabled="true"></Date-picker> 
+	     </form-item>
+	     <form-item label="荣誉级别:"> 
+	           <i-input v-model="params.task_code" style="width:200px;" :disabled="true"></i-input> 
+	     </form-item>
+	     <form-item label="项目开始时间:" :label-width="120"> 
+	            <Date-picker  placeholder="项目开始时间"  type="datetime" v-model="params.date"  format="yyyy-MM-dd"   style="width:200px;" :disabled="true"></Date-picker>  
+	     </form-item>
+	     <form-item label="项目结束时间:" :label-width="120"> 
+	            <Date-picker  placeholder="项目结束时间"  type="datetime" v-model="params.date"  format="yyyy-MM-dd"   style="width:200px;" :disabled="true"></Date-picker>  
+	     </form-item> 
+	     <form-item label="状态:" :label-width="120"> 
+	           <i-input v-model="params.task_code" style="width:200px;" :disabled="true"></i-input> 
+	     </form-item>
+	     <form-item label="主导单位:"> 
+	           <i-input v-model="params.task_code" style="width:200px;" :disabled="true"></i-input> 
+	     </form-item>
+	     <form-item label="申报公司:" :label-width="120"> 
+	           <i-input v-model="params.task_code" style="width:200px;" :disabled="true"></i-input> 
+	     </form-item>
+	     <form-item label="项目负责人:" :label-width="120"> 
+	           <i-input v-model="params.task_code" style="width:200px;" :disabled="true"></i-input> 
+	     </form-item> 
+	     <form-item label="结项确认人:" :label-width="120"> 
+	           <i-input v-model="params.task_code" style="width:200px;" :disabled="true"></i-input> 
+	     </form-item><br><br>
+	     <form-item label="废弃原因:" > 
+           <i-input type="textarea" v-model="params.abandonedReason" rows="5" style="width:530px;"></i-input> 
+	     </form-item>
+	     <form-item :label-width="23">
+	      <i-button type="primary" size="large">附件</i-button>
+		 </form-item>
+	     <br><br>
+	</i-form>
+	 </Content>
+	 </Layout>
+	 </div>
+</div>
+
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.min.js"></script>
+<script src="../../js/jquery/jquery-migrate.min.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<script src="../../js/jquery/IE.plugin.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.min.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.min.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="RYProjectAbandoned.js"></script>
+</body>
+</html>

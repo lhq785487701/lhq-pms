@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.org.mgr">
+	<resultMap id="resultOrgList" type="com.lhq.pms.data.Row">
+		<result column="org_code" property="org_code" jdbcType="VARCHAR" />
+		<result column="org_name" property="org_name" jdbcType="VARCHAR" />
+		<result column="org_order" property="org_order" jdbcType="VARCHAR" />
+		<result column="org_pcode" property="org_pcode" jdbcType="VARCHAR" />
+		<result column="org_path" property="org_path" jdbcType="VARCHAR" />
+		<result column="org_name_path" property="org_name_path"
+			jdbcType="VARCHAR" />
+		<result column="mdm_code" property="mdm_code" jdbcType="VARCHAR" />
+		<result column="org_remark" property="org_remark" jdbcType="VARCHAR" />
+		<result column="org_level" property="org_level" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="org_column_list">
+		org.org_code , org.org_name , org.org_order , org.org_pcode
+		, org.org_path ,
+		org.org_name_path , org.mdm_code , org.org_remark ,
+		org.org_level
+	</sql>
+
+	<!--查询组织信息 mdm_code,org_code -->
+	<select id="queryOrgByMdm" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select
+		<include refid="org_column_list" />
+		from sdp_org org
+		where org.mdm_code=#{mdm_code,jdbcType=VARCHAR}
+		<if test="org_code != null">
+			and (org.org_code like
+			CONCAT('%',#{org_code,jdbcType=VARCHAR}, '%')
+			or org.org_name like
+			CONCAT('%',#{org_code,jdbcType=VARCHAR}, '%'))
+		</if>
+	</select>
+
+	<!-- 选中组织时的人员信息 -->
+	<select id="orgUserInfo" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select
+		orguser.oup_id,orguser.org_code,orguser.user_code,user.user_name,orguser.post_code,orguser.is_manager,
+		orguser.create_user,orguser.create_date,orguser.update_user,orguser.update_date
+		from sdp_org_user orguser
+		left join sdp_user user on
+		orguser.user_code=user.user_code
+		where
+		org_code=#{org_code,jdbcType=VARCHAR}
+		<if test="user_code != null">
+			and (orguser.user_code like
+			CONCAT('%',#{user_code,jdbcType=VARCHAR}, '%')
+			or user.user_name like
+			CONCAT('%',#{user_code,jdbcType=VARCHAR}, '%'))
+		</if>
+	</select>
+
+	<!-- 查询不在当前组织的用户 -->
+	<select id="userNotInOrg" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select user.user_code,user.user_name,user.user_email,user.user_mobile
+		from sdp_user user
+		where user.user_code not in (select
+		orguser.user_code from sdp_org_user orguser where
+		orguser.org_code=#{org_code,jdbcType=VARCHAR})
+		<if test="user_code != null">
+			and (user.user_code like
+			CONCAT('%',#{user_code,jdbcType=VARCHAR}, '%')
+			or user.user_name like
+			CONCAT('%',#{user_code,jdbcType=VARCHAR}, '%'))
+		</if>
+	</select>
+
+	<!-- #选择当前用户加入组织 -->
+	<insert id="userJoinOrg" parameterType="map">
+		insert into sdp_org_user
+		(oup_id,org_code,user_code,post_code,is_manager,create_date,create_user)
+		values
+		(#{$uuid,jdbcType=VARCHAR},#{org_code,jdbcType=VARCHAR},#{user_code,jdbcType=VARCHAR},#{post_code,jdbcType=VARCHAR},
+		#{is_manager,jdbcType=VARCHAR},now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 当前用户设为主负责人 -->
+	<update id="setMainManager" parameterType="map">
+		update sdp_org_user
+		set
+		is_manager='FM',update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		where oup_id=#{oup_id,jdbcType=VARCHAR}
+	</update>
+
+	<!--当前用户设为一般负责人 -->
+	<update id="setManager" parameterType="map">
+		update sdp_org_user set
+		is_manager='OM',update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		where oup_id=#{oup_id,jdbcType=VARCHAR}
+	</update>
+
+	<!--当前用户取消负责人 -->
+	<update id="cancelManager" parameterType="map">
+		update sdp_org_user set
+		is_manager='NM',update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		where oup_id=#{oup_id,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 从组织删除当前用户 -->
+	<delete id="deleteOrgUser" parameterType="map">
+		delete from
+		sdp_org_user
+		where oup_id=#{oup_id,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 查询当前组织岗位 -->
+	<select id="queryPostByOrg" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select
+		orgpost.post_code,orgpost.post_name,orgpost.org_code,orgpost.jobs_code,orgjobs.jobs_name,
+		orgpost.post_remark,orgpost.create_user,orgpost.create_date,orgpost.update_user,orgpost.update_date
+		from sdp_org_post orgpost
+		left join sdp_org_jobs orgjobs on
+		orgpost.jobs_code=orgjobs.jobs_code
+		where
+		org_code=#{org_code,jdbcType=VARCHAR}
+		<if test="post_code != null">
+			and (post_code like
+			CONCAT('%',#{post_code,jdbcType=VARCHAR}, '%')
+			or post_name like
+			CONCAT('%',#{post_code,jdbcType=VARCHAR}, '%'))
+		</if>
+	</select>
+
+	<!-- 当前组织添加岗位 -->
+	<insert id="insertPostOrg" parameterType="map">
+		insert into
+		sdp_org_post
+		(post_code,post_name,org_code,jobs_code,post_remark,create_user,create_date)
+		VALUES
+		(#{post_code,jdbcType=VARCHAR},#{post_name,jdbcType=VARCHAR},#{org_code,jdbcType=VARCHAR},
+		#{jobs_code,jdbcType=VARCHAR},#{post_remark,jdbcType=VARCHAR},
+		#{$user_code,jdbcType=VARCHAR},now())
+	</insert>
+
+	<!--更新组织岗位信息 -->
+	<update id="updatePostOrg" parameterType="map">
+		update sdp_org_post
+		<set>
+			<if test="post_name != null">
+				post_name=#{post_name,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where post_code=#{post_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 删除组织岗位信息 -->
+	<delete id="deletePostOrg" parameterType="map">
+		delete from
+		sdp_org_post
+		where
+		post_code=#{post_code,jdbcType=VARCHAR}
+	</delete>
+
+	<!-- 查询当前组织岗位人员 -->
+	<select id="queryUserByOrgPost" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select
+		user.user_name,user.user_code,orguser.is_manager,orguser.org_code
+		,orguser.oup_id
+		from sdp_user user
+		left join sdp_org_user orguser on
+		user.user_code=orguser.user_code and
+		orguser.post_code =
+		#{post_code,jdbcType=VARCHAR}
+		where
+		orguser.org_code=#{org_code,jdbcType=VARCHAR}
+		<if test="user_code != null">
+			and (user.user_code like
+			CONCAT('%',#{user_code,jdbcType=VARCHAR},'%')
+			or user.user_name like
+			CONCAT('%',#{user_code,jdbcType=VARCHAR},'%'))
+		</if>
+	</select>
+
+	<!-- 查询当前组织非此岗位人员 -->
+	<select id="queryUserNotInPost" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select
+		user.user_name,user.user_code,orguser.is_manager,orguser.org_code,orguser.oup_id
+		from sdp_user user
+		left join sdp_org_user orguser on
+		user.user_code=orguser.user_code and
+		(orguser.post_code
+		!=#{post_code,jdbcType=VARCHAR} or
+		orguser.post_code is null)
+		where
+		orguser.org_code=#{org_code,jdbcType=VARCHAR}
+		<if test="user_code != null">
+			and (user.user_code like
+			CONCAT('%',#{user_code,jdbcType=VARCHAR},'%')
+			or user.user_name like
+			CONCAT('%',#{user_code,jdbcType=VARCHAR},'%'))
+		</if>
+	</select>
+
+	<!--当前岗位移除人员,sdp_org_user.post_code设置为null -->
+	<update id="deletePostUser" parameterType="map">
+		update sdp_org_user
+		set
+		post_code=null,
+		update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		where
+		oup_id=#{oup_id,jdbcType=VARCHAR}
+	</update>
+
+	<!--选中人员设定岗位 -->
+	<update id="setPostUser" parameterType="map">
+		update sdp_org_user set
+		post_code=#{post_code,jdbcType=VARCHAR},
+		update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		where
+		oup_id in
+		<foreach collection="oup_id" item="oup" index="index" open="("
+			close=")" separator=",">
+			#{oup}
+		</foreach>
+	</update>
+
+	<!-- 查询所有职务 -->
+	<select id="queryJobsList" resultType="com.lhq.pms.data.Row"
+		parameterType="map">
+		select jobs_code,jobs_name from sdp_org_jobs
+	</select>
+
+	<!-- 获取用户主组织 -->
+	<select id="queryUserMainOrg" resultType="com.lhq.pms.map.LowerHashMap" parameterType="string">
+		select o.org_code,o.org_name from sdp_org o inner join sdp_org_user ou
+		on
+		o.org_code=ou.org_code inner join
+		sdp_org_mdm om on
+		om.mdm_code=o.mdm_code
+		where om.mdm_main='Y' and
+		ou.user_code=#{user_code,jdbcType=VARCHAR} limit 1
+	</select>
+</mapper>

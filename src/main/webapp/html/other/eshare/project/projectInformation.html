@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet"  href="project.css" />
+<style>
+	.ivu-tag{
+		height:30px;
+		width:80px;
+		line-height:30px
+	}
+	.ivu-form-item-content{
+		text-align:center
+	}
+	.cust{
+		display:inline-block;
+		height:30px;
+		width:200px;
+		font-size:15px;
+		color:#495060;
+		border-bottom:1px solid #B9BCBF;
+	}
+	textarea.ivu-input{
+		max-width:1000px;
+	    width: 580px
+	}	
+</style>
+</head>
+<body>
+	<div id="mainContainer" >		
+			<!-- 左边 -->
+			<div style="float:left; width:14%; height:100%; text-align:center;margin-top:275px;" >
+				<i-menu ref = "iMenuDetail" :theme="dataDetailMenuMess" active-name="baseMessDetail" style="width:100%;height:100%" @on-select="dataDetailMenuSelect" ref = "active_name">			
+		            <menu-item name="baseMessDetail" >
+		                <Icon type="chatbubble-working"></Icon>基本信息
+		            </menu-item>
+		            <menu-item name="studyPlanMessDetail" >
+		                <Icon type="pricetags"></Icon>学习计划
+		            </menu-item>			            
+		            <menu-item name="interviewMessDetail" >
+		                <Icon type="person-stalker"></Icon>面试信息
+		            </menu-item>
+			    </i-menu>
+			</div>
+		
+			<!--右边  -->
+			<div class = "dataDetailStyle">
+			<div style="float:right;width:86%; height:100%; text-align:center;overflow:auto;" class = "detailRight">
+				<div class="baseMessDetail">	
+					<Collapse v-model="collapseDetail1">
+						<Panel name = "1">工程信息
+						<div slot="content"  style="width:90%;min-height:100px; line-height: 40px;font-size: 13px;" >
+								<div id="right" style="min-height:100%;">	
+										 <div style = "text-align:center">
+										 <Row  type="flex" justify="center" class="code-row-bg">
+										 	<i-Col span="3">
+												<Tag>项目名称</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.proj_name}}</span>
+											</i-Col>
+											<i-Col span="3" offset="5">
+												<Tag>项目经理</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.proj_mgr}}</span>
+											</i-Col>
+										</Row>
+										 <Row  type="flex" justify="center" class="code-row-bg">											 	
+											<i-Col span="3">
+												<Tag>项目周期</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.proj_scale}}(月)</span>
+											</i-Col>
+											<i-Col span="3" offset="5">
+												<Tag>项目状态</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.proj_state}}</span>
+											</i-Col>														
+										</Row>
+										<Row  type="flex" justify="center" class="code-row-bg">
+										 	<i-Col span="3">
+												<Tag>开始时间</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.start_date}}</span>
+											</i-Col>
+											<i-Col span="3"  offset="5">
+												<Tag>上线时间</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.online_date}}</span>
+											</i-Col>
+										</Row>
+										<Row  type="flex" justify="center" class="code-row-bg">
+										 	<i-Col span="3">
+												<Tag>项目描述</Tag>
+											</i-Col>										
+											<i-Col span="14">
+												<i-input type="textarea" :rows="4" readonly v-model="curRow.proj_intro">
+											</i-Col>										
+										</Row>
+										</div>											
+								</div>
+							</div>	
+						</Panel>
+																	
+						<Panel name = "2">客户信息
+							<div slot="content"  style="width:90%;min-height:100px; line-height: 40px;font-size: 13px;" >
+								<div id="right" style="min-height:100%;">	
+										 <div style = "text-align:center">
+										 <Row  type="flex" justify="center" class="code-row-bg">
+										 	<i-Col span="3">
+												<Tag>客户名称</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.cust_name}}</span>
+											</i-Col>
+											<i-Col span="3"  offset="5">
+												<Tag>客户性质</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.cust_nature}}</span>
+											</i-Col>
+										</Row>
+										 <Row  type="flex" justify="center" class="code-row-bg">
+										 	<i-Col span="3">
+												<Tag>客户电话</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.cust_phone}}</span>
+											</i-Col>
+											<i-Col span="3"  offset="5">
+												<Tag>客户地址</Tag>
+											</i-Col>
+											<i-Col span="3">
+												<span class="cust">{{curRow.cust_addr}}</span>
+											</i-Col>
+										</Row>
+										<Row  type="flex" justify="center" class="code-row-bg">
+										 	<i-Col span="3">
+												<Tag>客户简介</Tag>
+											</i-Col>										
+											<i-Col span="14">
+												<i-input type="textarea" :rows="4" readonly v-model="curRow.cust_introduce">
+											</i-Col>
+										</Row>
+										</div>											
+								</div>
+							</div>	
+						</Panel>
+
+						<Panel name = "3" >人员信息
+							<div slot="content"><i-table :data='dataProjectNumber' :columns="columnUsernumber" ref="eduExperienceDate"  border highlight-row stripe > </i-table></div>
+						</Panel>
+					</Collapse>						
+				</div>
+				
+				<div class="interviewMessDetail" style="display:none">
+					<Collapse v-model="collapseDetail2">
+						<Panel name = "1">面试信息
+							<div slot="content" style="width:100%;min-height:100px; line-height: 40px;font-size: 13px;text-align:left">									
+								 <div id="cards">
+						            <div v-for="(item, index) in dataQuestion">
+						         	<card :padding="20"> 
+						            	<a>
+							                <span style="font-size: 20px;font-weight:bold;color:black">问题 {{index+1}}</span>
+							                <span>面试官：{{item.interviewer}}</span> 								                
+							                <span>面试时间：{{item.inter_date}}</span>	
+							                <span>面试地点：{{item.inter_addr}}</span>
+							                <span>面试人：{{item.interviewee}}</span>	
+							                <div class="dot">问题方向：{{item.question_direction}}</div>								                
+							                <div class="dot">问题：{{item.inter_question}}</div>
+							                <div class="dot">答案：{{item.inter_answer}}</div>
+						                </a>								                				                
+						             </card>
+						           </div>								      
+								</div>
+								<!-- 分页部分 -->
+								<page @on-page-size-change="handleInterSizeChange"
+									:page-size="inter_page.getPageRowCount()" @on-change="handleInterCurrentChange"
+									:current="inter_page.getPageNumber()" show-total show-elevator show-sizer
+									:total="inter_page.totalCount" :page-size-opts="[5, 10, 15, 20]" > </page>
+								</div>
+							</Panel>
+						</Collapse>			
+					</div>
+					
+					<div class="studyPlanMessDetail" style="display:none">
+						<Collapse v-model="collapseDetail3">
+							<Panel name = "1">学习计划
+							   <div slot="content" style="width:100%;min-height:100px; line-height: 40px;font-size: 13px;text-align:left">									
+								 <div id="cards">
+						            <div v-for="(item, index) in dataStudyPlan">
+						         	<card :padding="20"> 
+						            	<a>
+							                <span style="font-size: 20px;font-weight:bold;color:black">{{item.stu_name}}</span>
+							                <!-- <span>指派人：{{item.create_user}}</span>  -->								                
+							                <span>学习成员：{{item.users_name}}</span>
+							                <span>开始时间：{{item.stu_start_date}}</span>
+							                <span>结束时间：{{item.stu_end_date}}</span>	
+							                <div class="dot">任务描述：{{item.stu_details}}</div>								                								                		    	
+						                </a>
+						                
+						                <button-group class="button_group">
+						                    <i-button type="text" @click="studyNumberDetail(item)" >
+							                	 <Icon type="eye" size="16" style="color:#9ea7b4"></Icon>
+							                	学习进度详情
+							                </i-button>
+                							</button-group>								                				                
+						             </card>
+						           </div>								      
+								</div>
+								<!-- 分页部分 -->
+								<page @on-page-size-change="handleInterSizeChange"
+									:page-size="plan_page.getPageRowCount()" @on-change="handleInterCurrentChange"
+									:current="plan_page.getPageNumber()" show-total show-elevator show-sizer
+									:total="plan_page.totalCount" :page-size-opts="[5, 10, 15, 20]" > </page>
+								</div>
+							</Panel>
+						</Collapse>
+					</div>
+					
+					<div class="studyPlanNumberDetail" style="display:none">
+					<div id="mainContainer" v-cloak>
+				        <div>
+				        <card :bordered="false" :key="">
+				            <p slot="title">
+				                <Icon type="social-vimeo-outline" size="20"></Icon>
+				                <font size="4">计划详情</font>
+				            </p>
+				          <row style="text-align:left">
+				              <i-col span="3"><h3>计划名称:</h3></i-col>
+				              <i-col span="21">{{curStudyPlan.stu_name}}</i-col>
+				          </row>
+				           <br/>
+				           <row style="text-align:left">
+				               <i-col span="3"><h3>计划时间:</h3></i-col>
+				               <i-col span="4">{{curStudyPlan.stu_start_date}}</i-col>
+				               <i-col span="4"> —— </i-col>
+				               <i-col span="3">{{curStudyPlan.stu_end_date}}</i-col>
+				           </row>
+				          <br/>					         
+				          <br/>
+				          <row style="text-align:left">
+				              <i-col span="3"><h3>计划描述:</h3></i-col>					       
+				              <i-col span="20">
+				                <i-input v-model="curStudyPlan.stu_details" type="textarea" :autosize="{minRows: 4,maxRows: 6}" style="width:720px" :readonly="true"></i-input>
+				              </i-col>
+				            <!--   <i-col span="1">
+				              	<a @click="dataDetailMenuSelect('studyPlanMessDetail')">返回</a>
+				              </i-col> -->
+				          </row>
+				        </card>
+				        </div>
+				        <div>
+							<card :bordered="false">
+						        <p slot="title">
+						            <Icon type="ios-list-outline" size="20"></Icon>
+						            <font size="4">学习成员进度列表</font>
+						        </p>							        
+					                <card v-for="item in dataPlanDetail" :key=""> 
+					                <p slot="title">
+					                    <span style=" font-size: 15px;font-weight: bold;color:black">
+						                {{item.user_name}}
+						                </span>
+						               <!--  <span class="createDate">{{ }}</span> -->
+					                </p>
+					                <row>
+							               <i-col span="4" style="font-weight: bold;">计划名称</i-col>
+							               <i-col span="2" style="font-weight: bold;">所需时间</i-col>
+							               <i-col span="10" style="font-weight: bold;">学习详情</i-col>
+							               <i-col span="8" style="font-weight: bold;">学习进度</i-col>
+							        </row>
+					                <div v-for="data in item.items">
+					                	<!-- <p class="content">{{data.stu_detail}}</p> -->
+					                	<row>
+							               <i-col span="4">{{data.detail_name}}</i-col>
+							               <i-col span="2">{{data.stu_time}}天</i-col>
+							               <i-col span="10">{{data.stu_detail}}</i-col>
+							               <i-col span="8"> <i-progress :percent="data.stu_progress" status="active"></i-progress></i-col>
+							           </row>
+					                </div>						            
+					                </card>
+					        	</card>
+					        </div>
+				      </div>
+				    </div>
+				</div>
+			</div>
+		</div>
+</body>
+<script src="../../js/md5.js"></script>
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/jquery-migrate.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+<script type="text/javascript" src="projectInformation.js"></script>
+</html>

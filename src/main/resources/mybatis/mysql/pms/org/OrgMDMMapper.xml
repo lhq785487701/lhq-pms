@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lhq.pms.org.mdm">
+	<resultMap id="resultMDMMap" type="com.lhq.pms.data.Row">
+		<result column="mdm_code" property="mdm_code" jdbcType="VARCHAR" />
+		<result column="mdm_name" property="mdm_name" jdbcType="VARCHAR" />
+		<result column="mdm_main" property="mdm_main" jdbcType="VARCHAR" />
+		<result column="mdm_remark" property="mdm_remark" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<sql id="mdm_column_list">
+		mdm.mdm_code , mdm.mdm_name , mdm.mdm_main , mdm.mdm_remark,
+		mdm.create_date , mdm.create_user , mdm.update_date , mdm.update_user
+	</sql>
+
+	<!-- 获取组织信息，根据组织编码 -->
+	<select id="selectMDMByMDMCode" resultType="com.lhq.pms.data.Row" parameterType="java.lang.String">
+		select
+		<include refid="mdm_column_list" />
+		from sdp_org_mdm mdm where mdm.mdm_code
+		=#{mdm_code,jdbcType=VARCHAR}
+		order by mdm.mdm_code
+	</select>
+
+	<!--组织信息查询 -->
+	<select id="queryMDM" resultType="com.lhq.pms.data.Row"  parameterType="map">
+		select
+		<include refid="mdm_column_list" />
+		from sdp_org_mdm  mdm
+		<where>
+			<if test="mdm_code != null">
+				and (mdm.mdm_code like CONCAT('%',#{mdm_code,jdbcType=VARCHAR},'%')
+				or mdm.mdm_name like CONCAT('%',#{mdm_code,jdbcType=VARCHAR},'%'))
+			</if>
+		</where>
+		order by mdm.create_date
+	</select>
+
+	<!-- 插入组织 -->
+	<insert id="addMDM" parameterType="map">
+		insert into
+		sdp_org_mdm
+		(mdm_code,mdm_name,mdm_main,mdm_remark,create_date,create_user)
+		VALUES
+		(#{mdm_code,jdbcType=VARCHAR},#{mdm_name,jdbcType=VARCHAR},#{mdm_main,jdbcType=VARCHAR},#{mdm_remark,jdbcType=VARCHAR},
+		now(),#{$user_code,jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 更新组织信息 -->
+	<update id="updateMDM" parameterType="map">
+		update sdp_org_mdm
+		<set>
+			<if test="mdm_name != null">
+				mdm_name=#{mdm_name,jdbcType=VARCHAR},
+			</if>
+			<if test="mdm_main != null">
+				mdm_main=#{mdm_main,jdbcType=VARCHAR},
+			</if>
+			<if test="mdm_remark != null">
+				mdm_remark=#{mdm_remark,jdbcType=VARCHAR},
+			</if>
+			update_date=now(),update_user=#{$user_code,jdbcType=VARCHAR}
+		</set>
+		where mdm_code=#{mdm_code,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 删除职务信息 -->
+	<delete id="deleteMDM" parameterType="map">
+		delete from sdp_org_mdm
+		where
+		mdm_code=#{mdm_code,jdbcType=VARCHAR}
+	</delete>
+</mapper>

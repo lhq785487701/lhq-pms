@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>iviewTestBar</title>
+<link rel="stylesheet" href="../../css/iview.css">
+<link rel="stylesheet"
+	href="../../js/jquery/layer/skin/default/layer.css">
+<link rel="stylesheet" href="../../css/sdp-ui.css" />
+<link rel="stylesheet" href="../../css/sdp-admin.css" />
+<link rel="stylesheet" href="../../css/sdp-skin.css" />
+<link rel="stylesheet"
+	href="../../css/fonts/iconic/material-design-iconic-font.min.css" />
+<link rel="stylesheet"
+	href="../../css/fonts/awesome/font-awesome.min.css" />
+<script src="../../js/echarts/dist/echarts-all.js"></script>
+<style type="text/css">
+body {
+	background-color: rgb(243, 243, 243);
+	width: 80%;
+	margin: 0 auto;
+}
+</style>
+</head>
+
+<body>
+	<div id="app">
+		<h3>晋升可选岗位</h3>
+		<i-select v-model="curRow.select" filterable style="width: 200px;">
+		<i-option v-for="item in dataList" :value="item.plan_id"
+			:key="item.plan_id">{{item.plan_title}}</i-option> </i-select><br><br>
+		<div id="mainContainer">
+			<i-button @click="addData" type="info"
+				style="width:80px; height:30px;background-color:#009F95">晋级申请</i-button>
+			<modal v-model="dataAdd"> <i-form ref="formValidate"
+				:model="curRow" :rules="ruleValidate" :label-width="80"> <form-item
+				label="你的姓名" prop="create_user"> <i-input
+				v-model="curRow.create_user" placeholder="请输入姓名"></i-input> </form-item> <form-item
+				label="所属部门" prop="department"> <i-input
+				v-model="curRow.department" placeholder="请输入所属部门"></i-input> </form-item> <form-item
+				label="当前岗位" prop="cur_post"> <i-input
+				v-model="curRow.cur_post" placeholder="请输入岗位"></i-input> </form-item> <form-item
+				label="申请岗位" prop="apply_post"> <i-input
+				v-model="curRow.apply_post" placeholder="请输入申请岗位"></i-input> </form-item> <form-item
+				label="晋级说明" prop="rise_remark"> <i-input
+				v-model="curRow.rise_remark" type="textarea"
+				:autosize="{minRows: 2,maxRows: 8}" placeholder="请输入晋级说明..."></i-input>
+			</form-item> </i-form>
+
+			<p slot="footer">
+				<i-button type="primary" @click="handleSubmit('formValidate')">提交</i-button>
+				<i-button type="ghost" @click="handleReset('formValidate')"
+					style="margin-left: 8px">重置</i-button>
+			</p>
+			</modal>
+		</div>
+		<div id="main1" style="width: 850px; height: 500px"></div>
+		<br> <br> <br>
+	</div>
+</body>
+<script src="../../js/md5.js"></script>
+<!-- 引入 jquery -->
+<script src="../../js/jquery/jquery.js"></script>
+<script src="../../js/jquery/jquery-migrate.js"></script>
+<script src="../../js/jquery/layer/layer.js"></script>
+<!-- 引入 Vue -->
+<script src="../../js/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../js/vue/ui/iview.js"></script>
+
+<script src="../../js/sdp/SDPUrl.js"></script>
+<script src="../../js/sdp/SDPContext.js"></script>
+<script src="../../js/sdp/Page.js"></script>
+<script src="../../js/sdp/Row.js"></script>
+<script src="../../js/sdp/RowSet.js"></script>
+<script src="../../js/sdp/DataStore.js"></script>
+<script src="../../js/sdp/SDPDic.js"></script>
+
+<script type="text/javascript" src="iviewTestBar.js"></script>
+
+</html>

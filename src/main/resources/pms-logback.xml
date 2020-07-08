@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<!-- configuration为根元素，包含三个属性: debug,指是否开启logback内部日志，没有设置此属性或设置其值为空、null或false时，表示不开启，否则，开启； 
+	scan,设置是否定时扫描配置文件 scanPeriod,设置扫描周期，与scan属性配合使用，默认是60000毫秒，如果该属性值没有带单位，则单位为毫秒，可带的单位有milli/millisecond/second/seconde/minute/hour/day，可忽略大小写 -->
+<configuration debug="false">
+
+	<appender name="pmsLog" class="com.lhq.pms.logging.PMSLogAppender">
+
+	</appender>
+
+	<!-- 异步输出 -->
+	<appender name="ASYNC" class="com.lhq.pms.logging.PMSAsyncAppender">
+		<!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+		<discardingThreshold>0</discardingThreshold>
+		<!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+		<queueSize>1024</queueSize>
+		<!-- 添加附加的appender,最多只能添加一个 -->
+		<appender-ref ref="pmsLog" />
+	</appender>
+
+	<!-- root与logger类似，它表示根logger，只有大于等于level级别的日志才交由appender处理，level默认为DEBUG -->
+	<root level="WARN">
+		<appender-ref ref="ASYNC" />
+	</root>
+
+	<logger name="org.springframework" level="WARN">
+		<appender-ref ref="ASYNC" />
+	</logger>
+
+	<!-- 通过设置additivity="false"可以让日志不向上一级别的logger输出 -->
+	<logger name="com.lhq" additivity="false" level="DEBUG">
+		<appender-ref ref="ASYNC" />
+	</logger>
+
+	<logger name="org.apache" level="WARN">
+		<appender-ref ref="ASYNC" />
+	</logger>
+
+	<logger name="ch.qos" level="WARN">
+		<appender-ref ref="ASYNC" />
+	</logger>
+
+</configuration>
