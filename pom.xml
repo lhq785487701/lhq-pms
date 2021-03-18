@@ -44,7 +44,7 @@
         <!-- ehcache版本 -->
 		<ehcache.version>2.10.4</ehcache.version>
 		<!-- elasticsearch版本 -->
-		<elasticsearch.version>2.4.4</elasticsearch.version>
+		<elasticsearch.version>6.8.13</elasticsearch.version>
 		<!-- spring-security-cas版本 -->
 		<spring-security-cas.version>4.2.3.RELEASE</spring-security-cas.version>
 		<!-- cas client -->
