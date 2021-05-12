@@ -39,7 +39,7 @@
         <!-- quartz版本 -->
         <quartz.version>2.2.3</quartz.version>
         <!-- spring-security版本 -->
-        <spring-security.version>4.2.3.RELEASE</spring-security.version>
+        <spring-security.version>5.2.10.RELEASE</spring-security.version>
         <spring-session.version>1.3.0.RELEASE</spring-session.version>
         <!-- ehcache版本 -->
 		<ehcache.version>2.10.4</ehcache.version>
