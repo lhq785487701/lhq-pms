@@ -29,7 +29,7 @@
         <!-- apache.poi版本 -->
         <poi.version>3.15</poi.version>
         <!-- jackson版本 -->
-        <jackson.version>2.9.0</jackson.version>
+        <jackson.version>2.13.4.1</jackson.version>
         <!--pagehelper版本 -->
         <pagehelper.version>5.1.2</pagehelper.version>
         <!--useragent版本 -->
